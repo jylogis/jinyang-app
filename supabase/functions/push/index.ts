@@ -53,6 +53,7 @@ Deno.serve(async (req) => {
     if (body.test) {
       // 내 폰으로 시험 알림
       const sent = await sendTo([u.user.id], { title: '진양로지스틱스', body: '알림 연결이 완료됐어요 ✅', url: './' }, keys);
+      await log({ kind: 'test', title: '알림 연결 시험', sent_by: u.user.id, drivers: 1, ...sent });
       return json({ ok: true, ...sent });
     }
     const { data: n } = await admin.from('notices').select('id,company_id,title,body,starts_at,ends_at').eq('id', body.notice_id).single();
@@ -60,17 +61,28 @@ Deno.serve(async (req) => {
     const { data: can } = await userDb.rpc('can_manage', { cid: n.company_id });
     if (!can) return json({ error: 'forbidden' }, 403);
     const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // 한국 날짜
-    if ((n.starts_at && String(n.starts_at).slice(0, 10) > today) || (n.ends_at && String(n.ends_at).slice(0, 10) < today)) return json({ ok: true, skipped: 'out of posting period' });
+    const base = { kind: 'notice', notice_id: n.id, company_id: n.company_id, title: n.title, sent_by: u.user.id };
+    // 탭 관리의 '공지 알림' 설정 (Supabase tab_settings) 이 꺼져 있으면 보내지 않음
+    const { data: ts } = await admin.from('tab_settings').select('notify').eq('tab', 'notice').maybeSingle();
+    if (ts && ts.notify === false) { await log({ ...base, skipped: 'notify off' }); return json({ ok: true, skipped: 'notify off' }); }
+    if ((n.starts_at && String(n.starts_at).slice(0, 10) > today) || (n.ends_at && String(n.ends_at).slice(0, 10) < today)) { await log({ ...base, skipped: 'out of posting period' }); return json({ ok: true, skipped: 'out of posting period' }); }
 
     const { data: ds } = await admin.from('drivers').select('id').eq('company_id', n.company_id).eq('status', '활성');
     const ids = (ds || []).map((d: { id: string }) => d.id);
     const text = String(n.body || '').replace(/\s+/g, ' ').slice(0, 120);
     const sent = await sendTo(ids, { title: '📢 새 공지 · ' + n.title, body: text || '새 공지가 올라왔어요. 눌러서 확인해 주세요.', url: './?source=noti&notice=' + n.id, tag: 'notice-' + n.id }, keys);
+    await log({ ...base, drivers: ids.length, ...sent });
     return json({ ok: true, drivers: ids.length, ...sent });
   } catch (e) {
     return json({ error: String((e as Error)?.message || e) }, 500);
   }
 });
+
+// 발송 기록 저장 (실패해도 알림 자체는 막지 않음)
+async function log(row: Record<string, unknown>) {
+  const { error } = await admin.from('push_logs').insert(row);
+  if (error) console.log('push log error', error.message);
+}
 
 async function sendTo(userIds: string[], payload: Record<string, string>, keys: { pub: string; priv: string }) {
   if (!userIds.length) return { devices: 0, sent: 0, removed: 0 };
