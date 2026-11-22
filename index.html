@@ -855,7 +855,12 @@ async function afterAuth(user) {
     S.screen = 'app'; S.tab = 'home';
   }
 }
+async function loadCompanies() {
+  var r = await sb.from('companies').select('*').order('created_at');
+  if (!r.error) S.companies = r.data;
+}
 async function boot() {
+  loadCompanies();
   try {
     var r = await sb.auth.getSession();
     if (r.data && r.data.session) await afterAuth(r.data.session.user);
@@ -1011,7 +1016,7 @@ function build() {
         try { await afterAuth(r.data.user); } catch (e) { fail(e, '정보를 불러오지 못했어요'); }
       });
     },
-    goSignup: function () { S.screen = 'signup'; S.step = 1; S.form = emptyForm(); FILES = {}; S.err = ''; },
+    goSignup: function () { S.screen = 'signup'; S.step = 1; S.form = emptyForm(); FILES = {}; S.err = ''; loadCompanies(); },
     goAdminSignup: function () { S.screen = 'adminSignup'; S.adminErr = ''; S.adminForm = { name: '', phone: '', pw: '', pw2: '' }; },
     backToLogin: function () { S.screen = 'login'; },
     adminForm: s.adminForm, adminErr: s.adminErr,
