@@ -5,8 +5,8 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
-const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY') || '';
+const ANON_ENV = Deno.env.get('SUPABASE_ANON_KEY') || '';
 const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     // 보낸 사람 확인
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     if (!token) return json({ error: 'login required' }, 401);
-    const userDb = createClient(URL_, ANON, { global: { headers: { Authorization: 'Bearer ' + token } }, auth: { persistSession: false } });
+    const userDb = createClient(URL_, ANON_ENV || req.headers.get('apikey') || '', { global: { headers: { Authorization: 'Bearer ' + token } }, auth: { persistSession: false } });
     const { data: u } = await admin.auth.getUser(token);
     if (!u?.user) return json({ error: 'login required' }, 401);
 
