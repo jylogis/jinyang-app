@@ -1,0 +1,79 @@
+// 진양 푸시 알림 서버 (Supabase Edge Function: push)
+// GET            → 앱이 구독할 때 쓰는 공개키 반환 (처음 한 번 자동 생성해서 DB에 보관)
+// POST {notice_id} → 공지 업체의 기사들 폰으로 알림 발송 (관리 권한 있는 사람만)
+import { createClient } from 'npm:@supabase/supabase-js@2';
+import webpush from 'npm:web-push@3.6.7';
+
+const URL_ = Deno.env.get('SUPABASE_URL')!;
+const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+const ANON = Deno.env.get('SUPABASE_ANON_KEY')!;
+const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+};
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, 'Content-Type': 'application/json' } });
+
+async function vapid() {
+  const { data } = await admin.from('app_secrets').select('k,v').in('k', ['vapid_public', 'vapid_private']);
+  const m: Record<string, string> = {};
+  (data || []).forEach((r: { k: string; v: string }) => (m[r.k] = r.v));
+  if (m.vapid_public && m.vapid_private) return { pub: m.vapid_public, priv: m.vapid_private };
+  const k = webpush.generateVAPIDKeys();
+  await admin.from('app_secrets').upsert([{ k: 'vapid_public', v: k.publicKey }, { k: 'vapid_private', v: k.privateKey }]);
+  return { pub: k.publicKey, priv: k.privateKey };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+  try {
+    const keys = await vapid();
+    if (req.method === 'GET') return json({ publicKey: keys.pub });
+
+    // 보낸 사람 확인
+    const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+    if (!token) return json({ error: 'login required' }, 401);
+    const userDb = createClient(URL_, ANON, { global: { headers: { Authorization: 'Bearer ' + token } }, auth: { persistSession: false } });
+    const { data: u } = await admin.auth.getUser(token);
+    if (!u?.user) return json({ error: 'login required' }, 401);
+
+    const body = await req.json().catch(() => ({}));
+    if (body.test) {
+      // 내 폰으로 시험 알림
+      const sent = await sendTo([u.user.id], { title: '진양로지스틱스', body: '알림 연결이 완료됐어요 ✅', url: './' }, keys);
+      return json({ ok: true, ...sent });
+    }
+    const { data: n } = await admin.from('notices').select('id,company_id,title,body,starts_at,ends_at').eq('id', body.notice_id).single();
+    if (!n) return json({ error: 'notice not found' }, 404);
+    const { data: can } = await userDb.rpc('can_manage', { cid: n.company_id });
+    if (!can) return json({ error: 'forbidden' }, 403);
+    const today = new Date(Date.now() + 9 * 3600 * 1000).toISOString().slice(0, 10); // 한국 날짜
+    if ((n.starts_at && String(n.starts_at).slice(0, 10) > today) || (n.ends_at && String(n.ends_at).slice(0, 10) < today)) return json({ ok: true, skipped: 'out of posting period' });
+
+    const { data: ds } = await admin.from('drivers').select('id').eq('company_id', n.company_id).eq('status', '활성');
+    const ids = (ds || []).map((d: { id: string }) => d.id);
+    const text = String(n.body || '').replace(/\s+/g, ' ').slice(0, 120);
+    const sent = await sendTo(ids, { title: '📢 새 공지 · ' + n.title, body: text || '새 공지가 올라왔어요. 눌러서 확인해 주세요.', url: './?source=noti&notice=' + n.id, tag: 'notice-' + n.id }, keys);
+    return json({ ok: true, drivers: ids.length, ...sent });
+  } catch (e) {
+    return json({ error: String((e as Error)?.message || e) }, 500);
+  }
+});
+
+async function sendTo(userIds: string[], payload: Record<string, string>, keys: { pub: string; priv: string }) {
+  if (!userIds.length) return { devices: 0, sent: 0, removed: 0 };
+  webpush.setVapidDetails('mailto:admin@jinyang.app', keys.pub, keys.priv);
+  const { data: subs } = await admin.from('push_subs').select('endpoint,p256dh,auth').in('user_id', userIds);
+  let sent = 0, removed = 0;
+  await Promise.all((subs || []).map(async (s: { endpoint: string; p256dh: string; auth: string }) => {
+    try {
+      await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 * 24, urgency: 'high' });
+      sent++;
+    } catch (e) {
+      const code = (e as { statusCode?: number }).statusCode;
+      if (code === 404 || code === 410) { await admin.from('push_subs').delete().eq('endpoint', s.endpoint); removed++; }
+    }
+  }));
+  return { devices: (subs || []).length, sent, removed };
+}

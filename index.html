@@ -1260,8 +1260,34 @@ function notiEnv() {
   var supported = 'Notification' in window;
   return { isIOS: isIOS, standalone: standalone, supported: supported, perm: supported ? Notification.permission : 'unsupported' };
 }
+var PUSH_FN = SB_URL + '/functions/v1/push';
+function b64u(s) { var p = '='.repeat((4 - s.length % 4) % 4), b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')), a = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return a; }
+async function pushHeaders() { var t = (await sb.auth.getSession()).data.session; return { apikey: SB_KEY, Authorization: 'Bearer ' + (t ? t.access_token : SB_KEY), 'Content-Type': 'application/json' }; }
+// 이 폰을 알림 받을 기기로 등록 (알림 허용 + 로그인 상태일 때 접속마다 확인)
+async function pushSubscribe() {
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window) || Notification.permission !== 'granted') return false;
+    var reg = await navigator.serviceWorker.ready;
+    var key = (await (await fetch(PUSH_FN, { headers: await pushHeaders() })).json()).publicKey;
+    if (!key) return false;
+    var sub = await reg.pushManager.getSubscription();
+    if (sub && sub.options && sub.options.applicationServerKey) {
+      var cur = new Uint8Array(sub.options.applicationServerKey), want = b64u(key);
+      if (cur.length !== want.length || cur.some(function (v, i) { return v !== want[i]; })) { await sub.unsubscribe(); sub = null; }
+    }
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(key) });
+    var j = sub.toJSON();
+    var r = await sb.rpc('save_push_sub', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) });
+    return !r.error;
+  } catch (e) { console.warn('push subscribe', e); return false; }
+}
+async function pushCall(body) {
+  try { var r = await fetch(PUSH_FN, { method: 'POST', headers: await pushHeaders(), body: JSON.stringify(body) }); return await r.json(); }
+  catch (e) { return { error: String(e) }; }
+}
 function checkNoti() {
   var e = notiEnv(); S.notiPerm = e.perm;
+  if (e.perm === 'granted') pushSubscribe();
   if (S.notiDismissed) return;
   S.notiShow = e.perm !== 'granted';
 }
@@ -1769,8 +1795,12 @@ function build() {
       run(async function () {
         try {
           if (f.id) { row.updated_at = new Date().toISOString(); await q(sb.from('notices').update(row).eq('id', f.id)); }
-          else { row.company_id = S.role === 'admin' ? S.company : scopeId; await q(sb.from('notices').insert(row)); }
+          else { row.company_id = S.role === 'admin' ? S.company : scopeId; var ins = await q(sb.from('notices').insert(row).select('id').single()); }
           S.noticeOpen = false; await loadAll(); flash(f.id ? '공지를 수정했어요' : '공지를 등록했어요');
+          if (!f.id && ins && ins.id) pushCall({ notice_id: ins.id }).then(function (r) {
+            if (r && r.skipped) flash('공지를 등록했어요 · 게시 시작일에 맞춰 기사님들이 볼 수 있어요');
+            else if (r && r.ok) flash('공지를 등록했어요 · 알림 ' + r.sent + '대 발송 (기사 ' + r.drivers + '명)');
+          });
         } catch (e) { fail(e, '공지를 저장하지 못했어요'); }
       });
     },
@@ -1899,7 +1929,7 @@ function build() {
         primary: { label: '🔔 알림 허용하기', go: function () {
           Notification.requestPermission().then(function (p) {
             checkNoti();
-            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); if (navigator.serviceWorker) navigator.serviceWorker.ready.then(function (r) { r.showNotification('진양로지스틱스', { body: '알림이 켜졌어요. 배차·공지 소식을 알려드릴게요.', icon: 'icon-192.png', badge: 'badge-96.png' }); }).catch(function () {}); }
+            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); pushSubscribe().then(function (ok) { if (ok) pushCall({ test: true }); }); }
           });
         } }, later: later };
     })(),
