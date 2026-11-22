@@ -11,12 +11,44 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
-html,body{margin:0;background:#E5E7EB}
+html,body{margin:0;background:#0B1533;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 a{color:#1E4FD8;text-decoration:none}
 *{-webkit-tap-highlight-color:transparent}
 #app{min-height:100dvh}
+/* ---------- 진양 테마: 네이비 + 골드 ---------- */
+.jy-root{background:radial-gradient(1200px 500px at 110% -10%,#E7ECFF 0%,rgba(231,236,255,0) 60%),radial-gradient(900px 400px at -20% 110%,#FFF6E0 0%,rgba(255,246,224,0) 55%),#F3F5FA !important;letter-spacing:-0.01em}
+.jy-root *{font-family:'Pretendard Variable',Pretendard,'Noto Sans KR',sans-serif}
+.jy-root button,.jy-root input,.jy-root select,.jy-root textarea{font-family:'Pretendard Variable',Pretendard,'Noto Sans KR',sans-serif !important}
+.jy-root [style*="background: #FFFFFF"][style*="border-radius: 16px"],
+.jy-root [style*="background: #FFFFFF"][style*="border-radius: 14px"]{box-shadow:0 1px 2px rgba(15,23,42,.04),0 10px 28px -14px rgba(15,23,42,.22) !important;border-color:rgba(15,23,42,.06)}
+.jy-root button[style*="background: #1E4FD8"]{background:linear-gradient(135deg,#4F6BFF 0%,#2337B8 100%) !important;box-shadow:0 10px 20px -10px rgba(35,55,184,.75) !important}
+.jy-root button[style*="background: #111827"]{background:linear-gradient(135deg,#1F2A44 0%,#0B1533 100%) !important;box-shadow:0 10px 20px -10px rgba(11,21,51,.8) !important}
+.jy-root button[style*="background: #C2410C"]{background:linear-gradient(135deg,#F97316 0%,#C2410C 100%) !important}
+.jy-root div[style*="background: #1E4FD8"][style*="border-radius: 20px"],.jy-root div[style*="background: #1E4FD8"][style*="border-radius: 18px"]{background:linear-gradient(135deg,#3B5BFD 0%,#1E2E9E 70%,#172554 100%) !important;box-shadow:0 18px 34px -18px rgba(30,46,158,.8) !important;position:relative;overflow:hidden}
+.jy-root div[style*="background: #111827"][style*="border-radius"]{background:linear-gradient(135deg,#1F2A44 0%,#0B1533 100%) !important}
+.jy-root input:not([type=checkbox]):not([type=file]),.jy-root select,.jy-root textarea{background-color:#F8FAFD !important;transition:border-color .15s,box-shadow .15s}
+.jy-root input:focus,.jy-root select:focus,.jy-root textarea:focus{outline:none;border-color:#4F6BFF !important;box-shadow:0 0 0 4px rgba(79,107,255,.15)}
+.jy-root button{transition:transform .08s ease,filter .15s}
+.jy-root button:active{transform:scale(.98)}
+.jy-root button:disabled{filter:saturate(.6) opacity(.75)}
+.jy-root .jy-step button:disabled{filter:none}
+.e3d{object-fit:contain;flex:none;filter:drop-shadow(0 4px 6px rgba(15,23,42,.18))}
+.jy-head{background:linear-gradient(135deg,#0B1533 0%,#14245A 55%,#1E3A8A 100%);color:#fff;border-radius:0 0 26px 26px;box-shadow:0 12px 30px -18px rgba(11,21,51,.9);position:relative;overflow:hidden}
+.jy-head:after{content:"";position:absolute;right:-60px;top:-80px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(212,175,55,.28),rgba(212,175,55,0) 70%)}
+.jy-gold{background:linear-gradient(110deg,#BF953F,#FCF6BA 40%,#B38728 70%,#FBF5B7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.jy-nav{background:rgba(255,255,255,.92) !important;backdrop-filter:saturate(1.6) blur(14px);-webkit-backdrop-filter:saturate(1.6) blur(14px);border-top:1px solid rgba(15,23,42,.06) !important;box-shadow:0 -8px 24px -18px rgba(15,23,42,.35)}
+.jy-pill{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;font-size:12px;font-weight:800;padding:4px 10px 4px 6px;border-radius:999px}
+.jy-time{font-variant-numeric:tabular-nums;font-size:15px;font-weight:800;color:#0B1533;white-space:nowrap}
+.jy-step{min-width:0}
+.jy-step *{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.jy-login{background:radial-gradient(700px 380px at 50% -10%,rgba(212,175,55,.22),rgba(212,175,55,0) 60%),linear-gradient(180deg,#0B1533 0%,#0A0F1F 100%) !important;color:#fff}
+.jy-login label{color:#CBD5E1 !important}
+.jy-login input{background:#FFFFFF !important;border-color:rgba(255,255,255,.2) !important}
+.jy-switch{width:52px;height:30px;border-radius:15px;border:none;padding:3px;cursor:pointer;display:flex;align-items:center;transition:background .2s}
+
 .jy-splash{position:fixed;inset:0;z-index:100;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .7s ease;overflow:hidden}
 .jy-out{opacity:0;pointer-events:none}
 .jy-gold{background:linear-gradient(110deg,#7a5a12 0%,#bf953f 18%,#fcf6ba 32%,#b38728 46%,#fbf5b7 60%,#aa771c 76%,#7a5a12 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -41,7 +73,7 @@ a{color:#1E4FD8;text-decoration:none}
 <body>
 <div id="app"></div>
 <script type="text/x-template" id="tpl">
-<div style="width: 100%; max-width: 480px; margin: 0 auto; height: 100dvh; position: relative; overflow: hidden; background: #F4F6F9; font-family: 'Noto Sans KR', sans-serif; color: #111827">
+<div class="jy-root" style="width: 100%; max-width: 480px; margin: 0 auto; height: 100dvh; position: relative; overflow: hidden; background: #F4F6F9; color: #0F172A">
 
 
 <template v-if="v.splash">
@@ -56,9 +88,9 @@ a{color:#1E4FD8;text-decoration:none}
 <template v-if="v.isBoot"><div style="height: 100dvh; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #4B5563">불러오는 중…</div></template>
 
 <template v-if="v.isLogin">
-  <div style="height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 32px 28px; background: #FFFFFF">
-    <span style="font-size: 14px; font-weight: 800; color: #1E4FD8; letter-spacing: 1px">JINYANG LOGISTICS</span>
-    <h1 style="margin: 0 0 10px; font-size: 26px; font-weight: 800; line-height: 1.4">기사님 전용 앱에<br>오신 걸 환영해요</h1>
+  <div class="jy-login" style="height: 100dvh; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 32px 28px; background: #FFFFFF">
+    <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; margin-bottom: 6px"><span class="jy-gold" style="font-family: 'Cinzel', serif; font-size: 34px; font-weight: 700; letter-spacing: .04em; line-height: 1.1">Jin Yang</span><span class="jy-gold" style="font-family: 'Cinzel', serif; font-size: 13px; letter-spacing: .5em">logistics</span></div>
+    <h1 style="margin: 6px 0 8px; font-size: 24px; font-weight: 800; line-height: 1.4; color: #FFFFFF">기사님 전용 앱에<br>오신 걸 환영해요 <img :src="v.emo.wave" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; vertical-align: -6px"></h1>
     <div style="display: flex; flex-direction: column; gap: 4px">
       <label for="lg-phone" style="font-size: 13px; font-weight: 700; color: #374151">아이디 또는 휴대폰 번호</label>
       <input id="lg-phone" type="text" autocapitalize="off" autocomplete="username" :value="v.login.phone" @input="v.onLogin.phone" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
@@ -67,9 +99,9 @@ a{color:#1E4FD8;text-decoration:none}
       <label for="lg-pw" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호</label>
       <input id="lg-pw" type="password" :value="v.login.pw" @input="v.onLogin.pw" @keyup.enter="v.doLogin" placeholder="비밀번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
     </div>
-    <button type="button" @click="v.doLogin" :disabled="v.busy" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{ v.busy ? '확인 중…' : '로그인' }}</button>
-    <button type="button" @click="v.goSignup" style="min-height: 52px; border: 1px solid #1E4FD8; border-radius: 14px; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">처음이에요 · 기사 회원가입</button>
-    <template v-if="v.loginErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C; text-align: center">{{ v.loginErr }}</span></template>
+    <button type="button" @click="v.doLogin" :disabled="v.busy" style="min-height: 54px; border: none; border-radius: 16px; background: linear-gradient(135deg,#F7E7A1 0%,#D4AF37 45%,#A8801F 100%); color: #1A1305; box-shadow: 0 12px 26px -12px rgba(212,175,55,.8); font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{ v.busy ? '확인 중…' : '로그인' }}</button>
+    <button type="button" @click="v.goSignup" style="min-height: 52px; border: 1px solid rgba(255,255,255,.35); border-radius: 16px; background: rgba(255,255,255,.06); color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">처음이에요 · 기사 회원가입</button>
+    <template v-if="v.loginErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #FCA5A5; text-align: center">{{ v.loginErr }}</span></template>
   </div>
 </template>
 
@@ -201,23 +233,26 @@ a{color:#1E4FD8;text-decoration:none}
 
 <template v-if="v.isApp">
   <div style="height: 100dvh; display: flex; flex-direction: column">
-    <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px 12px">
-      <div style="display: flex; flex-direction: column; gap: 2px">
-        <span style="font-size: 12px; font-weight: 700; color: #1E4FD8">{{ v.scopeName }}</span>
-        <h1 style="margin: 0; font-size: 22px; font-weight: 800">{{ v.headerTitle }}</h1>
+    <div class="jy-head" style="flex: none; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 16px 20px 18px">
+      <div style="display: flex; align-items: center; gap: 10px; min-width: 0; position: relative; z-index: 1">
+        <img :src="v.headerEmo" alt="" aria-hidden="true" class="e3d" style="width: 38px; height: 38px">
+        <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
+          <span class="jy-gold" style="font-size: 12px; font-weight: 800; letter-spacing: .02em">{{ v.scopeName }}</span>
+          <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #FFFFFF; white-space: nowrap">{{ v.headerTitle }}</h1>
+        </div>
       </div>
       <template v-if="v.isAdminRole">
-        <button type="button" @click="v.goPick" style="display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 1px solid #D1D5DB; border-radius: 22px; background: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 700; color: #111827; cursor: pointer">
+        <button type="button" @click="v.goPick" style="position: relative; z-index: 1; display: flex; align-items: center; gap: 6px; min-height: 42px; padding: 0 14px; border: 1px solid rgba(255,255,255,.28); border-radius: 22px; background: rgba(255,255,255,.1); font-family: inherit; font-size: 13px; font-weight: 700; color: #FFFFFF; cursor: pointer; white-space: nowrap">
           <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-3-3M17 17H4l3 3"></path></svg>
           업체 변경
         </button>
       </template>
       <template v-if="v.isDriverRole">
-        <span style="font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 12px; background: #E0E7FF; color: #1E3A8A">{{ v.me.name }} {{ v.me.rank }}</span>
+        <span style="position: relative; z-index: 1; font-size: 12px; font-weight: 800; padding: 6px 12px; border-radius: 999px; background: linear-gradient(135deg,#F7E7A1,#D4AF37); color: #1A1305; white-space: nowrap">{{ v.me.name }} {{ v.me.rank }}</span>
       </template>
     </div>
 
-    <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 20px 24px">
+    <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 16px 28px">
 
       
       <template v-if="v.dHome">
@@ -251,12 +286,13 @@ a{color:#1E4FD8;text-decoration:none}
             <button type="button" @click="v.goMe" style="text-align: left; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 14px; padding: 12px 14px; font-family: inherit; font-size: 14px; color: #9A3412; font-weight: 700; cursor: pointer">감차 요청 승인 대기 중 · 승인되면 그날부터 60일 카운트가 시작돼요 ›</button>
           </template>
           <button v-if="v.todayDisp" type="button" @click="v.goDispatch" style="text-align: left; display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
-            <span style="flex: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; font-weight: 700; color: #1E4FD8">오늘 배차</span><span style="font-size: 18px; font-weight: 800">{{ v.todayDisp.route }}</span><span style="font-size: 13px; color: #374151">{{ v.todayDisp.summary }}</span></span>
-            <span :style="v.todayDisp.statusStyle">{{ v.todayDisp.statusText }}</span>
+            <img :src="v.emo.truck" alt="" aria-hidden="true" class="e3d" style="width: 44px; height: 44px">
+            <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; font-weight: 800; color: #2337B8">오늘 배차</span><span style="font-size: 18px; font-weight: 800">{{ v.todayDisp.route }}</span><span style="font-size: 13px; color: #374151">{{ v.todayDisp.summary }}</span></span>
+            <span class="jy-pill" :style="v.todayDisp.statusStyle" style="flex: none"><span v-if="v.todayDisp.lastTime" style="font-variant-numeric: tabular-nums">{{ v.todayDisp.lastTime }}</span><img :src="v.todayDisp.statusEmo" alt="" class="e3d" style="width: 18px; height: 18px">{{ v.todayDisp.statusText }}</span>
           </button>
           <template v-if="v.homeNormal">
             <div style="background: #1E4FD8; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
-              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">{{ v.myPay.title }}</span></div>
+              <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 14px; opacity: .9">{{ v.myPay.title }}</span><img :src="v.emo.money" alt="" aria-hidden="true" class="e3d" style="width: 46px; height: 46px"></div>
               <span style="font-size: 13px">{{ v.myPay.label }}</span>
               <span style="font-size: 30px; font-weight: 800">{{ v.myPay.totalText }}</span>
               <button type="button" @click="v.goPay" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">급여내역 자세히 보기 →</button>
@@ -264,20 +300,20 @@ a{color:#1E4FD8;text-decoration:none}
           </template>
           <template v-if="v.homeLease">
             <div style="background: #111827; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
-              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">넘버 임대 기사</span></div>
+              <div style="display: flex; justify-content: space-between; align-items: center"><span style="font-size: 14px; opacity: .9">넘버 임대 기사</span><img :src="v.emo.key" alt="" aria-hidden="true" class="e3d" style="width: 44px; height: 44px"></div>
               <span style="font-size: 13px">{{ v.lease.month }} 넘버 임대료</span>
               <span style="font-size: 30px; font-weight: 800">₩{{ v.lease.amountText }}</span>
               <span style="font-size: 13px">납부 기한 {{ v.lease.dueText }} · {{ v.lease.status }}</span>
               <button type="button" @click="v.goPay" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">임대료 안내 보기 →</button>
             </div>
           </template>
-          <button v-if="v.latestMsg" type="button" @click="v.goTeams" style="text-align: left; display: flex; flex-direction: column; gap: 4px; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
-            <span style="font-size: 12px; font-weight: 700; color: #C2410C">팀즈 감지 · {{ v.co.room }} · {{ v.latestMsg.time }}</span>
+          <button v-if="v.latestMsg" type="button" @click="v.goTeams" style="text-align: left; display: flex; flex-direction: column; gap: 4px; position: relative; padding-right: 64px !important; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
+            <img :src="v.emo.sat" alt="" aria-hidden="true" class="e3d" style="width: 40px; height: 40px; position: absolute; right: 14px; top: 14px"><span style="font-size: 12px; font-weight: 800; color: #C2410C">팀즈 감지 · {{ v.co.room }} · {{ v.latestMsg.time }}</span>
             <span style="font-size: 15px">"{{ v.latestMsg.text }}"</span>
           </button>
           <button v-if="v.mustN" type="button" @click="v.goNotice" style="text-align: left; display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: none; border-radius: 16px; padding: 16px; font-family: inherit; color: #111827; cursor: pointer">
-            <span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 2px 6px; border-radius: 6px">필독</span>
-            <span style="flex: 1; font-size: 15px">{{ v.mustN.title }}</span>
+            <img :src="v.emo.mega" alt="" aria-hidden="true" class="e3d" style="width: 34px; height: 34px"><span style="font-size: 11px; font-weight: 800; color: #FFFFFF; background: linear-gradient(135deg,#F43F5E,#BE123C); padding: 3px 8px; border-radius: 999px">필독</span>
+            <span style="flex: 1; font-size: 15px; font-weight: 600">{{ v.mustN.title }}</span>
             <span style="font-size: 18px; color: #4B5563">›</span>
           </button>
         </div>
@@ -287,10 +323,10 @@ a{color:#1E4FD8;text-decoration:none}
       <template v-if="v.aHome">
         <div style="display: flex; flex-direction: column; gap: 14px">
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">등록 기사</span><span style="font-size: 22px; font-weight: 800">{{ v.stats.total }}명</span></div>
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">승인 대기</span><span style="font-size: 22px; font-weight: 800; color: #B45309">{{ v.stats.pending }}명</span></div>
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">서류 미비</span><span style="font-size: 22px; font-weight: 800; color: #B91C1C">{{ v.stats.missing }}명</span></div>
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">감차 요청</span><span style="font-size: 22px; font-weight: 800; color: #C2410C">{{ v.stats.reduce }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">등록 기사</span><span style="font-size: 22px; font-weight: 800">{{ v.stats.total }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.hour" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">승인 대기</span><span style="font-size: 22px; font-weight: 800; color: #B45309">{{ v.stats.pending }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.card" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">서류 미비</span><span style="font-size: 22px; font-weight: 800; color: #B91C1C">{{ v.stats.missing }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.warn" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">감차 요청</span><span style="font-size: 22px; font-weight: 800; color: #C2410C">{{ v.stats.reduce }}명</span></div>
           </div>
           <div style="background: #FFF7ED; border: 2px solid #FB923C; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
             <h2 style="margin: 10px 0 4px; font-size: 16px; font-weight: 800; color: #9A3412">감차 요청 · 승인 필요</h2>
@@ -299,7 +335,7 @@ a{color:#1E4FD8;text-decoration:none}
               <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 64px; border: none; border-top: 1px solid #FED7AA; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
                 <span style="width: 36px; height: 36px; border-radius: 18px; background: #FFEDD5; color: #9A3412; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none">{{ r.initial }}</span>
                 <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
-                  <span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="font-size: 11px; font-weight: 700; color: #1E3A8A; background: #E0E7FF; padding: 1px 6px; border-radius: 6px">{{ r.rank }}</span>
+                  <span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="display: inline-block; width: fit-content; align-self: flex-start; font-size: 11px; font-weight: 800; color: #1E3A8A; background: linear-gradient(135deg,#E0E7FF,#C7D2FE); padding: 2px 8px; border-radius: 999px; margin-left: 4px">{{ r.rank }}</span>
                   <span style="font-size: 12px; color: #374151">신청 {{ r.reqShort }} · 오늘 승인 시 ~{{ r.endShort }}</span>
                 </span>
                 <span style="font-size: 13px; font-weight: 800; color: #C2410C">{{ r.dday }} ›</span>
@@ -312,7 +348,7 @@ a{color:#1E4FD8;text-decoration:none}
             <template v-for="(r, $index) in v.pendingRows" :key="$index">
               <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 56px; border: none; border-top: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
                 <span style="width: 36px; height: 36px; border-radius: 18px; background: #FEF3C7; color: #92400E; font-weight: 700; display: flex; align-items: center; justify-content: center">{{ r.initial }}</span>
-                <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="font-size: 11px; font-weight: 700; color: #1E3A8A; background: #E0E7FF; padding: 1px 6px; border-radius: 6px">{{ r.rank }}</span><span style="font-size: 12px; color: #4B5563">{{ r.phone }} · {{ r.docText }}</span></span>
+                <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="display: inline-block; width: fit-content; align-self: flex-start; font-size: 11px; font-weight: 800; color: #1E3A8A; background: linear-gradient(135deg,#E0E7FF,#C7D2FE); padding: 2px 8px; border-radius: 999px; margin-left: 4px">{{ r.rank }}</span><span style="font-size: 12px; color: #4B5563">{{ r.phone }} · {{ r.docText }}</span></span>
                 <span style="font-size: 13px; font-weight: 700; color: #1E4FD8">확인 ›</span>
               </button>
             </template>
@@ -324,56 +360,85 @@ a{color:#1E4FD8;text-decoration:none}
       
       <template v-if="v.tDispatch">
         <div style="display: flex; flex-direction: column; gap: 12px">
-          <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border-radius: 14px; padding: 4px">
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border-radius: 16px; padding: 4px">
             <button type="button" aria-label="전날" @click="v.dayPrev" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 22px; cursor: pointer">‹</button>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
-              <span style="font-size: 16px; font-weight: 700">{{ v.dispDateText }}</span>
-              <button v-if="!v.isToday" type="button" @click="v.dayToday" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 12px; font-weight: 700; color: #1E4FD8; cursor: pointer">오늘로</button>
-              <span v-else style="font-size: 12px; color: #4B5563">오늘</span>
+            <div style="display: flex; align-items: center; gap: 8px">
+              <img :src="v.emo.cal" alt="" aria-hidden="true" class="e3d" style="width: 28px; height: 28px">
+              <div style="display: flex; flex-direction: column; align-items: flex-start">
+                <span style="font-size: 16px; font-weight: 800; white-space: nowrap">{{ v.dispDateText }}</span>
+                <button v-if="!v.isToday" type="button" @click="v.dayToday" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 12px; font-weight: 800; color: #2337B8; cursor: pointer">오늘로 이동</button>
+                <span v-else style="font-size: 12px; font-weight: 700; color: #2337B8">오늘</span>
+              </div>
             </div>
             <button type="button" aria-label="다음날" @click="v.dayNext" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 22px; cursor: pointer">›</button>
           </div>
 
           <template v-if="v.isAdminRole">
-            <div style="display: flex; gap: 8px; align-items: stretch">
-              <div style="flex: 1; background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column"><span style="font-size: 12px; color: #4B5563">배차</span><span style="font-size: 18px; font-weight: 800">{{ v.dispStats.count }}건</span></div>
-              <div style="flex: 1; background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column"><span style="font-size: 12px; color: #4B5563">완료</span><span style="font-size: 18px; font-weight: 800; color: #15803D">{{ v.dispStats.done }}건</span></div>
-              <div style="flex: 1.4; background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column"><span style="font-size: 12px; color: #4B5563">배송료 합계</span><span style="font-size: 18px; font-weight: 800">{{ v.dispStats.feeText }}</span></div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <div style="background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0"><img :src="v.emo.clip" alt="" aria-hidden="true" class="e3d" style="width: 26px; height: 26px"><span style="font-size: 12px; color: #4B5563">배차</span><span style="font-size: 18px; font-weight: 800">{{ v.dispStats.count }}건</span></div>
+              <div style="background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0"><img :src="v.emo.check" alt="" aria-hidden="true" class="e3d" style="width: 26px; height: 26px"><span style="font-size: 12px; color: #4B5563">완료</span><span style="font-size: 18px; font-weight: 800; color: #15803D">{{ v.dispStats.done }}건</span></div>
+              <div style="background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px; min-width: 0"><img :src="v.emo.money" alt="" aria-hidden="true" class="e3d" style="width: 26px; height: 26px"><span style="font-size: 12px; color: #4B5563">배송료 합계</span><span style="font-size: clamp(14px, 4.2vw, 18px); font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ v.dispStats.feeText }}</span></div>
             </div>
-            <button type="button" @click="v.openDispAdd" style="min-height: 50px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">+ 배차 추가</button>
-            <template v-if="v.noRoutes"><p style="margin: 0; font-size: 13px; color: #B45309; background: #FEF3C7; border-radius: 10px; padding: 10px 12px">먼저 설정 → 노선 설정에서 노선을 만들어 주세요.</p></template>
+            <button type="button" @click="v.openDispAdd" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer">+ 배차 추가</button>
+            <template v-if="v.noRoutes"><p style="margin: 0; font-size: 13px; color: #92400E; background: #FEF3C7; border-radius: 12px; padding: 10px 12px">먼저 설정 → 노선 설정에서 노선을 만들어 주세요.</p></template>
           </template>
 
-          <template v-if="!v.dispRows.length"><div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; text-align: center; font-size: 14px; color: #4B5563">{{ v.isAdminRole ? '이 날짜에 배차가 없어요' : '이 날짜에 내 배차가 없어요' }}</div></template>
+          <template v-if="!v.dispRows.length">
+            <div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-size: 14px; color: #4B5563"><img :src="v.emo.truck" alt="" aria-hidden="true" class="e3d" style="width: 56px; height: 56px"><span>{{ v.isAdminRole ? '이 날짜에 배차가 없어요' : '이 날짜에 내 배차가 없어요' }}</span></div>
+          </template>
 
           <div v-for="d in v.dispRows" :key="d.id" :style="d.cardStyle">
-            <button type="button" @click="d.toggle" :aria-expanded="d.isOpen ? 'true' : 'false'" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 12px 14px; border: none; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
-              <span style="flex: 1; display: flex; flex-direction: column; gap: 3px">
-                <span style="font-size: 17px; font-weight: 800; color: #111827">{{ d.route }}</span>
-                <span style="font-size: 13px; color: #374151">{{ d.driverText }}</span>
+            <button type="button" @click="d.toggle" :aria-expanded="d.isOpen ? 'true' : 'false'" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 64px; padding: 12px 14px; border: none; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <img :src="v.emo.truck" alt="" aria-hidden="true" class="e3d" style="width: 36px; height: 36px">
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                <span style="font-size: 17px; font-weight: 800; color: #0F172A; line-height: 1.3; word-break: keep-all">{{ d.route }}</span>
+                <span style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px">
+                  <span style="font-size: 13px; color: #475569; word-break: keep-all">{{ d.driverText }}</span>
+                  <span class="jy-pill" :style="d.statusStyle"><span v-if="d.lastTime" style="font-variant-numeric: tabular-nums">{{ d.lastTime }}</span><img :src="d.statusEmo" alt="" class="e3d" style="width: 18px; height: 18px">{{ d.statusText }}</span>
+                </span>
               </span>
-              <span :style="d.statusStyle">{{ d.statusText }}</span>
-              <span style="font-size: 18px; color: #4B5563">{{ d.isOpen ? '⌃' : '⌄' }}</span>
+              <span aria-hidden="true" :style="d.chevStyle">⌄</span>
             </button>
             <template v-if="d.isOpen">
-              <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px">
-                <div style="display: flex; justify-content: space-between; font-size: 14px; padding-top: 10px; border-top: 1px solid #E5E7EB"><span style="color: #4B5563">담당 기사</span><span style="font-weight: 700">{{ d.driverText }}</span></div>
-                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
-                  <div v-for="st in d.steps" :key="st.key" style="display: flex; flex-direction: column; gap: 4px">
-                    <button type="button" @click="st.stamp" :disabled="!d.canStamp" :style="st.style">
-                      <span style="font-size: 12px; font-weight: 700">{{ st.label }}</span>
-                      <span :style="st.textStyle">{{ st.timeText }}</span>
-                    </button>
-                    <button v-if="st.has && d.canStamp" type="button" @click="st.clear" style="min-height: 32px; border: none; background: transparent; font-family: inherit; font-size: 12px; color: #4B5563; text-decoration: underline; cursor: pointer">기록 취소</button>
+              <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px">
+                <div style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid #EEF2F7">
+                  <img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
+                  <span style="font-size: 13px; color: #475569">담당 기사</span>
+                  <span style="margin-left: auto; font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ d.driverText }}</span>
+                </div>
+
+                <div>
+                  <span style="display: block; font-size: 12px; font-weight: 800; color: #475569; margin-bottom: 6px">현황</span>
+                  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+                    <div v-for="st in d.steps" :key="st.key" class="jy-step" style="display: flex; flex-direction: column; gap: 4px">
+                      <button type="button" @click="st.stamp" :disabled="!st.canTap" :aria-label="st.label + ' ' + (st.has ? st.timeText : '기록하기')" :style="st.style">
+                        <img :src="st.emo" alt="" class="e3d" style="width: 30px; height: 30px">
+                        <span style="font-size: 12px; font-weight: 800">{{ st.label }}</span>
+                        <span :style="st.textStyle">{{ st.timeText }}</span>
+                      </button>
+                      <button v-if="st.has && v.canClear" type="button" @click="st.clear" style="min-height: 30px; border: none; background: transparent; font-family: inherit; font-size: 12px; color: #64748B; text-decoration: underline; cursor: pointer">기록 취소</button>
+                    </div>
                   </div>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px"><span style="color: #4B5563">배송료</span><span style="font-size: 18px; font-weight: 800">{{ d.feeText }}</span></div>
-                <div v-if="d.memo" style="font-size: 13px; color: #374151; background: #F3F4F6; border-radius: 10px; padding: 10px 12px; white-space: pre-line">{{ d.memo }}</div>
+
+                <div style="background: linear-gradient(180deg,#F8FAFF,#F1F5FF); border: 1px solid #E0E7FF; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px">
+                  <span style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #1E3A8A"><img :src="v.emo.memo" alt="" aria-hidden="true" class="e3d" style="width: 22px; height: 22px">상세내용</span>
+                  <span v-if="d.memo" style="font-size: 14px; color: #1F2937; line-height: 1.6; white-space: pre-line; word-break: keep-all">{{ d.memo }}</span>
+                  <span v-else style="font-size: 13px; color: #94A3B8">등록된 상세내용이 없어요</span>
+                  <span v-if="d.routeMemo" style="font-size: 12px; color: #475569">노선 메모 · {{ d.routeMemo }}</span>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 10px; background: linear-gradient(135deg,#FFFBEB,#FEF3C7); border-radius: 14px; padding: 12px 14px">
+                  <img :src="v.emo.money" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
+                  <span style="font-size: 13px; font-weight: 700; color: #92400E">배송료</span>
+                  <span style="margin-left: auto; font-size: clamp(17px, 5vw, 21px); font-weight: 800; color: #0F172A; white-space: nowrap">{{ d.feeText }}</span>
+                </div>
+
                 <template v-if="v.isAdminRole">
                   <div style="display: flex; gap: 8px">
-                    <button type="button" @click="d.edit" style="flex: 1; min-height: 44px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 14px">수정</button>
-                    <button v-if="!d.delAsk" type="button" @click="d.askDel" style="flex: 1; min-height: 44px; border: 1px solid #FCA5A5; border-radius: 12px; background: #FFFFFF; color: #B91C1C; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">삭제</button>
-                    <button v-else type="button" @click="d.del" style="flex: 1; min-height: 44px; border: none; border-radius: 12px; background: #B91C1C; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">정말 삭제</button>
+                    <button type="button" @click="d.edit" style="flex: 1; min-height: 46px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 14px">수정</button>
+                    <button v-if="!d.delAsk" type="button" @click="d.askDel" style="flex: 1; min-height: 46px; border: 1px solid #FCA5A5; border-radius: 12px; background: #FFFFFF; color: #B91C1C; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">삭제</button>
+                    <button v-else type="button" @click="d.del" style="flex: 1; min-height: 46px; border: none; border-radius: 12px; background: #B91C1C; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">정말 삭제</button>
                   </div>
                 </template>
               </div>
@@ -587,6 +652,11 @@ a{color:#1E4FD8;text-decoration:none}
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">노선 설정</span><span style="font-size: 12px; color: #4B5563">배차에 쓰는 노선 이름·기본 배송료</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
+            <button type="button" @click="v.goPerms" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <img :src="v.emo.crown" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">직급 권한</span><span style="font-size: 12px; color: #4B5563">총괄·이상·팀장·기사별로 할 수 있는 일</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
             <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"></path></svg>
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">업체·센터 관리</span><span style="font-size: 12px; color: #4B5563">업체 추가, 업체별 관리자 지정</span></span>
@@ -638,6 +708,24 @@ a{color:#1E4FD8;text-decoration:none}
         </div>
       </template>
 
+      <template v-if="v.sPerms">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
+          <div style="display: flex; align-items: center; gap: 10px"><img :src="v.emo.crown" alt="" aria-hidden="true" class="e3d" style="width: 36px; height: 36px"><h2 style="margin: 0; font-size: 18px; font-weight: 800">직급 권한</h2></div>
+          <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6">관리자는 모든 권한이 있어요. 아래에서 켠 직급만 배차 시간 <b>기록 취소</b>를 할 수 있어요.</p>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 16px">
+            <div style="display: flex; align-items: center; gap: 10px; min-height: 60px; border-bottom: 1px solid #EEF2F7">
+              <span style="font-size: 15px; font-weight: 800; flex: 1">관리자</span><span class="jy-pill" style="background: linear-gradient(135deg,#F7E7A1,#D4AF37); color: #1A1305; padding-left: 10px">모든 권한</span>
+            </div>
+            <div v-for="pr in v.permRows" :key="pr.rank" :style="pr.rowStyle">
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 800">{{ pr.rank }}</span><span style="font-size: 12px; color: #64748B">배차 시간 기록 취소</span></span>
+              <span :id="'pl-' + pr.rank" style="font-size: 12px; font-weight: 700" :style="{ color: pr.on ? '#15803D' : '#94A3B8' }">{{ pr.on ? '허용' : '불가' }}</span>
+              <button type="button" role="switch" :aria-checked="pr.on ? 'true' : 'false'" :aria-label="pr.rank + ' 기록 취소 권한'" @click="pr.toggle" class="jy-switch" :style="pr.switchStyle"><span :style="pr.knobStyle"></span></button>
+            </div>
+          </div>
+        </div>
+      </template>
+
       <template v-if="v.sList">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
@@ -648,7 +736,7 @@ a{color:#1E4FD8;text-decoration:none}
               <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 64px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
                 <span style="width: 40px; height: 40px; border-radius: 20px; background: #E0E7FF; color: #1E3A8A; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none">{{ r.initial }}</span>
                 <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
-                  <span style="display: flex; align-items: center; gap: 6px"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="font-size: 11px; font-weight: 700; color: #1E3A8A; background: #E0E7FF; padding: 1px 6px; border-radius: 6px">{{ r.rank }}</span><template v-if="r.pending"><span style="font-size: 11px; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 1px 6px; border-radius: 6px">승인 대기</span></template><template v-if="r.reduce"><span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #C2410C; padding: 1px 6px; border-radius: 6px">감차 요청</span></template></span>
+                  <span style="display: flex; align-items: center; gap: 6px"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="display: inline-block; width: fit-content; align-self: flex-start; font-size: 11px; font-weight: 800; color: #1E3A8A; background: linear-gradient(135deg,#E0E7FF,#C7D2FE); padding: 2px 8px; border-radius: 999px; margin-left: 4px">{{ r.rank }}</span><template v-if="r.pending"><span style="font-size: 11px; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 1px 6px; border-radius: 6px">승인 대기</span></template><template v-if="r.reduce"><span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #C2410C; padding: 1px 6px; border-radius: 6px">감차 요청</span></template></span>
                   <span style="font-size: 12px; color: #4B5563">{{ r.phone }}</span>
                 </span>
                 <span :style="r.docStyle">{{ r.docText }}</span>
@@ -729,11 +817,11 @@ a{color:#1E4FD8;text-decoration:none}
       </template>
     </div>
 
-    <nav aria-label="하단 메뉴" style="flex: none; display: flex; background: #FFFFFF; border-top: 1px solid #E5E7EB; padding: 6px 0 14px">
+    <nav class="jy-nav" aria-label="하단 메뉴" style="flex: none; display: flex; gap: 2px; background: #FFFFFF; border-top: 1px solid #E5E7EB; padding: 6px 6px calc(10px + env(safe-area-inset-bottom))">
       <template v-for="(t, $index) in v.tabs" :key="$index">
         <button type="button" @click="t.go" :style="t.style">
           <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path :d="t.d"></path></svg>
-          <span>{{ t.label }}</span>
+          <span style="white-space: nowrap">{{ t.label }}</span>
         </button>
       </template>
     </nav>
@@ -805,7 +893,7 @@ a{color:#1E4FD8;text-decoration:none}
       <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-driver" style="font-size: 13px; font-weight: 700; color: #374151">담당 기사</label>
         <select id="dp-driver" :value="v.dispForm.driver_id" @change="v.onDisp.driver_id" style="min-height: 46px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; background: #FFFFFF; min-width: 0"><option value="">미배정</option><option v-for="o in v.driverOptions" :key="o.id" :value="o.id">{{ o.label }}</option></select></div>
       <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-fee" style="font-size: 13px; font-weight: 700; color: #374151">배송료 (원)</label><input id="dp-fee" type="text" inputmode="numeric" :value="v.dispForm.fee" @input="v.onDisp.fee" placeholder="노선 기본값이 들어가요" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
-      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-memo" style="font-size: 13px; font-weight: 700; color: #374151">메모 (선택)</label><input id="dp-memo" type="text" :value="v.dispForm.memo" @input="v.onDisp.memo" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-memo" style="font-size: 13px; font-weight: 700; color: #374151">상세내용 (선택)</label><textarea id="dp-memo" rows="4" :value="v.dispForm.memo" @input="v.onDisp.memo" placeholder="예: 3층 하차, 오후 2시 이전 픽업 필수" style="border: 1px solid #D1D5DB; border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 15px; resize: vertical"></textarea></div>
       <template v-if="v.dispErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.dispErr }}</span></template>
       <div style="display: flex; gap: 8px">
         <button type="button" @click="v.closeDisp" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">취소</button>
@@ -865,6 +953,7 @@ var ICONS = {
 
 // ---------- 작은 도우미 ----------
 function won(n) { return Number(n || 0).toLocaleString('ko-KR'); }
+function wonShort(n) { n = Number(n || 0); return n >= 10000 ? (Math.round(n / 1000) / 10).toLocaleString('ko-KR') + '만원' : won(n) + '원'; }
 function pad(n) { return (n < 10 ? '0' : '') + n; }
 function today0() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }
 function addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
@@ -883,6 +972,17 @@ function digits(s) { return String(s || '').replace(/\D/g, ''); }
 function fmtPhone(s) { var d = digits(s); return d.length === 11 ? d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7) : (d.length === 10 ? d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6) : s); }
 function loginEmail(id) { var t = String(id || '').trim().toLowerCase(); return (/[a-z]/.test(t) ? t.replace(/[^a-z0-9._-]/g, '') : digits(t)) + '@jinyang.app'; }
 var RANKS = ['총괄', '이상', '팀장', '기사'];
+var EMO_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
+function emo(p) { return EMO_BASE + encodeURI(p); }
+var EMO = {
+  truck: emo('Delivery truck/3D/delivery_truck_3d.png'), pkg: emo('Package/3D/package_3d.png'), check: emo('Check mark button/3D/check_mark_button_3d.png'),
+  mega: emo('Megaphone/3D/megaphone_3d.png'), money: emo('Money bag/3D/money_bag_3d.png'), sat: emo('Satellite antenna/3D/satellite_antenna_3d.png'),
+  user: emo('Bust in silhouette/3D/bust_in_silhouette_3d.png'), gear: emo('Gear/3D/gear_3d.png'), house: emo('House/3D/house_3d.png'),
+  clip: emo('Clipboard/3D/clipboard_3d.png'), hour: emo('Hourglass not done/3D/hourglass_not_done_3d.png'), memo: emo('Memo/3D/memo_3d.png'),
+  office: emo('Office building/3D/office_building_3d.png'), cal: emo('Calendar/3D/calendar_3d.png'), key: emo('Key/3D/key_3d.png'),
+  warn: emo('Warning/3D/warning_3d.png'), card: emo('Identification card/3D/identification_card_3d.png'), crown: emo('Crown/3D/crown_3d.png'),
+  wave: emo('Waving hand/Default/3D/waving_hand_3d_default.png'), stop: emo('Stopwatch/3D/stopwatch_3d.png'), bank: emo('Bank/3D/bank_3d.png')
+};
 function mask(r) { return r ? r.slice(0, 8) + '******' : '미입력'; }
 function monthLabel(m) { if (!m) return ''; var p = m.split('-'); return p[0] + '년 ' + (+p[1]) + '월 정산'; }
 
@@ -936,7 +1036,8 @@ var S = Vue.reactive({
   splash: true, splashOut: false,
   routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
-  routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null
+  routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
+  perms: {}
 });
 var toastTimer = null;
 function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
@@ -967,6 +1068,7 @@ async function loadAll() {
   var mr = {}; res[4].forEach(function (r) { mr[r.notice_id] = true; }); S.myReads = mr;
   S.teams = res[5]; S.payslips = res[6]; S.reduces = res[7]; S.leases = res[8];
   S.routes = await q(sb.from('routes').select('*').order('sort').order('name'));
+  var pm = {}; (await q(sb.from('rank_perms').select('*'))).forEach(function (r) { pm[r.rank] = r.can_clear_times; }); S.perms = pm;
   await loadDispatches();
   await refreshUrls();
   await refreshStats();
@@ -1090,7 +1192,7 @@ function build() {
   var tabs = tabDefs.map(function (t) {
     var on = s.tab === t[0];
     return { label: t[1], d: ICONS[t[0]],
-      style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minHeight: '52px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: on ? 700 : 500, color: on ? '#1E4FD8' : '#4B5563' },
+      style: { flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minHeight: '54px', border: 'none', borderRadius: '14px', background: on ? 'linear-gradient(180deg,#EEF2FF,#E0E7FF)' : 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: '11.5px', fontWeight: on ? 800 : 600, color: on ? '#2337B8' : '#64748B' },
       go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; S.editMe = false; S.showRrn = false; S.delAsk = null; } };
   });
   var titles = { home: '홈', dispatch: '배차', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
@@ -1152,12 +1254,13 @@ function build() {
   // ---------- 배차 ----------
   var STEPS = [['arrive_at', '입차'], ['pickup_at', '픽업'], ['done_at', '완료']];
   function dispStatus(d) {
-    if (d.done_at) return ['완료', '#15803D', '#DCFCE7'];
-    if (d.pickup_at) return ['배송 중', '#1E4FD8', '#E0E7FF'];
-    if (d.arrive_at) return ['입차', '#B45309', '#FEF3C7'];
-    return ['대기', '#374151', '#F3F4F6'];
+    if (d.done_at) return ['완료', '#065F46', 'linear-gradient(135deg,#D1FAE5,#A7F3D0)', EMO.check, d.done_at];
+    if (d.pickup_at) return ['픽업', '#1E3A8A', 'linear-gradient(135deg,#E0E7FF,#C7D2FE)', EMO.pkg, d.pickup_at];
+    if (d.arrive_at) return ['입차', '#92400E', 'linear-gradient(135deg,#FEF3C7,#FDE68A)', EMO.truck, d.arrive_at];
+    return ['대기', '#334155', 'linear-gradient(135deg,#F1F5F9,#E2E8F0)', EMO.hour, null];
   }
-  function stStyle(c) { return { fontSize: '12px', fontWeight: 700, color: c[1], background: c[2], padding: '4px 10px', borderRadius: '10px', whiteSpace: 'nowrap' }; }
+  function stStyle(c) { return { color: c[1], background: c[2] }; }
+  var canClear = !isDriver || !!(meD && s.perms[meD.rank || '기사']);
   function driverName(id) { var d = s.drivers.find(function (x) { return x.id === id; }); return d ? d.name + ' ' + (d.rank || '기사') : '미배정'; }
   function setTime(d, field, val) {
     run(async function () {
@@ -1167,17 +1270,22 @@ function build() {
   }
   function dispView(d) {
     var stt = dispStatus(d), canStamp = !isDriver || d.driver_id === s.uid, open = s.dispSel === d.id;
+    var rt = s.routes.find(function (r) { return r.id === d.route_id; });
     return {
-      id: d.id, route: d.route_name, driverText: driverName(d.driver_id), feeText: '₩' + won(d.fee), memo: d.memo,
-      statusText: stt[0], statusStyle: stStyle(stt), isOpen: open, canStamp: canStamp, delAsk: s.delAsk === d.id,
+      id: d.id, route: d.route_name, driverText: driverName(d.driver_id), feeText: '₩' + won(d.fee), memo: d.memo, routeMemo: rt ? rt.memo : '',
+      statusText: stt[0], statusStyle: stStyle(stt), statusEmo: stt[3], lastTime: stt[4] ? hm(stt[4]) : '',
+      chevStyle: { fontSize: '18px', color: '#64748B', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' },
+      isOpen: open, canStamp: canStamp, delAsk: s.delAsk === d.id,
       summary: STEPS.map(function (x) { return x[1] + ' ' + (hm(d[x[0]]) || '—'); }).join(' · '),
-      cardStyle: { background: '#FFFFFF', borderRadius: '16px', border: open ? '2px solid #1E4FD8' : '2px solid #FFFFFF', overflow: 'hidden' },
+      cardStyle: { background: '#FFFFFF', borderRadius: '18px', border: open ? '2px solid #4F6BFF' : '2px solid transparent', overflow: 'hidden', boxShadow: open ? '0 16px 34px -18px rgba(35,55,184,.55)' : '0 1px 2px rgba(15,23,42,.04), 0 10px 28px -14px rgba(15,23,42,.22)' },
       toggle: function () { S.dispSel = open ? null : d.id; S.delAsk = null; },
       steps: STEPS.map(function (x) {
-        var t = d[x[0]];
-        return { key: x[0], label: x[1], has: !!t, timeText: t ? hm(t) : '누르면 기록', textStyle: t ? { fontSize: '18px', fontWeight: 800 } : { fontSize: '12px', fontWeight: 500 },
-          style: { width: '100%', minHeight: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', borderRadius: '12px', fontFamily: 'inherit', cursor: canStamp ? 'pointer' : 'default',
-            border: t ? '2px solid #1E4FD8' : '1px dashed #9CA3AF', background: t ? '#EEF2FF' : '#FFFFFF', color: t ? '#1E3A8A' : '#4B5563' },
+        var t = d[x[0]], em = { arrive_at: EMO.truck, pickup_at: EMO.pkg, done_at: EMO.check }[x[0]];
+        var tap = canStamp && !t;
+        return { key: x[0], label: x[1], has: !!t, emo: em, canTap: tap, timeText: t ? hm(t) : (canStamp ? '탭하여 기록' : '대기'),
+          textStyle: t ? { fontSize: '18px', fontWeight: 800, fontVariantNumeric: 'tabular-nums' } : { fontSize: '11px', fontWeight: 600, color: '#64748B' },
+          style: { width: '100%', minHeight: '92px', padding: '8px 4px', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '3px', borderRadius: '14px', fontFamily: 'inherit', cursor: tap ? 'pointer' : 'default',
+            border: t ? '2px solid #4F6BFF' : '1.5px dashed #CBD5E1', background: t ? 'linear-gradient(180deg,#EEF2FF,#E0E7FF)' : '#FFFFFF', color: t ? '#1E3A8A' : '#334155', opacity: 1 },
           stamp: function () { if (!canStamp || t) return; setTime(d, x[0], new Date().toISOString()); },
           clear: function () { setTime(d, x[0], null); } };
       }),
@@ -1438,10 +1546,27 @@ function build() {
 
     // 배차
     tDispatch: s.tab === 'dispatch',
+    emo: EMO, canClear: canClear,
+    headerEmo: { home: EMO.house, dispatch: EMO.truck, notice: EMO.mega, pay: EMO.money, teams: EMO.sat, me: EMO.user, settings: EMO.gear }[s.tab] || EMO.house,
+    sPerms: !isDriver && s.tab === 'settings' && s.adminView === 'perms',
+    goPerms: function () { S.adminView = 'perms'; },
+    permRows: RANKS.map(function (rk, i) {
+      var on = !!s.perms[rk];
+      return { rank: rk, on: on,
+        rowStyle: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '64px', borderTop: i === 0 ? 'none' : '1px solid #EEF2F7' },
+        switchStyle: { background: on ? 'linear-gradient(135deg,#34D399,#059669)' : '#CBD5E1', justifyContent: on ? 'flex-end' : 'flex-start' },
+        knobStyle: { width: '24px', height: '24px', borderRadius: '12px', background: '#FFFFFF', display: 'block', boxShadow: '0 2px 4px rgba(0,0,0,.2)' },
+        toggle: function () {
+          run(async function () {
+            try { await q(sb.from('rank_perms').update({ can_clear_times: !on }).eq('rank', rk)); var pm = Object.assign({}, S.perms); pm[rk] = !on; S.perms = pm; flash(rk + ' 기록 취소 ' + (!on ? '허용' : '불가') + '로 바꿨어요'); }
+            catch (e) { fail(e, '권한을 바꾸지 못했어요'); }
+          });
+        } };
+    }),
     dispRows: dispRows,
     dispDateText: fmtDate(parseD(s.dispDate)), isToday: s.dispDate === iso(today0()),
     dayPrev: function () { shiftDay(-1); }, dayNext: function () { shiftDay(1); }, dayToday: function () { S.dispDate = iso(today0()); S.dispSel = null; run(loadDispatches); },
-    dispStats: { count: dayDisp.length, done: dayDisp.filter(function (d) { return d.done_at; }).length, feeText: '₩' + won(dayDisp.reduce(function (a, d) { return a + Number(d.fee || 0); }, 0)) },
+    dispStats: { count: dayDisp.length, done: dayDisp.filter(function (d) { return d.done_at; }).length, feeText: wonShort(dayDisp.reduce(function (a, d) { return a + Number(d.fee || 0); }, 0)) },
     todayDisp: todayRaw ? dispView(todayRaw) : null,
     goDispatch: function () { S.tab = 'dispatch'; S.dispDate = iso(today0()); S.dispSel = todayRaw ? todayRaw.id : null; },
     noRoutes: scopeRoutes.length === 0,
