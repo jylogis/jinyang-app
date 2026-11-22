@@ -271,3 +271,9 @@ create policy "docs own or admin read" on storage.objects for select to authenti
 -- ---------- 기본 업체 ----------
 insert into public.companies(name, camp, teams_room) values ('진양로지스틱스', '[캠프명]', '[캠프명] Teams방')
 on conflict (name) do nothing;
+
+-- ---------- 앱(Data API)에서 테이블을 쓸 수 있게 권한 부여 (실제 범위는 위 RLS 규칙이 제한) ----------
+grant usage on schema public to anon, authenticated;
+grant select on public.companies to anon;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant execute on function public.is_admin(), public.my_company(), public.notice_stats(uuid) to authenticated;
