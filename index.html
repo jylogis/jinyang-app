@@ -1270,15 +1270,24 @@ async function pushSubscribe() {
     var reg = await navigator.serviceWorker.ready;
     var key = (await (await fetch(PUSH_FN, { headers: await pushHeaders() })).json()).publicKey;
     if (!key) return false;
-    var sub = await reg.pushManager.getSubscription();
+    var sub = await reg.pushManager.getSubscription(), fresh = false;
     if (sub && sub.options && sub.options.applicationServerKey) {
       var cur = new Uint8Array(sub.options.applicationServerKey), want = b64u(key);
       if (cur.length !== want.length || cur.some(function (v, i) { return v !== want[i]; })) { await sub.unsubscribe(); sub = null; }
     }
-    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(key) });
+    if (sub) {
+      // 서버가 이 등록을 '못 쓰는 등록'으로 지웠으면 새로 등록
+      var mine = await sb.from('push_subs').select('endpoint').eq('endpoint', sub.endpoint);
+      var savedBefore = false; try { savedBefore = localStorage.getItem('jy-push-ep') === sub.endpoint; } catch (x) {}
+      if (!mine.error && (!mine.data || !mine.data.length) && savedBefore) { await sub.unsubscribe(); sub = null; }
+    }
+    if (!sub) { sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64u(key) }); fresh = true; }
     var j = sub.toJSON();
     var r = await sb.rpc('save_push_sub', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) });
-    return !r.error;
+    if (r.error) return false;
+    try { localStorage.setItem('jy-push-ep', j.endpoint); } catch (x) {}
+    if (fresh) pushCall({ test: true });
+    return true;
   } catch (e) { console.warn('push subscribe', e); return false; }
 }
 async function pushCall(body) {
@@ -1916,7 +1925,7 @@ function build() {
     // 배차
     tDispatch: s.tab === 'dispatch',
     notiPop: (function () {
-      if (!s.notiShow || (s.screen !== 'app' && s.screen !== 'pick') || s.splash) return null;
+      if (!s.notiShow || s.screen !== 'app' || s.role === 'admin' || s.splash) return null;
       var e = notiEnv(), later = function () { S.notiShow = false; S.notiDismissed = true; };
       if (e.isIOS && !e.standalone) return { title: '홈 화면에 설치해 주세요', body: '아이폰은 홈 화면에 설치한 앱에서만\n알림을 받을 수 있어요.',
         steps: ['사파리 아래 가운데 공유 버튼을 눌러요', '"홈 화면에 추가"를 눌러요', '홈 화면의 JY 아이콘으로 열어 알림을 허용해요'],
@@ -1924,12 +1933,15 @@ function build() {
       if (!e.supported) return { title: '알림을 쓸 수 없는 환경이에요', body: '크롬(안드로이드) 또는 홈 화면에 설치한 앱(아이폰)에서 열어 주세요.', steps: null, primary: null, later: later };
       if (e.perm === 'denied') return { title: '알림이 꺼져 있어요', body: '배차·공지 소식을 받으려면 알림을 켜 주세요.',
         steps: e.isIOS ? ['아이폰 설정 앱을 열어요', '아래로 내려 "진양" 앱을 눌러요', '알림 → "알림 허용"을 켜요'] : ['주소창 왼쪽 설정(자물쇠) 아이콘을 눌러요 (설치한 앱이면 휴대폰 설정 → 애플리케이션 → 진양)', '권한(또는 사이트 설정) → 알림', '"허용"으로 바꿔요'],
-        primary: { label: '켰어요, 다시 확인', go: function () { checkNoti(); if (Notification.permission === 'granted') flash('알림이 허용됐어요 🎉'); } }, later: later };
+        primary: { label: '켰어요, 다시 확인', go: function () {
+          var done = function () { checkNoti(); if (Notification.permission === 'granted') flash('알림이 허용됐어요 🎉'); else flash('아직 알림이 꺼져 있어요. 위 순서대로 "허용"으로 바꾼 뒤 다시 눌러 주세요'); };
+          if (Notification.permission === 'default') Notification.requestPermission().then(done); else done();
+        } }, later: later };
       return { title: '알림을 허용해 주세요', body: '배차·공지·감차 승인 소식을\n바로 알려드릴게요.', steps: null,
         primary: { label: '🔔 알림 허용하기', go: function () {
           Notification.requestPermission().then(function (p) {
             checkNoti();
-            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); pushSubscribe().then(function (ok) { if (ok) pushCall({ test: true }); }); }
+            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); pushSubscribe(); }
           });
         } }, later: later };
     })(),

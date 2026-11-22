@@ -77,14 +77,18 @@ async function sendTo(userIds: string[], payload: Record<string, string>, keys: 
   webpush.setVapidDetails('mailto:admin@jinyang.app', keys.pub, keys.priv);
   const { data: subs } = await admin.from('push_subs').select('endpoint,p256dh,auth').in('user_id', userIds);
   let sent = 0, removed = 0;
+  const errors: { code?: number; body?: string; host?: string }[] = [];
   await Promise.all((subs || []).map(async (s: { endpoint: string; p256dh: string; auth: string }) => {
     try {
       await webpush.sendNotification({ endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } }, JSON.stringify(payload), { TTL: 60 * 60 * 24, urgency: 'high' });
       sent++;
     } catch (e) {
-      const code = (e as { statusCode?: number }).statusCode;
+      const er = e as { statusCode?: number; body?: string; message?: string };
+      const code = er.statusCode;
+      errors.push({ code, body: String(er.body || er.message || '').slice(0, 200), host: new URL(s.endpoint).host });
       if (code === 404 || code === 410) { await admin.from('push_subs').delete().eq('endpoint', s.endpoint); removed++; }
     }
   }));
-  return { devices: (subs || []).length, sent, removed };
+  if (errors.length) console.log('push errors', JSON.stringify(errors));
+  return { devices: (subs || []).length, sent, removed, errors };
 }
