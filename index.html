@@ -47,12 +47,12 @@ a{color:#1E4FD8;text-decoration:none}
 .jy-login{background:radial-gradient(700px 380px at 50% -10%,rgba(212,175,55,.22),rgba(212,175,55,0) 60%),linear-gradient(180deg,#0B1533 0%,#0A0F1F 100%) !important;color:#fff}
 .jy-login label{color:#CBD5E1 !important}
 .jy-login input{background:#FFFFFF !important;border-color:rgba(255,255,255,.2) !important}
-.jy-co{position:relative;height:36px;min-width:44px;max-width:48vw;padding:0 14px;box-sizing:border-box;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;
+.jy-co{position:relative;height:28px;min-width:40px;max-width:46vw;padding:0 11px;box-sizing:border-box;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden;
   background:linear-gradient(135deg,#2A3FC4 0%,#14245A 55%,#0B1533 100%);
   box-shadow:0 0 0 2px rgba(212,175,55,.9),0 10px 20px -10px rgba(0,0,0,.7);
   animation:jyCoIn .7s cubic-bezier(.2,.8,.2,1) both,jyCoGlow 3.2s ease-in-out .7s infinite}
 .jy-co:after{content:"";position:absolute;top:-50%;bottom:-50%;width:45%;left:-60%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-18deg);animation:jySheen 3.6s ease-in-out 1.2s infinite}
-.jy-co-t{position:relative;z-index:1;font-size:15px;font-weight:900;line-height:1;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;background:linear-gradient(135deg,#FCF6BA 0%,#D4AF37 45%,#FBF5B7 70%,#B38728 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.jy-co-t{position:relative;z-index:1;font-size:12.5px;font-weight:900;line-height:1;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;background:linear-gradient(135deg,#FCF6BA 0%,#D4AF37 45%,#FBF5B7 70%,#B38728 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
 @keyframes jyCoIn{from{opacity:0;transform:scale(.55) rotate(-10deg)}to{opacity:1;transform:none}}
 @keyframes jyCoGlow{0%,100%{box-shadow:0 0 0 2px rgba(212,175,55,.9),0 10px 20px -10px rgba(0,0,0,.7)}50%{box-shadow:0 0 0 2px rgba(252,246,186,1),0 0 20px 3px rgba(212,175,55,.5)}}
 @keyframes jySheen{0%{left:-60%}55%,100%{left:130%}}
@@ -249,7 +249,7 @@ a{color:#1E4FD8;text-decoration:none}
         <img v-else :src="v.headerEmo" alt="" aria-hidden="true" class="e3d" style="width: 38px; height: 38px">
         <div style="display: flex; flex-direction: column; gap: 1px; min-width: 0">
           <span v-if="!v.showCoBadge" class="jy-gold" style="font-size: 12px; font-weight: 800; letter-spacing: .02em">{{ v.scopeName }}</span>
-          <h1 style="margin: 0; font-size: 22px; font-weight: 800; color: #FFFFFF; white-space: nowrap">{{ v.headerTitle }}</h1>
+          <h1 :style="v.headerTitleStyle">{{ v.headerTitle }}</h1>
         </div>
       </div>
       <template v-if="v.isAdminRole">
@@ -266,10 +266,24 @@ a{color:#1E4FD8;text-decoration:none}
     <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 16px 16px 28px">
 
       
-      <template v-if="v.meTabs">
-        <div role="tablist" aria-label="내 정보 메뉴" style="display: flex; gap: 4px; padding: 4px; margin-bottom: 14px; background: #FFFFFF; border-radius: 16px; box-shadow: 0 1px 2px rgba(15,23,42,.04), 0 10px 28px -14px rgba(15,23,42,.22)">
-          <button v-for="mt in v.meTabs" :key="mt.key" type="button" role="tab" :aria-selected="mt.on ? 'true' : 'false'" @click="mt.go" :style="mt.style"><img :src="mt.emo" alt="" aria-hidden="true" class="e3d" style="width: 22px; height: 22px">{{ mt.label }}</button>
+      <template v-if="v.meMenu">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; gap: 12px; background: #FFFFFF; border-radius: 16px; padding: 16px">
+            <img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 44px; height: 44px">
+            <span style="display: flex; flex-direction: column"><span style="font-size: 17px; font-weight: 800">{{ v.me.name }}</span><span style="font-size: 13px; color: #64748B">{{ v.me.rank }} · {{ v.me.center }}</span></span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 16px">
+            <button v-for="(mi, i) in v.meMenu" :key="mi.key" type="button" @click="mi.go" :style="mi.rowStyle">
+              <img :src="mi.emo" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
+              <span style="flex: 1; display: flex; flex-direction: column; text-align: left"><span style="font-size: 16px; font-weight: 800; color: #0F172A">{{ mi.label }}</span><span style="font-size: 12px; color: #64748B">{{ mi.desc }}</span></span>
+              <span style="font-size: 20px; color: #94A3B8">›</span>
+            </button>
+          </div>
+          <button type="button" @click="v.logout" style="min-height: 48px; border-radius: 14px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; cursor: pointer">로그아웃</button>
         </div>
+      </template>
+      <template v-if="v.meBack">
+        <button type="button" @click="v.meBack" style="align-self: flex-start; min-height: 40px; margin-bottom: 6px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 내 정보</button>
       </template>
 
       <template v-if="v.dHome">
@@ -435,8 +449,9 @@ a{color:#1E4FD8;text-decoration:none}
               <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px">
                 <div style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid #EEF2F7">
                   <img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
-                  <span style="font-size: 13px; color: #475569">담당 기사</span>
-                  <span style="margin-left: auto; font-size: 15px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ d.driverText }}</span>
+                  <span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 16px; font-weight: 800; color: #0F172A">{{ d.driverNameOnly }}</span><span style="font-size: 12px; color: #64748B">담당 기사</span></span>
+                  <span v-if="d.driverRank" style="font-size: 11px; font-weight: 800; color: #1E3A8A; background: linear-gradient(135deg,#E0E7FF,#C7D2FE); padding: 3px 9px; border-radius: 999px">{{ d.driverRank }}</span>
+                  <a v-if="d.driverPhone" :href="'tel:' + d.driverPhone" style="margin-left: auto; display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap">📞 전화</a>
                 </div>
 
                 <div>
@@ -481,7 +496,7 @@ a{color:#1E4FD8;text-decoration:none}
 
       <template v-if="v.tNotice">
         <div style="display: flex; flex-direction: column; gap: 12px">
-          <template v-if="v.isAdminRole">
+          <template v-if="v.canWriteNotice">
             <button type="button" @click="v.openNotice" style="min-height: 48px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">+ {{ v.scopeName }} 공지 작성</button>
           </template>
           <article v-if="v.mustN" style="background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
@@ -684,6 +699,11 @@ a{color:#1E4FD8;text-decoration:none}
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">노선 설정</span><span style="font-size: 12px; color: #4B5563">배차에 쓰는 노선 이름·기본 배송료</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
+            <button type="button" @click="v.goTabs" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <img :src="v.emo.gear" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">탭 관리</span><span style="font-size: 12px; color: #4B5563">탭별 사용·알림, 직급별 보기·수정 권한</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
             <button type="button" @click="v.goPerms" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
               <img :src="v.emo.crown" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">직급 권한</span><span style="font-size: 12px; color: #4B5563">총괄·이상·팀장·기사별로 할 수 있는 일</span></span>
@@ -737,6 +757,45 @@ a{color:#1E4FD8;text-decoration:none}
             </div>
           </div>
           <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6">노선을 지워도 이미 만든 배차 기록은 노선 이름 그대로 남아요.</p>
+        </div>
+      </template>
+
+      <template v-if="v.sTabs">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
+          <div style="display: flex; align-items: center; gap: 10px"><img :src="v.emo.gear" alt="" aria-hidden="true" class="e3d" style="width: 34px; height: 34px"><h2 style="margin: 0; font-size: 18px; font-weight: 800">탭 관리</h2></div>
+          <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6">탭마다 <b>사용</b>과 <b>알림</b>을 켜고 끌 수 있어요. ⚙️를 누르면 직급별로 <b>보기</b>·<b>수정</b> 권한을 줄 수 있어요. 관리자는 항상 모든 권한이 있어요.</p>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 14px">
+            <div v-for="tr in v.tabRows" :key="tr.key" :style="tr.rowStyle">
+              <div style="display: flex; align-items: center; gap: 10px; min-height: 66px">
+                <img :src="tr.emo" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
+                <span style="flex: 1; min-width: 0; font-size: 16px; font-weight: 800">{{ tr.label }}</span>
+                <span style="display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 10px; font-weight: 700; color: #64748B">사용</span>
+                  <button type="button" role="switch" :aria-checked="tr.enabled ? 'true' : 'false'" :aria-label="tr.label + ' 탭 사용'" @click="tr.toggleEnabled" class="jy-switch" :style="tr.enStyle"><span :style="tr.knob"></span></button></span>
+                <span style="display: flex; flex-direction: column; align-items: center; gap: 2px"><span style="font-size: 10px; font-weight: 700; color: #64748B">알림</span>
+                  <button type="button" role="switch" :aria-checked="tr.notify ? 'true' : 'false'" :aria-label="tr.label + ' 알림'" @click="tr.toggleNotify" class="jy-switch" :style="tr.ntStyle"><span :style="tr.knob"></span></button></span>
+                <button type="button" @click="tr.toggleOpen" :aria-expanded="tr.open ? 'true' : 'false'" :aria-label="tr.label + ' 권한 설정'" :style="tr.gearStyle"><img :src="v.emo.gear" alt="" aria-hidden="true" class="e3d" style="width: 22px; height: 22px"></button>
+              </div>
+              <template v-if="tr.open">
+                <div style="margin: 0 0 14px; padding: 12px; border-radius: 14px; background: linear-gradient(180deg,#F8FAFF,#F1F5FF); border: 1px solid #E0E7FF; display: flex; flex-direction: column; gap: 10px">
+                  <div style="display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #334155; line-height: 1.5">
+                    <span><b style="color: #1E3A8A">보기</b> · {{ tr.viewDesc }}</span>
+                    <span><b style="color: #1E3A8A">수정</b> · {{ tr.editDesc }}</span>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 8px; min-height: 40px; border-top: 1px solid #E0E7FF; padding-top: 8px">
+                    <span style="flex: 1; font-size: 14px; font-weight: 800">관리자</span>
+                    <span class="jy-pill" style="background: linear-gradient(135deg,#F7E7A1,#D4AF37); color: #1A1305; padding-left: 10px">보기 · 수정 항상</span>
+                  </div>
+                  <div v-for="rp in tr.ranks" :key="rp.rank" style="display: flex; align-items: center; gap: 8px; min-height: 44px; border-top: 1px solid #E0E7FF">
+                    <span style="flex: 1; font-size: 14px; font-weight: 800">{{ rp.rank }}</span>
+                    <button type="button" :aria-pressed="rp.view ? 'true' : 'false'" @click="rp.toggleView" :style="rp.viewStyle">{{ rp.view ? '✓ ' : '' }}보기</button>
+                    <button type="button" :aria-pressed="rp.edit ? 'true' : 'false'" @click="rp.toggleEdit" :style="rp.editStyle">{{ rp.edit ? '✓ ' : '' }}수정</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </div>
+          <p style="margin: 0; font-size: 12px; color: #64748B; line-height: 1.6">알림 설정은 저장돼요. 휴대폰 푸시 알림 발송은 다음 단계에서 연결할게요.</p>
         </div>
       </template>
 
@@ -1004,7 +1063,14 @@ function fmtWhen(ts) {
 function digits(s) { return String(s || '').replace(/\D/g, ''); }
 function fmtPhone(s) { var d = digits(s); return d.length === 11 ? d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7) : (d.length === 10 ? d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6) : s); }
 function loginEmail(id) { var t = String(id || '').trim().toLowerCase(); return (/[a-z]/.test(t) ? t.replace(/[^a-z0-9._-]/g, '') : digits(t)) + '@jinyang.app'; }
-var RANKS = ['총괄', '이상', '팀장', '기사'];
+var RANKS = ['총괄', '이사', '팀장', '조장', '기사'];
+var TAB_CONF = [
+  { key: 'notice', label: '공지', emo: 'mega', view: '공지 탭을 보고 필독 공지를 확인할 수 있어요', edit: '소속 업체에 공지를 작성할 수 있어요' },
+  { key: 'dispatch', label: '배차', emo: 'truck', view: '배차 탭에서 본인 배차를 보고 입차·픽업·완료를 기록해요', edit: '업체 배차 추가·수정 (다음 단계에서 연결 예정)' },
+  { key: 'pay', label: '정산', emo: 'money', view: '내 정보 → 정산에서 본인 정산서·임대료를 봐요', edit: '정산 수정 (다음 단계에서 연결 예정)' },
+  { key: 'teams', label: '팀즈', emo: 'sat', view: '팀즈 탭에서 감지된 메시지를 봐요', edit: '감지 설정 (다음 단계에서 연결 예정)' },
+  { key: 'me', label: '내 정보', emo: 'user', view: '내 정보 탭(기본 정보·서류·감차 요청)을 써요', edit: '본인 서브폰·주소·서류 사진 수정' }
+];
 var TAB_EMO_KEYS = { home: 'house', dispatch: 'truck', notice: 'mega', pay: 'money', teams: 'sat', me: 'user', settings: 'gear' };
 var EMO_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
 function emo(p) { return EMO_BASE + encodeURI(p); }
@@ -1073,7 +1139,7 @@ var S = Vue.reactive({
   routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
   routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
-  perms: {}, armKey: null, meSub: 'pay', reduceTaps: 0
+  perms: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null
 });
 var toastTimer = null, armTimer = null, reduceTimer = null;
 function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
@@ -1105,6 +1171,7 @@ async function loadAll() {
   S.teams = res[5]; S.payslips = res[6]; S.reduces = res[7]; S.leases = res[8];
   S.routes = await q(sb.from('routes').select('*').order('sort').order('name'));
   var pm = {}; (await q(sb.from('rank_perms').select('*'))).forEach(function (r) { pm[r.rank] = r.can_clear_times; }); S.perms = pm;
+  var ts = {}; (await q(sb.from('tab_settings').select('*'))).forEach(function (r) { ts[r.tab] = r; }); S.tabSet = ts;
   await loadDispatches();
   await refreshUrls();
   await refreshStats();
@@ -1222,8 +1289,14 @@ function build() {
   var sel = s.drivers.find(function (d) { return d.id === s.selId; });
   var scopeDrivers = s.drivers.filter(function (d) { return d.company_id === scopeId; });
 
+  var myRank = meD ? (meD.rank || '기사') : '관리자';
+  function tabCan(tab, kind) {
+    if (!isDriver) return true;
+    var t = s.tabSet[tab]; if (!t) return tab !== 'teams';
+    return !!t.enabled && !!(t.perms && t.perms[myRank] && t.perms[myRank][kind]);
+  }
   var tabDefs = isDriver
-    ? [['home', '홈'], ['notice', '공지'], ['dispatch', '배차'], ['me', '내 정보']]
+    ? [['home', '홈'], ['notice', '공지'], ['dispatch', '배차'], ['teams', '팀즈'], ['me', '내 정보']].filter(function (t) { return t[0] === 'home' || tabCan(t[0], 'view'); })
     : [['home', '홈'], ['notice', '공지'], ['dispatch', '배차'], ['pay', '급여'], ['teams', '팀즈'], ['settings', '설정']];
   var tabs = tabDefs.map(function (t) {
     var on = s.tab === t[0];
@@ -1233,7 +1306,7 @@ function build() {
       iconWrap: { width: '40px', height: '32px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
         background: on ? 'linear-gradient(135deg,#1E2E9E,#0B1533)' : 'transparent', boxShadow: on ? '0 8px 16px -8px rgba(11,21,51,.8)' : 'none', transform: on ? 'translateY(-2px)' : 'none' },
       emoStyle: { width: on ? '24px' : '22px', height: on ? '24px' : '22px', objectFit: 'contain', filter: on ? 'drop-shadow(0 2px 3px rgba(0,0,0,.35))' : 'grayscale(.85) opacity(.55)' },
-      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; if (t[0] === 'me') S.meSub = 'pay'; S.armKey = null; S.editMe = false; S.showRrn = false; S.delAsk = null; } };
+      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; if (t[0] === 'me') S.meSub = 'menu'; if (t[0] === 'dispatch') S.dispSel = null; S.armKey = null; S.editMe = false; S.showRrn = false; S.delAsk = null; } };
   });
   var titles = { home: '홈', dispatch: '배차', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
 
@@ -1313,7 +1386,7 @@ function build() {
     var stt = dispStatus(d), canStamp = !isDriver || d.driver_id === s.uid, open = s.dispSel === d.id;
     var rt = s.routes.find(function (r) { return r.id === d.route_id; });
     return {
-      id: d.id, route: d.route_name, driverText: driverName(d.driver_id), title: driverShort(d.driver_id) + ' / ' + d.route_name, feeText: '₩' + won(d.fee), memo: d.memo, routeMemo: rt ? rt.memo : '',
+      id: d.id, route: d.route_name, driverText: driverName(d.driver_id), driverNameOnly: driverShort(d.driver_id), driverRank: (function () { var x = s.drivers.find(function (y) { return y.id === d.driver_id; }); return x ? (x.rank || '기사') : ''; })(), driverPhone: (function () { var x = s.drivers.find(function (y) { return y.id === d.driver_id; }); return x && !isDriver ? x.phone : ''; })(), title: driverShort(d.driver_id) + ' / ' + d.route_name, feeText: '₩' + won(d.fee), memo: d.memo, routeMemo: rt ? rt.memo : '',
       statusText: stt[0], statusStyle: stStyle(stt), statusEmo: stt[3], lastTime: stt[4] ? hm(stt[4]) : '',
       chevStyle: { fontSize: '18px', color: '#64748B', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' },
       isOpen: open, canStamp: canStamp, delAsk: s.delAsk === d.id,
@@ -1446,7 +1519,8 @@ function build() {
     // 공통 머리
     scopeName: scopeName, company: scopeName, co: { room: co.teams_room || '[캠프명] Teams방' },
     showMeBadge: isDriver && s.tab !== 'home',
-    showCoBadge: s.tab === 'home', coInitial: (scopeName || '?').charAt(0),
+    showCoBadge: s.tab === 'home',
+    headerTitleStyle: { margin: 0, fontSize: s.tab === 'home' ? '18px' : '22px', fontWeight: 800, color: '#FFFFFF', whiteSpace: 'nowrap' }, coInitial: (scopeName || '?').charAt(0),
     headerTitle: s.tab === 'home' ? (isDriver ? (meD ? meD.name + ' ' + (meD.rank || '기사') + '님' : '홈') : '관리자') : titles[s.tab], isAdminRole: !isDriver, isDriverRole: isDriver, tabs: tabs,
     dHome: isDriver && s.tab === 'home', aHome: !isDriver && s.tab === 'home',
     tNotice: s.tab === 'notice', tTeams: s.tab === 'teams', tMe: isDriver && s.tab === 'me' && s.meSub === 'info',
@@ -1484,7 +1558,7 @@ function build() {
       var f = S.noticeForm;
       if (!f.title.trim()) { S.noticeErr = '제목을 입력해 주세요'; return; }
       run(async function () {
-        try { await q(sb.from('notices').insert({ company_id: S.company, tag: f.tag, title: f.title.trim(), body: f.body.trim(), must: f.must })); S.noticeOpen = false; await loadAll(); flash('공지를 등록했어요'); }
+        try { await q(sb.from('notices').insert({ company_id: S.role === 'admin' ? S.company : scopeId, tag: f.tag, title: f.title.trim(), body: f.body.trim(), must: f.must })); S.noticeOpen = false; await loadAll(); flash('공지를 등록했어요'); }
         catch (e) { fail(e, '공지를 등록하지 못했어요'); }
       });
     },
@@ -1599,7 +1673,50 @@ function build() {
 
     // 배차
     tDispatch: s.tab === 'dispatch',
-    meTabs: isDriver && s.tab === 'me' ? [['pay', '정산', EMO.money], ['info', '내 정보', EMO.user]].map(function (x) {
+    canWriteNotice: !isDriver || tabCan('notice', 'edit'),
+    sTabs: !isDriver && s.tab === 'settings' && s.adminView === 'tabs',
+    goTabs: function () { S.adminView = 'tabs'; S.tabOpen = null; },
+    tabRows: TAB_CONF.map(function (c, i) {
+      var t = s.tabSet[c.key] || { enabled: true, notify: true, perms: {} }, open = s.tabOpen === c.key;
+      function save(patch, msg) {
+        run(async function () {
+          try { await q(sb.from('tab_settings').update(patch).eq('tab', c.key)); var ts = Object.assign({}, S.tabSet); ts[c.key] = Object.assign({}, t, patch); S.tabSet = ts; flash(msg); }
+          catch (e) { fail(e, '설정을 저장하지 못했어요'); }
+        });
+      }
+      function sw(on) { return { background: on ? 'linear-gradient(135deg,#34D399,#059669)' : '#CBD5E1', justifyContent: on ? 'flex-end' : 'flex-start' }; }
+      var knob = { width: '24px', height: '24px', borderRadius: '12px', background: '#FFFFFF', display: 'block', boxShadow: '0 2px 4px rgba(0,0,0,.2)' };
+      return {
+        key: c.key, label: c.label, emo: EMO[c.emo], open: open, enabled: !!t.enabled, notify: !!t.notify,
+        viewDesc: c.view, editDesc: c.edit,
+        rowStyle: { borderTop: i === 0 ? 'none' : '1px solid #EEF2F7' },
+        enStyle: sw(t.enabled), ntStyle: sw(t.notify), knob: knob,
+        gearStyle: { width: '40px', height: '40px', flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '12px', border: open ? '2px solid #4F6BFF' : '1px solid #E2E8F0', background: open ? '#EEF2FF' : '#FFFFFF', cursor: 'pointer' },
+        toggleEnabled: function () { save({ enabled: !t.enabled }, c.label + ' 탭 ' + (!t.enabled ? '사용' : '숨김')); },
+        toggleNotify: function () { save({ notify: !t.notify }, c.label + ' 알림 ' + (!t.notify ? '켬' : '끔')); },
+        toggleOpen: function () { S.tabOpen = open ? null : c.key; },
+        ranks: RANKS.map(function (rk) {
+          var p = (t.perms && t.perms[rk]) || { view: false, edit: false };
+          function setP(kind) {
+            var np = JSON.parse(JSON.stringify(t.perms || {})); np[rk] = Object.assign({ view: false, edit: false }, np[rk] || {});
+            np[rk][kind] = !np[rk][kind];
+            if (kind === 'edit' && np[rk].edit) np[rk].view = true;   // 수정하려면 볼 수 있어야 함
+            if (kind === 'view' && !np[rk].view) np[rk].edit = false;
+            save({ perms: np }, c.label + ' · ' + rk + ' ' + (kind === 'view' ? '보기' : '수정') + ' ' + (np[rk][kind] ? '허용' : '해제'));
+          }
+          function chip(on) { return { minHeight: '34px', padding: '0 12px', borderRadius: '999px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', border: on ? 'none' : '1px solid #CBD5E1', background: on ? 'linear-gradient(135deg,#4F6BFF,#2337B8)' : '#FFFFFF', color: on ? '#FFFFFF' : '#64748B' }; }
+          return { rank: rk, view: !!p.view, edit: !!p.edit, viewStyle: chip(p.view), editStyle: chip(p.edit), toggleView: function () { setP('view'); }, toggleEdit: function () { setP('edit'); } };
+        })
+      };
+    }),
+    meMenu: isDriver && s.tab === 'me' && s.meSub === 'menu' ? [
+      ['pay', '정산', '정산서 · 넘버 임대료', EMO.money], ['info', '내 정보', '기본 정보 · 서류 사진 · 감차 요청', EMO.card]
+    ].filter(function (x) { return x[0] !== 'pay' || tabCan('pay', 'view'); }).map(function (x, i) {
+      return { key: x[0], label: x[1], desc: x[2], emo: x[3], go: function () { S.meSub = x[0]; S.editMe = false; S.showRrn = false; },
+        rowStyle: { width: '100%', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '68px', border: 'none', borderTop: i === 0 ? 'none' : '1px solid #EEF2F7', background: 'transparent', fontFamily: 'inherit', cursor: 'pointer', padding: '0' } };
+    }) : null,
+    meBack: isDriver && s.tab === 'me' && s.meSub !== 'menu' ? function () { S.meSub = 'menu'; S.editMe = false; S.showRrn = false; } : null,
+    meTabsOld: false ? [['pay', '정산', EMO.money], ['info', '내 정보', EMO.user]].map(function (x) {
       var on = s.meSub === x[0];
       return { key: x[0], label: x[1], emo: x[2], on: on, go: function () { S.meSub = x[0]; S.editMe = false; S.showRrn = false; },
         style: { flex: 1, minHeight: '46px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', border: 'none', borderRadius: '12px', fontFamily: 'inherit', fontSize: '15px', fontWeight: on ? 800 : 600, cursor: 'pointer',
