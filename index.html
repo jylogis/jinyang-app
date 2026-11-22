@@ -233,7 +233,8 @@ a{color:#1E4FD8;text-decoration:none}
         <span style="font-size: 22px; color: #4B5563">›</span>
       </button>
     </template>
-    <button type="button" @click="v.openAddCo" style="min-height: 56px; border: 1px dashed #9CA3AF; border-radius: 16px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer">+ 업체 추가</button>
+    <button v-if="v.isRealAdmin" type="button" @click="v.openAddCo" style="min-height: 56px; border: 1px dashed #9CA3AF; border-radius: 16px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer">+ 업체 추가</button>
+    <button v-if="v.isMgrMode" type="button" @click="v.toDriverMode" style="min-height: 52px; border: none; border-radius: 16px; background: linear-gradient(135deg,#F7E7A1,#D4AF37); color: #1A1305; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">👤 기사 모드로 돌아가기</button>
     <template v-if="v.addCoOpen"><div style="display: flex; gap: 8px"><input aria-label="새 업체 이름" :value="v.addCoName" @input="v.onAddCo" placeholder="업체 이름" style="flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"><button type="button" @click="v.saveCo" style="min-height: 48px; padding: 0 18px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">추가</button></div></template>
     <div style="flex: 1"></div>
     <button type="button" @click="v.logout" style="min-height: 44px; border: none; background: transparent; color: #374151; font-family: inherit; font-size: 14px; text-decoration: underline; cursor: pointer">로그아웃</button>
@@ -448,8 +449,7 @@ a{color:#1E4FD8;text-decoration:none}
               <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px">
                 <div style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid #EEF2F7">
                   <img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
-                  <span style="display: flex; flex-direction: column; min-width: 0"><span style="font-size: 16px; font-weight: 800; color: #0F172A">{{ d.driverNameOnly }}</span><span style="font-size: 12px; color: #64748B">담당 기사</span></span>
-                  <span v-if="d.driverRank" style="font-size: 11px; font-weight: 800; color: #1E3A8A; background: linear-gradient(135deg,#E0E7FF,#C7D2FE); padding: 3px 9px; border-radius: 999px">{{ d.driverRank }}</span>
+                  <span style="font-size: 16px; font-weight: 800; color: #0F172A">{{ d.driverNameOnly }}</span>
                   <a v-if="d.driverPhone" :href="'tel:' + d.driverPhone" style="margin-left: auto; display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap">📞 전화</a>
                 </div>
 
@@ -698,19 +698,19 @@ a{color:#1E4FD8;text-decoration:none}
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">노선 설정</span><span style="font-size: 12px; color: #4B5563">배차에 쓰는 노선 이름·기본 배송료</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
-            <button type="button" @click="v.goTabs" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+            <button v-if="v.isRealAdmin" type="button" @click="v.goTabs" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
               <img :src="v.emo.gear" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">탭 관리</span><span style="font-size: 12px; color: #4B5563">탭별 사용·알림, 직급별 보기·수정 권한</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
-            <button type="button" @click="v.goPerms" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+            <button v-if="v.isRealAdmin" type="button" @click="v.goPerms" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
               <img :src="v.emo.crown" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">
-              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">직급 권한</span><span style="font-size: 12px; color: #4B5563">총괄·이상·팀장·기사별로 할 수 있는 일</span></span>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">직급 권한</span><span style="font-size: 12px; color: #4B5563">총괄·이사·팀장·조장·기사별 기록 취소</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
-            <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+            <button v-if="v.isRealAdmin" type="button" @click="v.goCompanies" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"></path></svg>
-              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">업체·센터 관리</span><span style="font-size: 12px; color: #4B5563">업체 추가, 업체별 관리자 지정</span></span>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">업체·센터 관리</span><span style="font-size: 12px; color: #4B5563">업체 추가·이름 수정, 업체별 관리 권한자 보기</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
             <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
@@ -756,6 +756,33 @@ a{color:#1E4FD8;text-decoration:none}
             </div>
           </div>
           <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6">노선을 지워도 이미 만든 배차 기록은 노선 이름 그대로 남아요.</p>
+        </div>
+      </template>
+
+      <template v-if="v.sCompanies">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
+          <div style="display: flex; align-items: center; gap: 10px"><img :src="v.emo.office" alt="" aria-hidden="true" class="e3d" style="width: 34px; height: 34px"><h2 style="margin: 0; font-size: 18px; font-weight: 800">업체·센터 관리</h2></div>
+          <p style="margin: 0; font-size: 13px; color: #475569; line-height: 1.6">업체마다 관리 권한을 가진 사람이 보여요. 권한을 주거나 빼려면 <b>설정 → 기사 정보 관리 → 사람 선택 → 🛡️ 관리 권한 설정</b>에서 하면 돼요.</p>
+          <div v-if="v.allManagers.length" style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; background: linear-gradient(135deg,#FFFBEB,#FEF3C7)">
+            <span style="font-size: 13px; font-weight: 800; color: #92400E">전체 관리 권한</span>
+            <span style="display: flex; flex-wrap: wrap; gap: 6px"><span v-for="m in v.allManagers" :key="m" class="jy-pill" style="background: #FFFFFF; color: #92400E; padding-left: 10px">{{ m }}</span></span>
+          </div>
+          <div v-for="c in v.companyRows" :key="c.id" style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <span class="jy-co" style="animation: none"><span class="jy-co-t">{{ c.name }}</span></span>
+              <span style="margin-left: auto; font-size: 12px; color: #64748B; white-space: nowrap">기사 {{ c.total }}명</span>
+            </div>
+            <template v-if="c.editing">
+              <div style="display: flex; gap: 6px"><input :aria-label="c.name + ' 새 이름'" :value="c.editName" @input="c.onName" style="flex: 1; min-width: 0; min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
+                <button type="button" @click="c.saveName" style="min-height: 44px; padding: 0 14px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 14px">저장</button></div>
+            </template>
+            <span style="font-size: 12px; font-weight: 700; color: #475569">관리 권한자</span>
+            <span v-if="c.managers.length" style="display: flex; flex-wrap: wrap; gap: 6px"><span v-for="m in c.managers" :key="m" class="jy-pill" style="background: linear-gradient(135deg,#E0E7FF,#C7D2FE); color: #1E3A8A; padding-left: 10px">🛡️ {{ m }}</span></span>
+            <span v-else style="font-size: 13px; color: #94A3B8">지정된 사람이 없어요 (관리자만 관리)</span>
+            <button type="button" @click="c.toggleEdit" style="align-self: flex-start; min-height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ c.editing ? '취소' : '이름 수정' }}</button>
+          </div>
+          <button type="button" @click="v.goPick" style="min-height: 48px; border-radius: 14px; border: 1px dashed #9CA3AF; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; cursor: pointer">+ 업체 추가는 「업체 변경」 화면에서</button>
         </div>
       </template>
 
@@ -850,10 +877,31 @@ a{color:#1E4FD8;text-decoration:none}
             </div>
           </div>
           <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
-            <div style="display: flex; flex-direction: column; gap: 4px"><label for="sel-rank" style="font-size: 12px; font-weight: 700; color: #374151">직급</label>
+            <div v-if="v.isRealAdmin" style="display: flex; flex-direction: column; gap: 4px"><label for="sel-rank" style="font-size: 12px; font-weight: 700; color: #374151">직급</label>
               <select id="sel-rank" :value="v.sel.rank" @change="v.setRank" style="min-height: 44px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; font-weight: 700; background: #FFFFFF"><option v-for="rk in v.ranks" :key="rk" :value="rk">{{ rk }}</option></select></div>
             <div style="display: flex; flex-direction: column; gap: 4px"><label for="sel-co" style="font-size: 12px; font-weight: 700; color: #374151">소속 업체</label>
               <select id="sel-co" :value="v.sel.companyId" @change="v.setCompany" style="min-height: 44px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; font-weight: 700; background: #FFFFFF"><option v-for="c in v.companyOptions" :key="c.id" :value="c.id">{{ c.name }}</option></select></div>
+          </div>
+          <div v-if="v.isRealAdmin" style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <img :src="v.emo.shield" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 800">관리 권한</span><span style="font-size: 12px; color: #64748B">{{ v.mgr.summary }}</span></span>
+              <button type="button" @click="v.mgr.toggle" :aria-expanded="v.mgr.open ? 'true' : 'false'" style="min-height: 40px; padding: 0 14px; border-radius: 12px; border: 1px solid #C7D2FE; background: #EEF2FF; color: #1E3A8A; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">{{ v.mgr.open ? '닫기' : '관리 권한 설정' }}</button>
+            </div>
+            <template v-if="v.mgr.open">
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+                <button v-for="o in v.mgr.options" :key="o.key" type="button" @click="o.pick" :aria-pressed="o.on ? 'true' : 'false'" :style="o.style">{{ o.label }}</button>
+              </div>
+              <template v-if="v.mgr.isCompanies">
+                <span style="font-size: 12px; font-weight: 700; color: #475569">관리할 업체를 고르세요</span>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px">
+                  <button v-for="c in v.mgr.companies" :key="c.id" type="button" @click="c.pick" :aria-pressed="c.on ? 'true' : 'false'" :style="c.style">{{ c.on ? '✓ ' : '' }}{{ c.name }}</button>
+                </div>
+              </template>
+              <p style="margin: 0; font-size: 12px; color: #475569; line-height: 1.6; background: #F8FAFC; border-radius: 10px; padding: 10px 12px">{{ v.mgr.help }}</p>
+              <template v-if="v.mgr.err"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.mgr.err }}</span></template>
+              <button type="button" @click="v.mgr.save" style="min-height: 46px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 15px">관리 권한 저장</button>
+            </template>
           </div>
           <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
             <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px"><span style="color: #4B5563">주민번호</span><span style="display: flex; align-items: center; gap: 8px"><span style="font-weight: 500">{{ v.sel.rrnShown }}</span><button type="button" @click="v.toggleRrn" style="min-height: 32px; padding: 0 8px; border: 1px solid #D1D5DB; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 12px; cursor: pointer">{{ v.rrnBtn }}</button></span></div>
@@ -1080,7 +1128,7 @@ var EMO = {
   clip: emo('Clipboard/3D/clipboard_3d.png'), hour: emo('Hourglass not done/3D/hourglass_not_done_3d.png'), memo: emo('Memo/3D/memo_3d.png'),
   office: emo('Office building/3D/office_building_3d.png'), cal: emo('Calendar/3D/calendar_3d.png'), key: emo('Key/3D/key_3d.png'),
   warn: emo('Warning/3D/warning_3d.png'), card: emo('Identification card/3D/identification_card_3d.png'), crown: emo('Crown/3D/crown_3d.png'),
-  wave: emo('Waving hand/Default/3D/waving_hand_3d_default.png'), stop: emo('Stopwatch/3D/stopwatch_3d.png'), bank: emo('Bank/3D/bank_3d.png'),
+  wave: emo('Waving hand/Default/3D/waving_hand_3d_default.png'), stop: emo('Stopwatch/3D/stopwatch_3d.png'), bank: emo('Bank/3D/bank_3d.png'), shield: emo('Locked/3D/locked_3d.png'),
   cal2: emo('Spiral calendar/3D/spiral_calendar_3d.png')
 };
 var TAB_EMO = {}; Object.keys(TAB_EMO_KEYS).forEach(function (k) { TAB_EMO[k] = EMO[TAB_EMO_KEYS[k]]; });
@@ -1138,7 +1186,7 @@ var S = Vue.reactive({
   routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
   routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
-  perms: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null
+  perms: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null, mgrMode: false, myMgr: null, managers: [], mgrOpen: false, mgrForm: { scope: 'none', ids: [] }, mgrErr: '', coEdit: null, coEditName: ''
 });
 var toastTimer = null, armTimer = null, reduceTimer = null;
 function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
@@ -1171,6 +1219,8 @@ async function loadAll() {
   S.routes = await q(sb.from('routes').select('*').order('sort').order('name'));
   var pm = {}; (await q(sb.from('rank_perms').select('*'))).forEach(function (r) { pm[r.rank] = r.can_clear_times; }); S.perms = pm;
   var ts = {}; (await q(sb.from('tab_settings').select('*'))).forEach(function (r) { ts[r.tab] = r; }); S.tabSet = ts;
+  S.managers = await q(sb.from('managers').select('*'));
+  S.myMgr = S.managers.find(function (m) { return m.driver_id === S.uid; }) || null;
   await loadDispatches();
   await refreshUrls();
   await refreshStats();
@@ -1199,8 +1249,16 @@ async function refreshStats() {
 }
 
 // ---------- 로그인 흐름 ----------
+async function toManageMode() {
+  S.role = 'admin'; S.mgrMode = true; S.company = null; S.screen = 'pick'; S.tab = 'home'; S.adminView = 'menu';
+  await run(loadAll);
+}
+async function toDriverModeFn() {
+  S.role = 'driver'; S.mgrMode = false; S.company = null; S.screen = 'app'; S.tab = 'home'; S.meSub = 'menu';
+  await run(loadAll);
+}
 async function afterAuth(user) {
-  S.uid = user.id;
+  S.uid = user.id; S.mgrMode = false;
   var a = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
   S.role = a.data ? 'admin' : 'driver';
   await loadAll();
@@ -1266,7 +1324,7 @@ function rowOf(d) {
     name: d.name, rank: d.rank || '기사', initial: (d.name || '?').charAt(0), phone: d.phone,
     pending: d.status === '승인 대기', reduce: !!rr && rr.status === '요청',
     docText: '서류 ' + n + '/4', docStyle: { fontSize: '12px', fontWeight: 700, color: n === 4 ? '#15803D' : '#B91C1C' },
-    open: function () { S.tab = 'settings'; S.adminView = 'detail'; S.selId = d.id; S.showRrn = false; }
+    open: function () { S.tab = 'settings'; S.adminView = 'detail'; S.selId = d.id; S.showRrn = false; S.mgrOpen = false; }
   };
 }
 function payView(p) {
@@ -1489,7 +1547,7 @@ function build() {
     },
 
     // 업체 선택 (관리자)
-    companyCards: s.companies.map(function (c) {
+    companyCards: s.companies.filter(function (c) { return !s.mgrMode || !s.myMgr || s.myMgr.scope === 'all' || (s.myMgr.company_ids || []).indexOf(c.id) >= 0; }).map(function (c) {
       var ds = s.drivers.filter(function (d) { return d.company_id === c.id; });
       var p = ds.filter(function (d) { return d.status === '승인 대기'; }).length;
       return { name: c.name, initial: c.name.charAt(0), camp: c.camp || '캠프 미지정', total: ds.length, pending: p, hasPending: p > 0,
@@ -1511,7 +1569,7 @@ function build() {
     logout: function () {
       run(async function () {
         await sb.auth.signOut();
-        S.screen = 'login'; S.uid = null; S.company = null; S.drivers = []; S.rrn = {}; S.docs = {}; S.urls = {}; S.editMe = false; S.showRrn = false;
+        S.screen = 'login'; S.uid = null; S.company = null; S.mgrMode = false; S.myMgr = null; S.role = 'driver'; S.drivers = []; S.rrn = {}; S.docs = {}; S.urls = {}; S.editMe = false; S.showRrn = false;
       });
     },
 
@@ -1674,6 +1732,57 @@ function build() {
 
     // 배차
     tDispatch: s.tab === 'dispatch',
+    isRealAdmin: !isDriver && !s.mgrMode, isMgrMode: !!s.mgrMode,
+    toDriverMode: function () { toDriverModeFn(); },
+    sCompanies: !isDriver && s.tab === 'settings' && s.adminView === 'companies',
+    goCompanies: function () { S.adminView = 'companies'; S.coEdit = null; },
+    allManagers: s.managers.filter(function (m) { return m.scope === 'all'; }).map(function (m) { return driverShort(m.driver_id); }),
+    companyRows: s.companies.map(function (c) {
+      var editing = s.coEdit === c.id;
+      return { id: c.id, name: c.name, total: s.drivers.filter(function (d) { return d.company_id === c.id; }).length,
+        managers: s.managers.filter(function (m) { return m.scope === 'companies' && (m.company_ids || []).indexOf(c.id) >= 0; }).map(function (m) { return driverShort(m.driver_id); }),
+        editing: editing, editName: s.coEditName,
+        toggleEdit: function () { if (editing) S.coEdit = null; else { S.coEdit = c.id; S.coEditName = c.name; } },
+        onName: function (e) { S.coEditName = e.target.value; },
+        saveName: function () {
+          var n = S.coEditName.trim(); if (!n) return;
+          run(async function () {
+            try { await q(sb.from('companies').update({ name: n }).eq('id', c.id)); S.coEdit = null; await loadAll(); flash('업체 이름을 ' + n + '(으)로 바꿨어요'); }
+            catch (e) { fail(e, '이름을 바꾸지 못했어요 (같은 이름이 있는지 확인해 주세요)'); }
+          });
+        } };
+    }),
+    mgr: (function () {
+      if (!sel) return { open: false };
+      var cur = s.managers.find(function (m) { return m.driver_id === sel.id; }) || null;
+      var f = s.mgrForm;
+      function chip(on) { return { minHeight: '40px', padding: '0 10px', borderRadius: '12px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', border: on ? 'none' : '1px solid #CBD5E1', background: on ? 'linear-gradient(135deg,#4F6BFF,#2337B8)' : '#FFFFFF', color: on ? '#FFFFFF' : '#475569' }; }
+      var summary = !cur ? '없음 · 본인 정보만' : (cur.scope === 'all' ? '전체 관리 · 모든 업체' : (cur.company_ids || []).map(companyName).join(', ') + ' 관리');
+      var helps = { none: '일반 기사처럼 본인 정보만 볼 수 있어요.', companies: '고른 업체의 기사 정보·승인·배차·노선·공지·감차·임대료를 관리할 수 있어요. 직급 변경·탭 관리·권한 주기는 관리자만 해요.', all: '모든 업체를 관리할 수 있어요. 직급 변경·탭 관리·권한 주기는 관리자만 해요.' };
+      return {
+        open: s.mgrOpen, summary: summary, isCompanies: f.scope === 'companies', help: helps[f.scope], err: s.mgrErr,
+        toggle: function () { S.mgrErr = ''; if (!S.mgrOpen) S.mgrForm = { scope: cur ? cur.scope : 'none', ids: cur ? (cur.company_ids || []).slice() : [] }; S.mgrOpen = !S.mgrOpen; },
+        options: [['none', '없음'], ['companies', '특정 업체'], ['all', '전체 관리']].map(function (o) {
+          return { key: o[0], label: o[1], on: f.scope === o[0], style: chip(f.scope === o[0]), pick: function () { S.mgrForm.scope = o[0]; S.mgrErr = ''; } };
+        }),
+        companies: s.companies.map(function (c) {
+          var on = f.ids.indexOf(c.id) >= 0;
+          return { id: c.id, name: c.name, on: on, style: { minHeight: '36px', padding: '0 12px', borderRadius: '999px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', border: on ? 'none' : '1px solid #CBD5E1', background: on ? 'linear-gradient(135deg,#F7E7A1,#D4AF37)' : '#FFFFFF', color: on ? '#1A1305' : '#475569' },
+            pick: function () { var i = S.mgrForm.ids.indexOf(c.id); if (i >= 0) S.mgrForm.ids.splice(i, 1); else S.mgrForm.ids.push(c.id); } };
+        }),
+        save: function () {
+          var ff = S.mgrForm, who = sel.name;
+          if (ff.scope === 'companies' && !ff.ids.length) { S.mgrErr = '관리할 업체를 하나 이상 골라 주세요'; return; }
+          run(async function () {
+            try {
+              if (ff.scope === 'none') await q(sb.from('managers').delete().eq('driver_id', sel.id));
+              else await q(sb.from('managers').upsert({ driver_id: sel.id, scope: ff.scope, company_ids: ff.scope === 'all' ? [] : ff.ids, updated_at: new Date().toISOString() }));
+              S.mgrOpen = false; await loadAll(); flash(who + ' 님 관리 권한을 저장했어요');
+            } catch (e) { fail(e, '관리 권한을 저장하지 못했어요'); }
+          });
+        }
+      };
+    })(),
     canWriteNotice: !isDriver || tabCan('notice', 'edit'),
     sTabs: !isDriver && s.tab === 'settings' && s.adminView === 'tabs',
     goTabs: function () { S.adminView = 'tabs'; S.tabOpen = null; },
@@ -1711,9 +1820,9 @@ function build() {
       };
     }),
     meMenu: isDriver && s.tab === 'me' && s.meSub === 'menu' ? [
-      ['pay', '정산', '정산서 · 넘버 임대료', EMO.money], ['info', '내 정보', '기본 정보 · 서류 사진 · 감차 요청', EMO.card]
-    ].filter(function (x) { return x[0] !== 'pay' || tabCan('pay', 'view'); }).map(function (x, i) {
-      return { key: x[0], label: x[1], desc: x[2], emo: x[3], go: function () { S.meSub = x[0]; S.editMe = false; S.showRrn = false; },
+      ['pay', '정산', '정산서 · 넘버 임대료', EMO.money], ['info', '내 정보', '기본 정보 · 서류 사진 · 감차 요청', EMO.card], ['manage', '관리 모드', '맡은 업체의 기사·배차·공지 관리', EMO.shield]
+    ].filter(function (x) { return (x[0] !== 'pay' || tabCan('pay', 'view')) && (x[0] !== 'manage' || !!s.myMgr); }).map(function (x, i) {
+      return { key: x[0], label: x[1], desc: x[2], emo: x[3], go: function () { if (x[0] === 'manage') { toManageMode(); return; } S.meSub = x[0]; S.editMe = false; S.showRrn = false; },
         rowStyle: { width: '100%', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '68px', border: 'none', borderTop: i === 0 ? 'none' : '1px solid #EEF2F7', background: 'transparent', fontFamily: 'inherit', cursor: 'pointer', padding: '0' } };
     }) : null,
     meBack: isDriver && s.tab === 'me' && s.meSub !== 'menu' ? function () { S.meSub = 'menu'; S.editMe = false; S.showRrn = false; } : null,
