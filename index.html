@@ -1291,8 +1291,15 @@ async function pushSubscribe() {
   } catch (e) { console.warn('push subscribe', e); return false; }
 }
 async function pushCall(body) {
-  try { var r = await fetch(PUSH_FN, { method: 'POST', headers: await pushHeaders(), body: JSON.stringify(body) }); return await r.json(); }
-  catch (e) { return { error: String(e) }; }
+  try {
+    var r = await fetch(PUSH_FN, { method: 'POST', headers: await pushHeaders(), body: JSON.stringify(body) });
+    if (r.status === 401) {
+      // 로그인 정보가 오래됐으면 새로 받아서 한 번 더
+      await sb.auth.refreshSession();
+      r = await fetch(PUSH_FN, { method: 'POST', headers: await pushHeaders(), body: JSON.stringify(body) });
+    }
+    var j = await r.json(); if (!r.ok && !j.error) j.error = 'HTTP ' + r.status; return j;
+  } catch (e) { return { error: String(e) }; }
 }
 function checkNoti() {
   var e = notiEnv(); S.notiPerm = e.perm;
@@ -1809,6 +1816,7 @@ function build() {
           if (!f.id && ins && ins.id) pushCall({ notice_id: ins.id }).then(function (r) {
             if (r && r.skipped) flash('공지를 등록했어요 · 게시 시작일에 맞춰 기사님들이 볼 수 있어요');
             else if (r && r.ok) flash('공지를 등록했어요 · 알림 ' + r.sent + '대 발송 (기사 ' + r.drivers + '명)');
+            else flash('공지는 등록됐지만 알림을 보내지 못했어요. 로그아웃 후 다시 로그인해 주세요');
           });
         } catch (e) { fail(e, '공지를 저장하지 못했어요'); }
       });
