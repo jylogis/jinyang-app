@@ -362,7 +362,7 @@ a{color:#1E4FD8;text-decoration:none}
                   <div v-for="st in d.steps" :key="st.key" style="display: flex; flex-direction: column; gap: 4px">
                     <button type="button" @click="st.stamp" :disabled="!d.canStamp" :style="st.style">
                       <span style="font-size: 12px; font-weight: 700">{{ st.label }}</span>
-                      <span style="font-size: 18px; font-weight: 800">{{ st.timeText }}</span>
+                      <span :style="st.textStyle">{{ st.timeText }}</span>
                     </button>
                     <button v-if="st.has && d.canStamp" type="button" @click="st.clear" style="min-height: 32px; border: none; background: transparent; font-family: inherit; font-size: 12px; color: #4B5563; text-decoration: underline; cursor: pointer">기록 취소</button>
                   </div>
@@ -1175,7 +1175,7 @@ function build() {
       toggle: function () { S.dispSel = open ? null : d.id; S.delAsk = null; },
       steps: STEPS.map(function (x) {
         var t = d[x[0]];
-        return { key: x[0], label: x[1], has: !!t, timeText: t ? hm(t) : '누르면 기록',
+        return { key: x[0], label: x[1], has: !!t, timeText: t ? hm(t) : '누르면 기록', textStyle: t ? { fontSize: '18px', fontWeight: 800 } : { fontSize: '12px', fontWeight: 500 },
           style: { width: '100%', minHeight: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', borderRadius: '12px', fontFamily: 'inherit', cursor: canStamp ? 'pointer' : 'default',
             border: t ? '2px solid #1E4FD8' : '1px dashed #9CA3AF', background: t ? '#EEF2FF' : '#FFFFFF', color: t ? '#1E3A8A' : '#4B5563' },
           stamp: function () { if (!canStamp || t) return; setTime(d, x[0], new Date().toISOString()); },
