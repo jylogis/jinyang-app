@@ -1899,7 +1899,7 @@ function build() {
         primary: { label: '🔔 알림 허용하기', go: function () {
           Notification.requestPermission().then(function (p) {
             checkNoti();
-            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); if (navigator.serviceWorker) navigator.serviceWorker.ready.then(function (r) { r.showNotification('진양로지스틱스', { body: '알림이 켜졌어요. 배차·공지 소식을 알려드릴게요.', icon: 'icon-192.png', badge: 'icon-192.png' }); }).catch(function () {}); }
+            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); if (navigator.serviceWorker) navigator.serviceWorker.ready.then(function (r) { r.showNotification('진양로지스틱스', { body: '알림이 켜졌어요. 배차·공지 소식을 알려드릴게요.', icon: 'icon-192.png', badge: 'badge-96.png' }); }).catch(function () {}); }
           });
         } }, later: later };
     })(),
