@@ -368,16 +368,15 @@ a{color:#1E4FD8;text-decoration:none}
       
       <template v-if="v.aHome">
         <div style="display: flex; flex-direction: column; gap: 14px">
-          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">등록 기사</span><span style="font-size: 22px; font-weight: 800">{{ v.stats.total }}명</span></div>
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.hour" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">승인 대기</span><span style="font-size: 22px; font-weight: 800; color: #B45309">{{ v.stats.pending }}명</span></div>
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.card" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">서류 미비</span><span style="font-size: 22px; font-weight: 800; color: #B91C1C">{{ v.stats.missing }}명</span></div>
-            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.warn" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">감차 요청</span><span style="font-size: 22px; font-weight: 800; color: #C2410C">{{ v.stats.reduce }}명</span></div>
+          <div v-if="v.anyStats" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <div v-if="v.stats.total" style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">등록 기사</span><span style="font-size: 22px; font-weight: 800">{{ v.stats.total }}명</span></div>
+            <div v-if="v.stats.pending" style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.hour" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">승인 대기</span><span style="font-size: 22px; font-weight: 800; color: #B45309">{{ v.stats.pending }}명</span></div>
+            <div v-if="v.stats.missing" style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.card" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">서류 미비</span><span style="font-size: 22px; font-weight: 800; color: #B91C1C">{{ v.stats.missing }}명</span></div>
+            <div v-if="v.stats.reduce" style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px; position: relative"><img :src="v.emo.warn" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px; position: absolute; right: 10px; top: 10px"><span style="font-size: 12px; color: #4B5563">감차 요청</span><span style="font-size: 22px; font-weight: 800; color: #C2410C">{{ v.stats.reduce }}명</span></div>
           </div>
-          <div style="background: #FFF7ED; border: 2px solid #FB923C; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
+          <div v-if="!v.noReduce" style="background: #FFF7ED; border: 2px solid #FB923C; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
             <h2 style="margin: 10px 0 4px; font-size: 16px; font-weight: 800; color: #9A3412">감차 요청 · 승인 필요</h2>
-            <template v-if="v.noReduce"><span style="font-size: 14px; color: #4B5563; padding: 12px 0">새 감차 요청이 없어요</span></template>
-            <template v-for="(r, $index) in v.reduceRows" :key="$index">
+                        <template v-for="(r, $index) in v.reduceRows" :key="$index">
               <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 64px; border: none; border-top: 1px solid #FED7AA; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
                 <span style="width: 36px; height: 36px; border-radius: 18px; background: #FFEDD5; color: #9A3412; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none">{{ r.initial }}</span>
                 <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
@@ -388,10 +387,9 @@ a{color:#1E4FD8;text-decoration:none}
               </button>
             </template>
           </div>
-          <div style="background: #FFFFFF; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
+          <div v-if="!v.noPending" style="background: #FFFFFF; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
             <h2 style="margin: 10px 0 4px; font-size: 16px; font-weight: 700">승인 대기 기사</h2>
-            <template v-if="v.noPending"><span style="font-size: 14px; color: #4B5563; padding: 12px 0">대기 중인 기사가 없어요</span></template>
-            <template v-for="(r, $index) in v.pendingRows" :key="$index">
+                        <template v-for="(r, $index) in v.pendingRows" :key="$index">
               <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 56px; border: none; border-top: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
                 <span style="width: 36px; height: 36px; border-radius: 18px; background: #FEF3C7; color: #92400E; font-weight: 700; display: flex; align-items: center; justify-content: center">{{ r.initial }}</span>
                 <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="display: inline-block; width: fit-content; align-self: flex-start; font-size: 11px; font-weight: 800; color: #1E3A8A; background: linear-gradient(135deg,#E0E7FF,#C7D2FE); padding: 2px 8px; border-radius: 999px; margin-left: 4px">{{ r.rank }}</span><span style="font-size: 12px; color: #4B5563">{{ r.phone }} · {{ r.docText }}</span></span>
@@ -399,6 +397,7 @@ a{color:#1E4FD8;text-decoration:none}
               </button>
             </template>
           </div>
+          <div v-if="v.adminAllClear" style="background: #FFFFFF; border-radius: 16px; padding: 24px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center"><img :src="v.emo.check" alt="" aria-hidden="true" class="e3d" style="width: 48px; height: 48px"><span style="font-size: 15px; font-weight: 800">처리할 일이 없어요</span><span style="font-size: 13px; color: #64748B">승인 대기·감차 요청이 생기면 여기에 바로 보여요</span></div>
           <button type="button" @click="v.goDriverList" style="min-height: 48px; border-radius: 14px; border: 1px solid #1E4FD8; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">전체 기사 정보 보기</button>
         </div>
       </template>
@@ -1534,6 +1533,8 @@ function build() {
     // 홈
     me: meView, stats: stats, rows: rows, noRows: rows.length === 0, pendingRows: pendingRows, noPending: pendingRows.length === 0,
     reduceRows: reduceRows, noReduce: reduceRows.length === 0,
+    anyStats: !!(stats.total || stats.pending || stats.missing || stats.reduce),
+    adminAllClear: reduceRows.length === 0 && pendingRows.length === 0,
     myPay: myPay, homeNormal: !myLease, homeLease: !!myLease, lease: leaseView(myLease),
     latestMsg: teamsMsgs[0] || null,
 
