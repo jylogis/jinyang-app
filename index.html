@@ -1,0 +1,1128 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1E4FD8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="진양 기사앱">
+<title>진양로지스틱스 기사앱</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#E5E7EB}
+a{color:#1E4FD8;text-decoration:none}
+*{-webkit-tap-highlight-color:transparent}
+#app{min-height:100dvh}
+</style>
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<script type="text/x-template" id="tpl">
+<div style="width: 100%; max-width: 480px; margin: 0 auto; height: 100dvh; position: relative; overflow: hidden; background: #F4F6F9; font-family: 'Noto Sans KR', sans-serif; color: #111827">
+
+
+<template v-if="v.isLogin">
+  <div style="height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 32px 28px; background: #FFFFFF">
+    <span style="font-size: 14px; font-weight: 800; color: #1E4FD8; letter-spacing: 1px">JINYANG LOGISTICS</span>
+    <h1 style="margin: 0 0 10px; font-size: 26px; font-weight: 800; line-height: 1.4">기사님 전용 앱에<br>오신 걸 환영해요</h1>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <label for="lg-phone" style="font-size: 13px; font-weight: 700; color: #374151">휴대폰 번호</label>
+      <input id="lg-phone" type="tel" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <label for="lg-pw" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호</label>
+      <input id="lg-pw" type="password" placeholder="비밀번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+    </div>
+    <button type="button" @click="v.loginDriver" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">로그인</button>
+    <button type="button" @click="v.goSignup" style="min-height: 52px; border: 1px solid #1E4FD8; border-radius: 14px; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">처음이에요 · 기사 회원가입</button>
+    <button type="button" @click="v.loginAdmin" style="min-height: 44px; border: none; background: transparent; color: #374151; font-family: inherit; font-size: 14px; font-weight: 500; text-decoration: underline; cursor: pointer">관리자로 로그인 (체험용)</button>
+    <p style="margin: 0; font-size: 12px; color: #4B5563; text-align: center">체험용 목업이라 아무 값이나 넣어도 로그인돼요</p>
+    <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; display: flex; flex-direction: column; gap: 8px">
+      <span style="font-size: 12px; font-weight: 700; color: #4B5563">예시 기사 계정으로 보기</span>
+      <div style="display: flex; gap: 8px">
+        <button type="button" @click="v.loginReduced" style="flex: 1; min-height: 44px; border: 1px solid #FDBA74; border-radius: 12px; background: #FFF7ED; color: #9A3412; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">감차 승인된 기사</button>
+        <button type="button" @click="v.loginLease" style="flex: 1; min-height: 44px; border: 1px solid #D1D5DB; border-radius: 12px; background: #F3F4F6; color: #111827; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">넘버 임대 기사</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+
+<template v-if="v.isSignup">
+  <div style="height: 100dvh; display: flex; flex-direction: column">
+    <div style="flex: none; display: flex; align-items: center; gap: 4px; padding: 14px 12px 10px; background: #FFFFFF; border-bottom: 1px solid #E5E7EB">
+      <button type="button" aria-label="뒤로" @click="v.signupBack" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 22px; color: #111827; cursor: pointer">‹</button>
+      <span style="flex: 1; font-size: 17px; font-weight: 700">기사 회원가입</span>
+      <span style="font-size: 13px; font-weight: 700; color: #1E4FD8; padding-right: 12px">{{ v.stepText }}</span>
+    </div>
+    <div style="flex: none; height: 4px; background: #E5E7EB"><div :style="v.stepBar"></div></div>
+
+    <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px">
+      <template v-if="v.step1">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 20px; font-weight: 800">기본 정보를 입력해 주세요</h2>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-name" style="font-size: 13px; font-weight: 700; color: #374151">이름 *</label>
+            <input id="su-name" type="text" :value="v.form.name" @input="v.on.name" placeholder="실명 입력" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-rrn1" style="font-size: 13px; font-weight: 700; color: #374151">주민등록번호 *</label>
+            <div style="display: flex; align-items: center; gap: 8px">
+              <input id="su-rrn1" type="text" inputmode="numeric" maxlength="6" :value="v.form.rrn1" @input="v.on.rrn1" placeholder="앞 6자리" style="flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+              <span style="font-size: 18px; color: #4B5563">-</span>
+              <input id="su-rrn2" type="password" inputmode="numeric" maxlength="7" aria-label="주민등록번호 뒤 7자리" :value="v.form.rrn2" @input="v.on.rrn2" placeholder="뒤 7자리" style="flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-phone" style="font-size: 13px; font-weight: 700; color: #374151">본폰 *</label>
+            <input id="su-phone" type="tel" :value="v.form.phone" @input="v.on.phone" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-sub" style="font-size: 13px; font-weight: 700; color: #374151">서브폰 (선택)</label>
+            <input id="su-sub" type="tel" :value="v.form.sub" @input="v.on.sub" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-addr" style="font-size: 13px; font-weight: 700; color: #374151">주소</label>
+            <input id="su-addr" type="text" :value="v.form.addr" @input="v.on.addr" placeholder="도로명 주소" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-center" style="font-size: 13px; font-weight: 700; color: #374151">소속센터 *</label>
+            <select id="su-center" :value="v.form.center" @change="v.on.center" style="min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 12px; font-family: inherit; font-size: 15px; background: #FFFFFF">
+              <option value="">소속센터를 선택하세요</option>
+              <option value="진양로지스틱스">진양로지스틱스</option>
+              <option value="협력업체A">협력업체A</option>
+            </select>
+          </div>
+          <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6; background: #EEF2FF; border-radius: 10px; padding: 10px 12px">주민등록번호는 암호화해서 저장되고, 본인과 소속 업체 관리자만 볼 수 있어요.</p>
+        </div>
+      </template>
+
+      <template v-if="v.step2">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 20px; font-weight: 800">서류 사진을 첨부해 주세요</h2>
+          <p style="margin: 0; font-size: 13px; color: #4B5563">글자가 잘 보이게 찍어 주세요. 나중에 '내 정보'에서 첨부해도 돼요.</p>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+            <template v-for="(doc, $index) in v.draftDocs" :key="$index">
+              <div style="background: #FFFFFF; border: 1px solid #E5E7EB; border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px">
+                <div style="height: 92px; border-radius: 10px; background: #F3F4F6; overflow: hidden; display: flex; align-items: center; justify-content: center">
+                  <template v-if="doc.isUrl"><img :src="doc.url" alt="{{ doc.label }} 사진" style="width: 100%; height: 92px; object-fit: cover"></template>
+                  <template v-if="doc.isSample"><span style="font-size: 12px; color: #374151">사진 첨부됨</span></template>
+                  <template v-if="doc.none">
+                    <svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                  </template>
+                </div>
+                <span style="font-size: 13px; font-weight: 700">{{ doc.label }}</span>
+                <span :style="doc.statusStyle">{{ doc.status }}</span>
+                <label :for="doc.inputId" style="min-height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #EEF2FF; color: #1E4FD8; font-size: 13px; font-weight: 700; cursor: pointer">{{ doc.btn }}</label>
+                <input :id="doc.inputId" type="file" accept="image/*" @change="doc.onFile" style="display: none">
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      <template v-if="v.step3">
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 60px; text-align: center">
+          <div style="width: 72px; height: 72px; border-radius: 36px; background: #DCFCE7; display: flex; align-items: center; justify-content: center">
+            <svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
+          </div>
+          <h2 style="margin: 0; font-size: 22px; font-weight: 800">가입 신청 완료!</h2>
+          <p style="margin: 0; font-size: 15px; color: #374151; line-height: 1.6">{{ v.form.center }} 기사 명단에 등록됐어요.<br>관리자가 승인하면 모든 기능을 쓸 수 있어요.</p>
+        </div>
+      </template>
+    </div>
+
+    <div style="flex: none; padding: 12px 20px 20px; background: #FFFFFF; border-top: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 8px">
+      <template v-if="v.hasErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.err }}</span></template>
+      <button type="button" @click="v.signupNext" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{ v.nextLabel }}</button>
+    </div>
+  </div>
+</template>
+
+
+<template v-if="v.isPick">
+  <div style="height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; gap: 14px; padding: 40px 24px 24px; background: #FFFFFF">
+    <span style="font-size: 13px; font-weight: 800; color: #1E4FD8; letter-spacing: 1px">JINYANG LOGISTICS · 관리자</span>
+    <h1 style="margin: 0; font-size: 24px; font-weight: 800; line-height: 1.4">관리할 업체를<br>선택하세요</h1>
+    <p style="margin: 0 0 6px; font-size: 14px; color: #4B5563; line-height: 1.6">업체마다 공지사항, 급여, 팀즈 감지, 기사 정보가 따로 관리돼요.</p>
+    <template v-for="(c, $index) in v.companyCards" :key="$index">
+      <button type="button" @click="c.pick" style="display: flex; align-items: center; gap: 14px; min-height: 88px; padding: 16px; border: 1px solid #D1D5DB; border-radius: 16px; background: #FFFFFF; font-family: inherit; text-align: left; cursor: pointer">
+        <span style="width: 48px; height: 48px; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none">{{ c.initial }}</span>
+        <span style="flex: 1; display: flex; flex-direction: column; gap: 3px">
+          <span style="font-size: 17px; font-weight: 800; color: #111827">{{ c.name }}</span>
+          <span style="font-size: 13px; color: #4B5563">{{ c.camp }} · 기사 {{ c.total }}명</span>
+          <template v-if="c.hasPending"><span style="align-self: flex-start; font-size: 12px; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 2px 8px; border-radius: 8px">승인 대기 {{ c.pending }}명</span></template>
+        </span>
+        <span style="font-size: 22px; color: #4B5563">›</span>
+      </button>
+    </template>
+    <button type="button" @click="v.soon" style="min-height: 56px; border: 1px dashed #9CA3AF; border-radius: 16px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer">+ 업체 추가</button>
+    <div style="flex: 1"></div>
+    <button type="button" @click="v.logout" style="min-height: 44px; border: none; background: transparent; color: #374151; font-family: inherit; font-size: 14px; text-decoration: underline; cursor: pointer">로그아웃</button>
+  </div>
+</template>
+
+
+<template v-if="v.isApp">
+  <div style="height: 100dvh; display: flex; flex-direction: column">
+    <div style="flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px 12px">
+      <div style="display: flex; flex-direction: column; gap: 2px">
+        <span style="font-size: 12px; font-weight: 700; color: #1E4FD8">{{ v.scopeName }}</span>
+        <h1 style="margin: 0; font-size: 22px; font-weight: 800">{{ v.headerTitle }}</h1>
+      </div>
+      <template v-if="v.isAdminRole">
+        <button type="button" @click="v.goPick" style="display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border: 1px solid #D1D5DB; border-radius: 22px; background: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 700; color: #111827; cursor: pointer">
+          <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h13l-3-3M17 17H4l3 3"></path></svg>
+          업체 변경
+        </button>
+      </template>
+      <template v-if="v.isDriverRole">
+        <span style="font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 12px; background: #E0E7FF; color: #1E3A8A">{{ v.me.name }} 기사</span>
+      </template>
+    </div>
+
+    <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 4px 20px 24px">
+
+      
+      <template v-if="v.dHome">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <template v-if="v.me.pending">
+            <div style="background: #FEF3C7; border-radius: 14px; padding: 12px 14px; font-size: 14px; color: #78350F; font-weight: 500">관리자 승인 대기 중이에요. 승인되면 알림으로 알려드릴게요.</div>
+          </template>
+          <span style="font-size: 15px; color: #374151">{{ v.me.name }} 기사님, 안녕하세요</span>
+          <template v-if="v.me.rd.approved">
+            <div style="background: #FFFFFF; border: 3px solid #EA580C; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: center; gap: 8px">
+                <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#C2410C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
+                <span style="font-size: 17px; font-weight: 800; color: #9A3412">감차 승인 확인</span>
+              </div>
+              <span style="font-size: 14px; color: #374151; line-height: 1.6">{{ v.me.rd.startText }}에 감차가 승인됐어요.<br>승인일부터 60일 동안 의무 근무 기간이에요.</span>
+              <div style="background: #FFF7ED; border-radius: 14px; padding: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px">
+                <div style="display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 12px; font-weight: 700; color: #9A3412">의무 근무 종료일</span>
+                  <span style="font-size: 16px; font-weight: 800">{{ v.me.rd.endText }}</span>
+                  <span style="font-size: 12px; color: #374151">{{ v.me.rd.progress }}</span>
+                </div>
+                <span style="font-size: 26px; font-weight: 800; color: #C2410C">{{ v.me.rd.dday }}</span>
+              </div>
+              <div style="height: 8px; border-radius: 4px; background: #FED7AA; overflow: hidden"><div :style="v.me.rd.barStyle"></div></div>
+              <template v-if="v.me.rd.needAck">
+                <button type="button" @click="v.ackReduce" style="min-height: 48px; border: none; border-radius: 12px; background: #C2410C; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">확인했어요</button>
+              </template>
+            </div>
+          </template>
+          <template v-if="v.me.rd.pending">
+            <button type="button" @click="v.goMe" style="text-align: left; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 14px; padding: 12px 14px; font-family: inherit; font-size: 14px; color: #9A3412; font-weight: 700; cursor: pointer">감차 요청 승인 대기 중 · 승인되면 그날부터 60일 카운트가 시작돼요 ›</button>
+          </template>
+          <template v-if="v.homeNormal">
+            <div style="background: #1E4FD8; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
+              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">11월 정산 · 10/26 ~ 11/25</span><span style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 10px">예시</span></div>
+              <span style="font-size: 13px">현재까지 예상 지급액</span>
+              <span style="font-size: 30px; font-weight: 800">₩3,842,000</span>
+              <button type="button" @click="v.goPay" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">급여내역 자세히 보기 →</button>
+            </div>
+          </template>
+          <template v-if="v.homeLease">
+            <div style="background: #111827; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
+              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">넘버 임대 기사</span><span style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 10px">예시</span></div>
+              <span style="font-size: 13px">{{ v.lease.month }} 넘버 임대료</span>
+              <span style="font-size: 30px; font-weight: 800">₩{{ v.lease.amountText }}</span>
+              <span style="font-size: 13px">납부 기한 {{ v.lease.dueText }} · {{ v.lease.status }}</span>
+              <button type="button" @click="v.goPay" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">임대료 안내 보기 →</button>
+            </div>
+          </template>
+          <button type="button" @click="v.goTeams" style="text-align: left; display: flex; flex-direction: column; gap: 4px; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
+            <span style="font-size: 12px; font-weight: 700; color: #C2410C">팀즈 감지 · {{ v.co.room }} · {{ v.latestMsg.time }}</span>
+            <span style="font-size: 15px">"{{ v.latestMsg.text }}"</span>
+          </button>
+          <button type="button" @click="v.goNotice" style="text-align: left; display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: none; border-radius: 16px; padding: 16px; font-family: inherit; color: #111827; cursor: pointer">
+            <span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 2px 6px; border-radius: 6px">필독</span>
+            <span style="flex: 1; font-size: 15px">{{ v.mustN.title }}</span>
+            <span style="font-size: 18px; color: #4B5563">›</span>
+          </button>
+        </div>
+      </template>
+
+      
+      <template v-if="v.aHome">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">등록 기사</span><span style="font-size: 22px; font-weight: 800">{{ v.stats.total }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">승인 대기</span><span style="font-size: 22px; font-weight: 800; color: #B45309">{{ v.stats.pending }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">서류 미비</span><span style="font-size: 22px; font-weight: 800; color: #B91C1C">{{ v.stats.missing }}명</span></div>
+            <div style="background: #FFFFFF; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 12px; color: #4B5563">감차 요청</span><span style="font-size: 22px; font-weight: 800; color: #C2410C">{{ v.stats.reduce }}명</span></div>
+          </div>
+          <div style="background: #FFF7ED; border: 2px solid #FB923C; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
+            <h2 style="margin: 10px 0 4px; font-size: 16px; font-weight: 800; color: #9A3412">감차 요청 · 승인 필요</h2>
+            <template v-if="v.noReduce"><span style="font-size: 14px; color: #4B5563; padding: 12px 0">새 감차 요청이 없어요</span></template>
+            <template v-for="(r, $index) in v.reduceRows" :key="$index">
+              <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 64px; border: none; border-top: 1px solid #FED7AA; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
+                <span style="width: 36px; height: 36px; border-radius: 18px; background: #FFEDD5; color: #9A3412; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none">{{ r.initial }}</span>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+                  <span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span>
+                  <span style="font-size: 12px; color: #374151">신청 {{ r.reqShort }} · 오늘 승인 시 ~{{ r.endShort }}</span>
+                </span>
+                <span style="font-size: 13px; font-weight: 800; color: #C2410C">{{ r.dday }} ›</span>
+              </button>
+            </template>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 6px 16px; display: flex; flex-direction: column">
+            <h2 style="margin: 10px 0 4px; font-size: 16px; font-weight: 700">승인 대기 기사</h2>
+            <template v-if="v.noPending"><span style="font-size: 14px; color: #4B5563; padding: 12px 0">대기 중인 기사가 없어요</span></template>
+            <template v-for="(r, $index) in v.pendingRows" :key="$index">
+              <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 56px; border: none; border-top: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
+                <span style="width: 36px; height: 36px; border-radius: 18px; background: #FEF3C7; color: #92400E; font-weight: 700; display: flex; align-items: center; justify-content: center">{{ r.initial }}</span>
+                <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><span style="font-size: 12px; color: #4B5563">{{ r.phone }} · {{ r.docText }}</span></span>
+                <span style="font-size: 13px; font-weight: 700; color: #1E4FD8">확인 ›</span>
+              </button>
+            </template>
+          </div>
+          <button type="button" @click="v.goDriverList" style="min-height: 48px; border-radius: 14px; border: 1px solid #1E4FD8; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">전체 기사 정보 보기</button>
+        </div>
+      </template>
+
+      
+      <template v-if="v.tNotice">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <template v-if="v.isAdminRole">
+            <button type="button" @click="v.soon" style="min-height: 48px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">+ {{ v.scopeName }} 공지 작성</button>
+          </template>
+          <article style="background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; gap: 6px; align-items: center">
+              <span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 2px 6px; border-radius: 6px">필독</span>
+              <span style="margin-left: auto; font-size: 12px; color: #4B5563">{{ v.mustN.date }} · {{ v.scopeName }} 관리자</span>
+            </div>
+            <h2 style="margin: 0; font-size: 17px; font-weight: 700">{{ v.mustN.title }}</h2>
+            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151">{{ v.mustN.body }}</p>
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <span style="font-size: 12px; color: #4B5563">{{ v.readCount }}명 / {{ v.readTotal }}명 확인</span>
+              <template v-if="v.noticeOk"><span style="min-height: 44px; display: flex; align-items: center; padding: 0 14px; border-radius: 12px; background: #DCFCE7; color: #15803D; font-size: 14px; font-weight: 700">✓ 확인 완료</span></template>
+              <template v-if="v.noticeNotOk"><button type="button" @click="v.confirmNotice" style="min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">확인했어요</button></template>
+            </div>
+          </article>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
+            <template v-for="(n, $index) in v.otherNotices" :key="$index">
+              <div :style="n.rowStyle"><span style="font-size: 12px; color: #4B5563">{{ n.tag }} · {{ n.date }}</span><span style="font-size: 15px">{{ n.title }}</span></div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      
+      <template v-if="v.aPay">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="background: #1E4FD8; border-radius: 18px; padding: 18px; color: #FFFFFF; display: flex; flex-direction: column; gap: 6px">
+            <span style="font-size: 13px">{{ v.scopeName }} · 11월 정산 (10/26~11/25) · 예시</span>
+            <span style="font-size: 13px">기사 지급 예정 총액 (정산 기사)</span>
+            <span style="font-size: 28px; font-weight: 800">₩{{ v.payTotal }}</span>
+            <span style="font-size: 13px">넘버 임대료 수납 예정 ₩{{ v.leaseTotal }}</span>
+          </div>
+          <div style="display: flex; gap: 8px">
+            <button type="button" @click="v.soon" style="flex: 1; min-height: 52px; border-radius: 14px; border: 1px solid #1E4FD8; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">정산 파일 업로드</button>
+            <button type="button" @click="v.openLease" style="flex: 1; min-height: 52px; border: none; border-radius: 14px; background: #111827; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">넘버 임대료 보내기</button>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
+            <template v-for="(p, $index) in v.payRows" :key="$index">
+              <div :style="p.rowStyle">
+                <span style="flex: 1; display: flex; align-items: center; gap: 6px"><span style="font-size: 15px; font-weight: 700">{{ p.name }}</span><template v-if="p.isLease"><span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #111827; padding: 1px 6px; border-radius: 6px">넘버 임대</span></template></span>
+                <span style="font-size: 13px; color: #4B5563">{{ p.count }}</span>
+                <span style="width: 100px; text-align: right; font-size: 14px; font-weight: 500">{{ p.amount }}</span>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
+      
+      <template v-if="v.dLease">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="background: #111827; border-radius: 18px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
+            <span style="font-size: 13px; font-weight: 700">넘버 임대료 안내 · {{ v.lease.month }} · 예시</span>
+            <span style="font-size: 32px; font-weight: 800">₩{{ v.lease.amountText }}</span>
+            <span style="font-size: 14px">납부 기한 {{ v.lease.dueText }}</span>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">구분</span><span style="font-weight: 500">넘버 임대 (정산 없음)</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">입금 계좌</span><span style="font-weight: 500">[은행] [계좌번호] {{ v.scopeName }}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">상태</span><span :style="v.lease.statusStyle">{{ v.lease.status }}</span></div>
+            <template v-if="v.lease.memo"><div style="font-size: 13px; color: #374151; background: #F3F4F6; border-radius: 10px; padding: 10px 12px">{{ v.lease.memo }}</div></template>
+          </div>
+          <template v-if="v.lease.canPay">
+            <button type="button" @click="v.markPaid" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">입금했어요</button>
+          </template>
+          <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6">넘버 임대 기사님은 정산서 대신 임대료 안내만 받아요.</p>
+        </div>
+      </template>
+
+      
+      <template v-if="v.dPay">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border-radius: 14px; padding: 4px">
+            <button type="button" aria-label="이전 달" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 20px; cursor: pointer">‹</button>
+            <div style="display: flex; flex-direction: column; align-items: center"><span style="font-size: 16px; font-weight: 700">2026년 11월 정산</span><span style="font-size: 12px; color: #4B5563">10/26 ~ 11/25 · 예시 데이터</span></div>
+            <button type="button" aria-label="다음 달" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 20px; color: #9CA3AF">›</button>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 9px">
+            <span style="font-size: 13px; color: #4B5563">실지급 예정액</span>
+            <span style="font-size: 30px; font-weight: 800; color: #1E4FD8">₩3,842,000</span>
+            <div style="height: 1px; background: #E5E7EB"></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>배송 수당 (1,284건)</span><span>4,108,800</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>백업·휴일 수당</span><span>300,000</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #B91C1C"><span>공제 합계</span><span>− 566,800</span></div>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 4px 16px">
+            <div style="display: flex; padding: 12px 0; border-bottom: 1px solid #E5E7EB; font-size: 14px"><span style="width: 84px; color: #4B5563">11/17 (월)</span><span style="flex: 1">62건</span><span>198,400</span></div>
+            <div style="display: flex; padding: 12px 0; border-bottom: 1px solid #E5E7EB; font-size: 14px"><span style="width: 84px; color: #4B5563">11/15 (토)</span><span style="flex: 1">58건 · 백업</span><span>185,600</span></div>
+            <div style="display: flex; padding: 12px 0; font-size: 14px"><span style="width: 84px; color: #4B5563">11/14 (금)</span><span style="flex: 1">65건</span><span>208,000</span></div>
+          </div>
+        </div>
+      </template>
+
+      
+      <template v-if="v.tTeams">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #16A34A"></span><span style="font-size: 15px; font-weight: 700">감지 중</span><span style="font-size: 13px; color: #4B5563">· {{ v.co.room }}</span></div>
+            <div style="display: flex; align-items: center; justify-content: space-between">
+              <span id="push-lbl" style="font-size: 14px">감지되면 알림 받기</span>
+              <button type="button" role="switch" aria-labelledby="push-lbl" :aria-checked="v.pushAria" @click="v.togglePush" :style="v.switchStyle"><span :style="v.knobStyle"></span></button>
+            </div>
+            <template v-if="v.isAdminRole">
+              <button type="button" @click="v.soon" style="min-height: 44px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; color: #111827; cursor: pointer">{{ v.scopeName }} 감지 방·키워드 설정</button>
+            </template>
+          </div>
+          <template v-for="(m, $index) in v.teamsMsgs" :key="$index">
+            <div :style="m.cardStyle">
+              <span :style="m.kwStyle">{{ m.kw }} · {{ m.time }}</span>
+              <span style="font-size: 15px">{{ m.text }}</span>
+            </div>
+          </template>
+        </div>
+      </template>
+
+      
+      <template v-if="v.tMe">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; gap: 8px; background: #EEF2FF; border-radius: 12px; padding: 10px 12px">
+            <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E4FD8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            <span style="font-size: 13px; color: #1E3A8A">내 정보는 나와 {{ v.me.center }} 관리자만 볼 수 있어요</span>
+          </div>
+          <template v-if="v.me.pending">
+            <div style="background: #FEF3C7; border-radius: 12px; padding: 10px 12px; font-size: 13px; color: #78350F; font-weight: 500">관리자 승인 대기 중</div>
+          </template>
+          <template v-if="v.me.rd.has">
+            <div style="background: #FFF7ED; border: 2px solid #EA580C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px">
+              <div style="display: flex; align-items: center; justify-content: space-between">
+                <span style="font-size: 13px; font-weight: 800; color: #9A3412">감차 요청 · {{ v.me.rd.statusText }}</span>
+                <span style="font-size: 13px; font-weight: 800; color: #FFFFFF; background: #C2410C; padding: 3px 10px; border-radius: 10px">{{ v.me.rd.dday }}</span>
+              </div>
+              <span style="font-size: 13px; color: #374151">감차 신청일 {{ v.me.rd.reqText }}</span>
+              <span style="font-size: 13px; color: #374151">의무 근무 기간</span>
+              <span style="font-size: 18px; font-weight: 800; color: #111827; line-height: 1.5">{{ v.me.rd.periodText }}</span>
+              <span style="font-size: 14px; font-weight: 700; color: #9A3412; line-height: 1.6">관리자가 감차를 승인한 날부터 60일 동안은 의무 근무 기간이에요. 이 기간에는 정상 근무해 주셔야 해요.</span>
+            </div>
+          </template>
+
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 700">기본 정보</h2>
+              <button type="button" @click="v.toggleEdit" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #1E4FD8; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ v.editLabel }}</button>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">이름</span><span style="font-weight: 500">{{ v.me.name }}</span></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px"><span style="color: #4B5563">주민번호</span><span style="display: flex; align-items: center; gap: 8px"><span style="font-weight: 500">{{ v.me.rrnShown }}</span><button type="button" @click="v.toggleRrn" style="min-height: 32px; padding: 0 8px; border: 1px solid #D1D5DB; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 12px; cursor: pointer">{{ v.rrnBtn }}</button></span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">소속센터</span><span style="font-weight: 500">{{ v.me.center }}</span></div>
+            <template v-if="v.viewMode">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">본폰</span><span style="font-weight: 500">{{ v.me.phone }}</span></div>
+                <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">서브폰</span><span style="font-weight: 500">{{ v.me.subText }}</span></div>
+                <div style="display: flex; justify-content: space-between; gap: 16px; font-size: 14px"><span style="color: #4B5563; flex: none">주소</span><span style="font-weight: 500; text-align: right">{{ v.me.addrText }}</span></div>
+              </div>
+            </template>
+            <template v-if="v.editMe">
+              <div style="display: flex; flex-direction: column; gap: 10px">
+                <label for="me-phone" style="font-size: 12px; font-weight: 700; color: #374151">본폰</label>
+                <input id="me-phone" type="tel" :value="v.me.phone" @input="v.onMe.phone" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
+                <label for="me-sub" style="font-size: 12px; font-weight: 700; color: #374151">서브폰</label>
+                <input id="me-sub" type="tel" :value="v.me.sub" @input="v.onMe.sub" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
+                <label for="me-addr" style="font-size: 12px; font-weight: 700; color: #374151">주소</label>
+                <input id="me-addr" type="text" :value="v.me.addr" @input="v.onMe.addr" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
+                <span style="font-size: 12px; color: #4B5563">이름·주민번호·소속센터 변경은 관리자에게 요청해 주세요</span>
+              </div>
+            </template>
+          </div>
+
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 700">서류 사진 <span style="font-size: 13px; font-weight: 500; color: #4B5563">{{ v.me.docText }}</span></h2>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+              <template v-for="(doc, $index) in v.meDocs" :key="$index">
+                <div style="border: 1px solid #E5E7EB; border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px">
+                  <div style="height: 84px; border-radius: 10px; background: #F3F4F6; overflow: hidden; display: flex; align-items: center; justify-content: center">
+                    <template v-if="doc.isUrl"><img :src="doc.url" alt="{{ doc.label }} 사진" style="width: 100%; height: 84px; object-fit: cover"></template>
+                    <template v-if="doc.isSample"><span style="font-size: 12px; color: #374151">사진 첨부됨</span></template>
+                    <template v-if="doc.none"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l2-3h6l2 3h3v13H4z"></path><circle cx="12" cy="13" r="4"></circle></svg></template>
+                  </div>
+                  <span style="font-size: 13px; font-weight: 700">{{ doc.label }}</span>
+                  <span :style="doc.statusStyle">{{ doc.status }}</span>
+                  <label :for="doc.inputId" style="min-height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 10px; background: #EEF2FF; color: #1E4FD8; font-size: 13px; font-weight: 700; cursor: pointer">{{ doc.btn }}</label>
+                  <input :id="doc.inputId" type="file" accept="image/*" @change="doc.onFile" style="display: none">
+                </div>
+              </template>
+            </div>
+          </div>
+          <template v-if="v.showReduceBtn">
+            <button type="button" @click="v.openReduce" style="min-height: 48px; border-radius: 14px; border: 1px solid #C2410C; background: #FFFFFF; color: #C2410C; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">감차 요청</button>
+          </template>
+          <button type="button" @click="v.logout" style="min-height: 48px; border-radius: 14px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; cursor: pointer">로그아웃</button>
+        </div>
+      </template>
+
+      
+      <template v-if="v.sMenu">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 4px 16px; display: flex; flex-direction: column">
+            <button type="button" @click="v.goDriverList" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4FD8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"></circle><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11h5M19.5 8.5v5"></path></svg>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">기사 정보 관리</span><span style="font-size: 12px; color: #4B5563">업체별 기사 명단·개인정보·서류</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
+            <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"></path></svg>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">업체·센터 관리</span><span style="font-size: 12px; color: #4B5563">업체 추가, 업체별 관리자 지정</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
+            <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="5"></circle></svg>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">팀즈 감지 설정</span><span style="font-size: 12px; color: #4B5563">감지할 방·키워드</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
+            <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"></path></svg>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">급여 업로드</span><span style="font-size: 12px; color: #4B5563">정산 프로그램 연동</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
+          </div>
+          <button type="button" @click="v.logout" style="min-height: 48px; border-radius: 14px; border: 1px solid #D1D5DB; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; cursor: pointer">로그아웃</button>
+        </div>
+      </template>
+
+      
+      <template v-if="v.sList">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
+          <input type="search" aria-label="기사 이름 또는 전화번호 검색" :value="v.search" @input="v.onSearch" placeholder="이름 또는 전화번호 검색" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          <span style="font-size: 13px; color: #4B5563">{{ v.company }} 기사 {{ v.stats.total }}명 · 승인 대기 {{ v.stats.pending }}명</span>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
+            <template v-for="(r, $index) in v.rows" :key="$index">
+              <button type="button" @click="r.open" style="display: flex; align-items: center; gap: 10px; min-height: 64px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer; padding: 8px 0">
+                <span style="width: 40px; height: 40px; border-radius: 20px; background: #E0E7FF; color: #1E3A8A; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none">{{ r.initial }}</span>
+                <span style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+                  <span style="display: flex; align-items: center; gap: 6px"><span style="font-size: 15px; font-weight: 700; color: #111827">{{ r.name }}</span><template v-if="r.pending"><span style="font-size: 11px; font-weight: 700; color: #92400E; background: #FEF3C7; padding: 1px 6px; border-radius: 6px">승인 대기</span></template><template v-if="r.reduce"><span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #C2410C; padding: 1px 6px; border-radius: 6px">감차 요청</span></template></span>
+                  <span style="font-size: 12px; color: #4B5563">{{ r.phone }}</span>
+                </span>
+                <span :style="r.docStyle">{{ r.docText }}</span>
+                <span style="font-size: 18px; color: #4B5563">›</span>
+              </button>
+            </template>
+            <template v-if="v.noRows"><span style="font-size: 14px; color: #4B5563; padding: 16px 0">검색 결과가 없어요</span></template>
+          </div>
+        </div>
+      </template>
+
+      
+      <template v-if="v.sDetail">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button type="button" @click="v.goDriverList" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ {{ v.company }} 기사 목록</button>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 12px">
+            <span style="width: 52px; height: 52px; border-radius: 26px; background: #E0E7FF; color: #1E3A8A; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center">{{ v.sel.initial }}</span>
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 2px">
+              <span style="font-size: 18px; font-weight: 800">{{ v.sel.name }}</span>
+              <span style="font-size: 13px; color: #4B5563">{{ v.sel.center }} · {{ v.sel.status }}</span>
+            </div>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px"><span style="color: #4B5563">주민번호</span><span style="display: flex; align-items: center; gap: 8px"><span style="font-weight: 500">{{ v.sel.rrnShown }}</span><button type="button" @click="v.toggleRrn" style="min-height: 32px; padding: 0 8px; border: 1px solid #D1D5DB; border-radius: 8px; background: #FFFFFF; font-family: inherit; font-size: 12px; cursor: pointer">{{ v.rrnBtn }}</button></span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">본폰</span><span style="font-weight: 500">{{ v.sel.phone }}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">서브폰</span><span style="font-weight: 500">{{ v.sel.subText }}</span></div>
+            <div style="display: flex; justify-content: space-between; gap: 16px; font-size: 14px"><span style="color: #4B5563; flex: none">주소</span><span style="font-weight: 500; text-align: right">{{ v.sel.addrText }}</span></div>
+            <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">소속센터</span><span style="font-weight: 500">{{ v.sel.center }}</span></div>
+          </div>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <h2 style="margin: 0; font-size: 16px; font-weight: 700">제출 서류 <span style="font-size: 13px; font-weight: 500; color: #4B5563">{{ v.sel.docText }}</span></h2>
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+              <template v-for="(doc, $index) in v.selDocs" :key="$index">
+                <div style="border: 1px solid #E5E7EB; border-radius: 14px; padding: 10px; display: flex; flex-direction: column; gap: 6px">
+                  <div style="height: 84px; border-radius: 10px; background: #F3F4F6; overflow: hidden; display: flex; align-items: center; justify-content: center">
+                    <template v-if="doc.isUrl"><img :src="doc.url" alt="{{ doc.label }} 사진" style="width: 100%; height: 84px; object-fit: cover"></template>
+                    <template v-if="doc.isSample"><span style="font-size: 12px; color: #374151">사진 보기</span></template>
+                    <template v-if="doc.none"><span style="font-size: 12px; font-weight: 700; color: #B91C1C">미제출</span></template>
+                  </div>
+                  <span style="font-size: 13px; font-weight: 700">{{ doc.label }}</span>
+                  <span :style="doc.statusStyle">{{ doc.status }}</span>
+                </div>
+              </template>
+            </div>
+          </div>
+          <template v-if="v.sel.rd.has">
+            <div style="background: #FFF7ED; border: 2px solid #EA580C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; align-items: center; justify-content: space-between">
+                <h2 style="margin: 0; font-size: 16px; font-weight: 800; color: #9A3412">감차 신청</h2>
+                <span style="font-size: 12px; font-weight: 800; color: #FFFFFF; background: #C2410C; padding: 3px 10px; border-radius: 10px">{{ v.sel.rd.statusText }}</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">감차 신청일</span><span style="font-weight: 700">{{ v.sel.rd.reqText }}</span></div>
+              <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">감차 승인일</span><span style="font-weight: 700">{{ v.sel.rd.startText }}</span></div>
+              <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">의무근무 종료일 (승인일 +60일)</span><span style="font-weight: 700">{{ v.sel.rd.endText }}</span></div>
+              <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">남은 기간</span><span style="font-weight: 800; color: #C2410C">{{ v.sel.rd.dday }}</span></div>
+              <template v-if="v.sel.rd.pending"><span style="font-size: 13px; font-weight: 700; color: #9A3412">지금 승인하면 오늘부터 60일 카운트가 시작돼요</span></template>
+              <template v-if="v.sel.rd.pending">
+                <div style="display: flex; gap: 8px">
+                  <button type="button" @click="v.rejectReduce" style="flex: 1; min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">반려</button>
+                  <button type="button" @click="v.approveReduce" style="flex: 2; min-height: 48px; border: none; border-radius: 12px; background: #C2410C; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">감차 승인</button>
+                </div>
+              </template>
+            </div>
+          </template>
+          <div style="display: flex; gap: 8px">
+            <template v-if="v.sel.pending">
+              <button type="button" @click="v.approve" style="flex: 1; min-height: 50px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">가입 승인</button>
+            </template>
+            <button type="button" @click="v.requestDocs" style="flex: 1; min-height: 50px; border: 1px solid #C2410C; border-radius: 14px; background: #FFFFFF; color: #C2410C; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">서류 보완 요청</button>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <nav aria-label="하단 메뉴" style="flex: none; display: flex; background: #FFFFFF; border-top: 1px solid #E5E7EB; padding: 6px 0 14px">
+      <template v-for="(t, $index) in v.tabs" :key="$index">
+        <button type="button" @click="t.go" :style="t.style">
+          <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path :d="t.d"></path></svg>
+          <span>{{ t.label }}</span>
+        </button>
+      </template>
+    </nav>
+  </div>
+</template>
+
+<template v-if="v.reduceOpen">
+  <div style="position: absolute; inset: 0; background: rgba(17,24,39,0.55); display: flex; align-items: center; justify-content: center; padding: 20px">
+    <div role="dialog" aria-modal="true" aria-labelledby="rd-title" style="width: 100%; background: #FFFFFF; border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 14px">
+      <h2 id="rd-title" style="margin: 0; font-size: 19px; font-weight: 800">감차 요청 전 꼭 확인해 주세요</h2>
+      <div style="background: #FFF7ED; border: 2px solid #EA580C; border-radius: 14px; padding: 14px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font-size: 13px; font-weight: 700; color: #9A3412">의무 근무 기간 · 승인일부터 60일</span>
+        <span style="font-size: 17px; font-weight: 800; line-height: 1.5">오늘({{ v.reqPreview }}) 승인되면<br>~ {{ v.endPreview }}까지</span>
+      </div>
+      <p style="margin: 0; font-size: 14px; color: #374151; line-height: 1.6">감차를 요청하면 <b>관리자가 승인한 날부터 60일 동안</b> 의무 근무 기간이에요. 이 기간 동안은 정상 근무해 주셔야 해요.</p>
+      <div style="display: flex; gap: 8px">
+        <button type="button" @click="v.closeReduce" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 14px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">취소</button>
+        <button type="button" @click="v.submitReduce" style="flex: 2; min-height: 50px; border: none; border-radius: 14px; background: #C2410C; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">확인하고 감차 요청</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template v-if="v.leaseOpen">
+  <div style="position: absolute; inset: 0; background: rgba(17,24,39,0.55); display: flex; align-items: flex-end">
+    <div role="dialog" aria-modal="true" aria-labelledby="ls-title" style="width: 100%; box-sizing: border-box; max-height: 780px; overflow-y: auto; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 12px">
+      <h2 id="ls-title" style="margin: 0; font-size: 19px; font-weight: 800">넘버 임대료 보내기</h2>
+      <p style="margin: 0; font-size: 13px; color: #4B5563">정산 내역 없이 임대료 안내만 선택한 기사에게 보내요.</p>
+      <span style="font-size: 13px; font-weight: 700; color: #374151">1. 기사 선택 ({{ v.scopeName }})</span>
+      <div style="max-height: 210px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px">
+        <template v-for="(p, $index) in v.leasePick" :key="$index">
+          <button type="button" @click="p.pick" :aria-pressed="p.pressed" :style="p.style">
+            <span style="flex: 1; display: flex; flex-direction: column; text-align: left"><span style="font-size: 15px; font-weight: 700">{{ p.name }}</span><span style="font-size: 12px; color: #4B5563">{{ p.phone }}</span></span>
+            <template v-if="p.isLease"><span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #111827; padding: 1px 6px; border-radius: 6px">임대 중</span></template>
+            <template v-if="p.on"><span style="font-size: 16px; font-weight: 800; color: #1E4FD8">✓</span></template>
+          </button>
+        </template>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+          <label for="ls-amt" style="font-size: 13px; font-weight: 700; color: #374151">2. 임대료 (원)</label>
+          <input id="ls-amt" type="text" inputmode="numeric" :value="v.leaseForm.amount" @input="v.onLease.amount" placeholder="금액" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0">
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 4px">
+          <label for="ls-due" style="font-size: 13px; font-weight: 700; color: #374151">3. 납부 기한</label>
+          <input id="ls-due" type="date" :value="v.leaseForm.due" @input="v.onLease.due" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 14px; min-width: 0">
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="ls-memo" style="font-size: 13px; font-weight: 700; color: #374151">메모 (선택)</label>
+        <input id="ls-memo" type="text" :value="v.leaseForm.memo" @input="v.onLease.memo" placeholder="예: 12월분 넘버 임대료입니다" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
+      </div>
+      <template v-if="v.hasLeaseErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.leaseErr }}</span></template>
+      <div style="display: flex; gap: 8px">
+        <button type="button" @click="v.closeLease" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 14px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">취소</button>
+        <button type="button" @click="v.sendLease" style="flex: 2; min-height: 50px; border: none; border-radius: 14px; background: #111827; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">임대료 안내 보내기</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template v-if="v.hasToast">
+  <div role="status" style="position: absolute; left: 20px; right: 20px; bottom: 96px; background: #111827; color: #FFFFFF; border-radius: 12px; padding: 14px 16px; font-size: 14px; font-weight: 500; text-align: center">{{ v.toast }}</div>
+</template>
+</div>
+</script>
+<script>
+// ---- React식 setState를 Vue 반응형 상태로 연결하는 작은 어댑터 ----
+class DCLogic {
+  constructor(props) { this.props = props || {}; }
+  setState(patch) { Object.assign(this.state, patch); saveState(this.state); }
+}
+var STORE_KEY = 'jinyang-app-v1';
+function saveState(st) {
+  try {
+    var keep = { drivers: st.drivers, noticeOk: st.noticeOk, pushOn: st.pushOn };
+    localStorage.setItem(STORE_KEY, JSON.stringify(keep, function (k, val) {
+      return (typeof val === 'string' && val.indexOf('blob:') === 0) ? 'sample' : val;
+    }));
+  } catch (e) {}
+}
+var DOCS = [
+  { k: 'license', label: '운전면허증' },
+  { k: 'cargo', label: '화물운송자격증' },
+  { k: 'car', label: '차량등록증' },
+  { k: 'biz', label: '사업자등록증' }
+];
+var SAMPLE = 'sample';
+var ICONS = {
+  home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
+  notice: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4',
+  pay: 'M3 6h18v14H3zM3 10h18M16 15h.01',
+  teams: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10M12 12h.01',
+  me: 'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8M4 21c0-4 4-6 8-6s8 2 8 6',
+  settings: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1'
+};
+function mkDriver(id, name, rrn, phone, sub, addr, center, status, keys) {
+  var docs = {};
+  DOCS.forEach(function (d) { docs[d.k] = keys.indexOf(d.k) >= 0 ? SAMPLE : null; });
+  return { id: id, name: name, rrn: rrn, phone: phone, sub: sub, addr: addr, center: center, status: status, docs: docs };
+}
+var ALL = ['license', 'cargo', 'car', 'biz'];
+var COMPANIES = ['진양로지스틱스', '협력업체A'];
+var CO = {
+  '진양로지스틱스': {
+    camp: '[캠프명]', room: '[캠프명] Teams방',
+    notices: [
+      { tag: '필독', must: true, date: '11/18', title: '11/20부터 라우트 변경 안내', body: '일부 라우트 번호가 변경됩니다. 본인 라우트 번호와 출차 웨이브를 꼭 확인해 주세요.' },
+      { tag: '정산', date: '11/15', title: '11월 정산 기간 안내 (10/26~11/25)' },
+      { tag: '안전', date: '11/12', title: '동절기 빙판길·언덕 배송 안전 수칙' },
+      { tag: '일반', date: '11/08', title: '연말 휴무 희망일 사전 조사' }
+    ],
+    teams: [
+      { kw: '웨이브 · 출차', time: '오늘 11:02', text: '내일 2웨이브 출차 30분 앞당겨 진행 예정입니다', hot: true },
+      { kw: '긴급', time: '오늘 07:48', text: '[긴급] 3번 도크 작업으로 진입 10분 지연' }
+    ],
+    pay: [3842000, 3615000, 2980000, 4012000]
+  },
+  '협력업체A': {
+    camp: '[캠프명]', room: '[캠프명] Teams방',
+    notices: [
+      { tag: '필독', must: true, date: '11/17', title: '12월 휴무 신청 마감 안내', body: '12월 휴무 희망일은 11/25까지 관리자에게 신청해 주세요.' },
+      { tag: '정산', date: '11/14', title: '11월 정산 명세서 발송 일정' },
+      { tag: '일반', date: '11/10', title: '차량 정기점검 일정 안내' }
+    ],
+    teams: [
+      { kw: '물량', time: '오늘 09:30', text: '오늘 물량 평소 대비 증가, 프레시백 회수 협조 부탁드립니다', hot: true },
+      { kw: '라우트', time: '어제 18:20', text: '내일부터 B구역 라우트 일부 조정 예정' }
+    ],
+    pay: [3721000, 2450000, 3988000, 3100000]
+  }
+};
+function won(n) { return n.toLocaleString('ko-KR'); }
+function today0() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }
+function addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
+function fmtDate(d) { return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' (' + '일월화수목금토'.charAt(d.getDay()) + ')'; }
+function fmtShort(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+function mkReduce(daysAgo) { var r = addDays(today0(), -daysAgo); return { req: r.getTime(), status: '요청' }; }
+function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function eom() { var t = today0(); return new Date(t.getFullYear(), t.getMonth() + 1, 0); }
+function reduceView(rd) {
+  var v = { has: false, pending: false, approved: false, needAck: false, statusText: '', reqText: '', startText: '—', endText: '', periodText: '', dday: '', reqShort: '', endShort: '', progress: '', barStyle: { width: '0%', height: '8px' } };
+  if (!rd) return v;
+  var req = new Date(rd.req), t = today0();
+  v.has = true; v.pending = rd.status === '요청'; v.approved = rd.status === '승인';
+  v.needAck = v.approved && !rd.ack;
+  v.statusText = v.pending ? '관리자 승인 대기' : (v.approved ? '승인 완료' : '반려됨');
+  v.reqText = fmtDate(req); v.reqShort = fmtShort(req);
+  if (v.approved) {
+    var st = new Date(rd.approvedAt), en = addDays(st, 60);
+    var left = Math.round((en.getTime() - t.getTime()) / 86400000);
+    var dayN = Math.min(60, Math.max(1, Math.round((t.getTime() - st.getTime()) / 86400000) + 1));
+    v.startText = fmtDate(st); v.endText = fmtDate(en); v.endShort = fmtShort(en);
+    v.periodText = fmtDate(st) + ' ~ ' + fmtDate(en);
+    v.dday = left > 0 ? 'D-' + left : (left === 0 ? 'D-DAY' : '완료');
+    v.progress = '60일 중 ' + dayN + '일째';
+    v.barStyle = { width: Math.round(dayN * 100 / 60) + '%', height: '8px', background: '#EA580C' };
+  } else if (v.pending) {
+    var ex = addDays(t, 60);
+    v.startText = '승인 전'; v.endShort = fmtShort(ex);
+    v.endText = '승인일 +60일 (오늘 승인 시 ' + fmtDate(ex) + ')';
+    v.periodText = '승인일부터 60일 (승인 후 확정)';
+    v.dday = '승인 대기';
+  } else {
+    v.periodText = '반려되어 의무 근무 기간이 없어요'; v.dday = '반려';
+  }
+  return v;
+}
+function leaseView(l) {
+  if (!l) return { amountText: '', dueText: '', status: '', month: '', memo: '', canPay: false, statusStyle: {} };
+  var p = l.due.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]);
+  return { amountText: won(l.amount), dueText: fmtDate(d), status: l.status, month: (d.getMonth() + 1) + '월', memo: l.memo || '', canPay: l.status === '납부 대기',
+    statusStyle: { fontSize: '14px', fontWeight: 700, color: l.status === '납부 대기' ? '#B45309' : (l.status === '납부 완료' ? '#15803D' : '#1E4FD8') } };
+}
+function emptyForm() {
+  return { name: '', rrn1: '', rrn2: '', phone: '', sub: '', addr: '', center: '', docs: { license: null, cargo: null, car: null, biz: null } };
+}
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      screen: 'login', role: 'driver', tab: 'home', step: 1, err: '',
+      form: emptyForm(), me: 'd1',
+      drivers: [
+        mkDriver('d1', '홍길동', '810415-1000000', '010-1234-5678', '010-9876-5432', '서울 서대문구 홍제동 ○○로 12', '진양로지스틱스', '활성', ALL),
+        mkDriver('d2', '김민수', '880921-1000000', '010-2345-6789', '', '서울 은평구 응암동 ○○길 5', '진양로지스틱스', '활성', ['license', 'cargo', 'car']),
+        mkDriver('d3', '이영호', '920107-1000000', '010-3456-7890', '010-1111-2222', '경기 고양시 덕양구 ○○로 33', '진양로지스틱스', '승인 대기', ['license', 'cargo']),
+        mkDriver('d4', '박정훈', '850630-1000000', '010-4567-8901', '', '서울 마포구 ○○동 7', '진양로지스틱스', '활성', ALL),
+        mkDriver('d8', '오준석', '870512-1000000', '010-8901-2345', '', '서울 서대문구 ○○로 40', '진양로지스틱스', '활성', ALL),
+        mkDriver('d5', '최성진', '790222-1000000', '010-5678-9012', '', '서울 강서구 ○○로 88', '협력업체A', '활성', ALL),
+        mkDriver('d6', '정대현', '950814-1000000', '010-6789-0123', '010-3333-4444', '경기 부천시 ○○로 21', '협력업체A', '승인 대기', ['license']),
+        mkDriver('d7', '한지훈', '900303-1000000', '010-7890-1234', '', '서울 양천구 ○○로 9', '협력업체A', '활성', ALL)
+      ],
+      company: '진양로지스틱스', search: '', adminView: 'menu', selId: null,
+      showRrn: false, editMe: false, noticeOk: {}, pushOn: true, toast: '', reduceOpen: false, leaseOpen: false, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' }
+    };
+  }
+  componentDidMount() {
+    var ds = this.state.drivers.map(function (d) {
+      if (d.id === 'd2') return Object.assign({}, d, { reduce: mkReduce(8) });
+      if (d.id === 'd7') return Object.assign({}, d, { reduce: mkReduce(3) });
+      if (d.id === 'd4') return Object.assign({}, d, { reduce: { req: addDays(today0(), -15).getTime(), approvedAt: addDays(today0(), -12).getTime(), status: '승인', ack: false } });
+      if (d.id === 'd8') return Object.assign({}, d, { lease: { amount: 300000, due: iso(eom()), memo: '', status: '납부 대기' } });
+      return d;
+    });
+    this.setState({ drivers: ds });
+  }
+  componentWillUnmount() { clearTimeout(this._t); }
+  flash(msg) {
+    this.setState({ toast: msg });
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this.setState({ toast: '' }), 2200);
+  }
+  setForm(k, v) {
+    var f = Object.assign({}, this.state.form); f[k] = v;
+    this.setState({ form: f, err: '' });
+  }
+  setFormDoc(k, v) {
+    var f = Object.assign({}, this.state.form); f.docs = Object.assign({}, f.docs); f.docs[k] = v;
+    this.setState({ form: f });
+  }
+  patchDriver(id, patch) {
+    this.setState({ drivers: this.state.drivers.map(function (d) { return d.id === id ? Object.assign({}, d, patch) : d; }) });
+  }
+  setDriverDoc(id, k, v) {
+    var d = this.state.drivers.find(function (x) { return x.id === id; });
+    var docs = Object.assign({}, d.docs); docs[k] = v;
+    this.patchDriver(id, { docs: docs });
+  }
+  fileUrl(e) {
+    var f = e && e.target && e.target.files && e.target.files[0];
+    return f ? URL.createObjectURL(f) : SAMPLE;
+  }
+  docCount(docs) { return DOCS.filter(function (d) { return !!docs[d.k]; }).length; }
+  mask(r) { return r.slice(0, 8) + '******'; }
+  docItems(docs, prefix, onSet) {
+    var self = this;
+    return DOCS.map(function (d) {
+      var v = docs[d.k];
+      return {
+        label: d.label, none: !v, isSample: v === SAMPLE, isUrl: !!v && v !== SAMPLE,
+        url: (v && v !== SAMPLE) ? v : '',
+        inputId: 'file-' + prefix + '-' + d.k,
+        btn: v ? '다시 첨부' : '사진 첨부',
+        status: v ? '첨부됨' : '미첨부',
+        statusStyle: { fontSize: '12px', fontWeight: 700, color: v ? '#15803D' : '#B91C1C' },
+        onFile: onSet ? function (e) { onSet(d.k, self.fileUrl(e)); } : null
+      };
+    });
+  }
+  view(d) {
+    var n = this.docCount(d.docs);
+    return {
+      name: d.name, initial: d.name.charAt(0), center: d.center, status: d.status,
+      pending: d.status === '승인 대기', phone: d.phone, sub: d.sub, addr: d.addr,
+      subText: d.sub || '없음', addrText: d.addr || '미입력',
+      rrnShown: this.state.showRrn ? d.rrn : this.mask(d.rrn),
+      docText: n + '/4 제출',
+      rd: reduceView(d.reduce)
+    };
+  }
+  row(d) {
+    var n = this.docCount(d.docs);
+    return {
+      name: d.name, initial: d.name.charAt(0), phone: d.phone,
+      pending: d.status === '승인 대기',
+      reduce: !!d.reduce && d.reduce.status === '요청',
+      docText: '서류 ' + n + '/4',
+      docStyle: { fontSize: '12px', fontWeight: 700, color: n === 4 ? '#15803D' : '#B91C1C' },
+      open: () => this.setState({ tab: 'settings', adminView: 'detail', selId: d.id, showRrn: false })
+    };
+  }
+  renderVals() {
+    var s = this.state, self = this;
+    var isApp = s.screen === 'app';
+    var isDriver = s.role === 'driver';
+    var meD = s.drivers.find(function (d) { return d.id === s.me; }) || s.drivers[0];
+    var sel = s.drivers.find(function (d) { return d.id === s.selId; });
+
+    var tabDefs = isDriver
+      ? [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['me', '내 정보']]
+      : [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['settings', '설정']];
+    var tabs = tabDefs.map(function (t) {
+      var on = s.tab === t[0];
+      return {
+        label: t[1], d: ICONS[t[0]],
+        style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minHeight: '52px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: on ? 700 : 500, color: on ? '#1E4FD8' : '#4B5563' },
+        go: function () { self.setState({ tab: t[0], adminView: t[0] === 'settings' ? 'menu' : s.adminView, editMe: false, showRrn: false }); }
+      };
+    });
+    var titles = { home: '홈', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
+
+    var companyDrivers = s.drivers.filter(function (d) { return d.center === s.company; });
+    var q = s.search.trim();
+    var rows = companyDrivers.filter(function (d) { return !q || d.name.indexOf(q) >= 0 || d.phone.indexOf(q) >= 0; }).map(function (d) { return self.row(d); });
+    var pendingRows = companyDrivers.filter(function (d) { return d.status === '승인 대기'; }).map(function (d) { return self.row(d); });
+    var reduceDrivers = companyDrivers.filter(function (d) { return d.reduce && d.reduce.status === '요청'; });
+    var reduceRows = reduceDrivers.map(function (d) {
+      var r = self.row(d), v = reduceView(d.reduce);
+      r.reqShort = v.reqShort; r.endShort = v.endShort; r.dday = v.dday;
+      return r;
+    });
+    var stats = {
+      reduce: reduceDrivers.length,
+      total: companyDrivers.length,
+      pending: pendingRows.length,
+      missing: companyDrivers.filter(function (d) { return self.docCount(d.docs) < 4; }).length
+    };
+
+    var scope = isDriver ? meD.center : s.company;
+    var co = CO[scope] || CO['진양로지스틱스'];
+    var scopeDrivers = s.drivers.filter(function (d) { return d.center === scope; });
+    var mustN = co.notices.filter(function (n) { return n.must; })[0];
+    var others = co.notices.filter(function (n) { return !n.must; });
+    var rowLine = function (i) { return { padding: '14px 0', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '4px' }; };
+    var ok = !!s.noticeOk[scope];
+    var payRows = scopeDrivers.map(function (d, i) {
+      var amt = co.pay[i % co.pay.length];
+      if (d.status === '승인 대기' || d.lease) amt = 0;
+      return { name: d.name, isLease: !!d.lease, lease: d.lease ? d.lease.amount : 0,
+        count: d.lease ? d.lease.status : (d.status === '승인 대기' ? '승인 대기' : Math.round(amt / 3000) + '건'),
+        amount: d.lease ? '임대 ' + won(d.lease.amount) : (amt ? won(amt) : '—'), amt: amt,
+        rowStyle: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '52px', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB' } };
+    });
+    var companyCards = COMPANIES.map(function (name) {
+      var ds = s.drivers.filter(function (d) { return d.center === name; });
+      var p = ds.filter(function (d) { return d.status === '승인 대기'; }).length;
+      return { name: name, initial: name.charAt(0), camp: CO[name].camp, total: ds.length, pending: p, hasPending: p > 0,
+        pick: function () { self.setState({ screen: 'app', role: 'admin', company: name, tab: 'home', adminView: 'menu', search: '', selId: null }); } };
+    });
+
+    var mkSet = function (k) { return function (e) { self.setForm(k, e.target.value); }; };
+    var mkMe = function (k) { return function (e) { var p = {}; p[k] = e.target.value; self.patchDriver(meD.id, p); }; };
+
+    return {
+      isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isApp: isApp,
+      loginDriver: function () { self.setState({ screen: 'app', role: 'driver', me: 'd1', tab: 'home' }); },
+      loginAdmin: function () { self.setState({ screen: 'pick', role: 'admin' }); },
+      isPick: s.screen === 'pick', companyCards: companyCards,
+      goPick: function () { self.setState({ screen: 'pick', showRrn: false }); },
+      isAdminRole: !isDriver, isDriverRole: isDriver,
+      scopeName: scope, co: co,
+      mustN: mustN,
+      otherNotices: others.map(function (n, i) { return { tag: n.tag, date: n.date, title: n.title, rowStyle: rowLine(i) }; }),
+      readTotal: scopeDrivers.length,
+      teamsMsgs: co.teams.map(function (m) {
+        return { kw: m.kw, time: m.time, text: m.text,
+          cardStyle: { background: '#FFFFFF', border: m.hot ? '1px solid #FDBA74' : '1px solid #FFFFFF', borderRadius: '16px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '6px' },
+          kwStyle: { fontSize: '12px', fontWeight: 700, color: m.hot ? '#C2410C' : '#991B1B' } };
+      }),
+      latestMsg: co.teams[0],
+      dPay: isDriver && s.tab === 'pay' && !meD.lease, dLease: isDriver && s.tab === 'pay' && !!meD.lease,
+      aPay: !isDriver && s.tab === 'pay',
+      homeNormal: !meD.lease, homeLease: !!meD.lease, lease: leaseView(meD.lease),
+      leaseTotal: won(payRows.reduce(function (a, r) { return a + r.lease; }, 0)),
+      markPaid: function () { self.patchDriver(meD.id, { lease: Object.assign({}, meD.lease, { status: '입금 확인 중' }) }); self.flash('입금 확인을 요청했어요'); },
+      loginReduced: function () { self.setState({ screen: 'app', role: 'driver', me: 'd4', tab: 'home' }); },
+      loginLease: function () { self.setState({ screen: 'app', role: 'driver', me: 'd8', tab: 'home' }); },
+      goMe: function () { self.setState({ tab: 'me' }); },
+      ackReduce: function () { self.patchDriver(meD.id, { reduce: Object.assign({}, meD.reduce, { ack: true }) }); self.flash('확인했어요. 의무 근무 종료일까지 함께해요'); },
+      leaseOpen: s.leaseOpen, leaseForm: s.leaseForm, hasLeaseErr: !!s.leaseErr, leaseErr: s.leaseErr,
+      openLease: function () { self.setState({ leaseOpen: true, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' } }); },
+      closeLease: function () { self.setState({ leaseOpen: false }); },
+      onLease: {
+        amount: function (e) { self.setState({ leaseErr: '', leaseForm: Object.assign({}, self.state.leaseForm, { amount: e.target.value.replace(/[^0-9]/g, '') }) }); },
+        due: function (e) { self.setState({ leaseForm: Object.assign({}, self.state.leaseForm, { due: e.target.value }) }); },
+        memo: function (e) { self.setState({ leaseForm: Object.assign({}, self.state.leaseForm, { memo: e.target.value }) }); }
+      },
+      leasePick: scopeDrivers.filter(function (d) { return d.status !== '승인 대기'; }).map(function (d) {
+        var on = s.leaseForm.driverId === d.id;
+        return { name: d.name, phone: d.phone, isLease: !!d.lease, on: on, pressed: on ? 'true' : 'false',
+          style: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '56px', padding: '8px 12px', borderRadius: '12px', border: on ? '2px solid #1E4FD8' : '1px solid #E5E7EB', background: on ? '#EEF2FF' : '#FFFFFF', fontFamily: 'inherit', color: '#111827', cursor: 'pointer' },
+          pick: function () { self.setState({ leaseErr: '', leaseForm: Object.assign({}, self.state.leaseForm, { driverId: d.id, amount: d.lease ? String(d.lease.amount) : self.state.leaseForm.amount }) }); } };
+      }),
+      sendLease: function () {
+        var f = s.leaseForm;
+        if (!f.driverId) { self.setState({ leaseErr: '임대료를 보낼 기사를 선택해 주세요' }); return; }
+        if (!f.amount || +f.amount <= 0) { self.setState({ leaseErr: '임대료 금액을 입력해 주세요' }); return; }
+        if (!f.due) { self.setState({ leaseErr: '납부 기한을 선택해 주세요' }); return; }
+        var d = s.drivers.find(function (x) { return x.id === f.driverId; });
+        self.patchDriver(f.driverId, { lease: { amount: +f.amount, due: f.due, memo: f.memo.trim(), status: '납부 대기' } });
+        self.setState({ leaseOpen: false });
+        self.flash(d.name + ' 기사에게 임대료 안내를 보냈어요 (푸시 발송)');
+      },
+      payRows: payRows,
+      payTotal: won(payRows.reduce(function (a, r) { return a + r.amt; }, 0)),
+      goSignup: function () { self.setState({ screen: 'signup', step: 1, form: emptyForm(), err: '' }); },
+
+      step1: s.step === 1, step2: s.step === 2, step3: s.step === 3,
+      stepText: s.step + ' / 3',
+      stepBar: { width: (s.step * 100 / 3) + '%', height: '4px', background: '#1E4FD8' },
+      nextLabel: s.step === 1 ? '다음' : (s.step === 2 ? '가입 신청하기' : '앱 시작하기'),
+      form: s.form,
+      on: { name: mkSet('name'), rrn1: mkSet('rrn1'), rrn2: mkSet('rrn2'), phone: mkSet('phone'), sub: mkSet('sub'), addr: mkSet('addr'), center: mkSet('center') },
+      draftDocs: this.docItems(s.form.docs, 'su', function (k, v) { self.setFormDoc(k, v); }),
+      hasErr: !!s.err, err: s.err,
+      signupBack: function () {
+        if (s.step === 2) self.setState({ step: 1 });
+        else if (s.step === 1) self.setState({ screen: 'login' });
+      },
+      signupNext: function () {
+        var f = s.form;
+        if (s.step === 1) {
+          if (!f.name.trim() || f.rrn1.length < 6 || f.rrn2.length < 7 || !f.phone.trim() || !f.center) {
+            self.setState({ err: '이름, 주민번호(13자리), 본폰, 소속센터는 꼭 입력해 주세요' });
+            return;
+          }
+          self.setState({ step: 2, err: '' });
+        } else if (s.step === 2) {
+          var id = 'n' + Date.now();
+          var d = { id: id, name: f.name.trim(), rrn: f.rrn1 + '-' + f.rrn2, phone: f.phone.trim(), sub: f.sub.trim(), addr: f.addr.trim(), center: f.center, status: '승인 대기', docs: Object.assign({}, f.docs) };
+          self.setState({ drivers: s.drivers.concat([d]), me: id, step: 3 });
+        } else {
+          self.setState({ screen: 'app', role: 'driver', tab: 'me' });
+          self.flash('가입 신청이 접수됐어요');
+        }
+      },
+
+      headerTitle: titles[s.tab],
+      roleBadge: isDriver ? meD.center : '관리자',
+      roleBadgeStyle: { fontSize: '12px', fontWeight: 700, padding: '5px 10px', borderRadius: '12px', background: isDriver ? '#E0E7FF' : '#111827', color: isDriver ? '#1E3A8A' : '#FFFFFF' },
+      tabs: tabs,
+
+      dHome: isDriver && s.tab === 'home',
+      aHome: !isDriver && s.tab === 'home',
+      tNotice: s.tab === 'notice', tTeams: s.tab === 'teams',
+      tMe: isDriver && s.tab === 'me',
+      sMenu: !isDriver && s.tab === 'settings' && s.adminView === 'menu',
+      sList: !isDriver && s.tab === 'settings' && s.adminView === 'list',
+      sDetail: !isDriver && s.tab === 'settings' && s.adminView === 'detail' && !!sel,
+
+      goPay: function () { self.setState({ tab: 'pay' }); },
+      goTeams: function () { self.setState({ tab: 'teams' }); },
+      goNotice: function () { self.setState({ tab: 'notice' }); },
+      goMenu: function () { self.setState({ adminView: 'menu' }); },
+      goDriverList: function () { self.setState({ tab: 'settings', adminView: 'list', showRrn: false }); },
+      soon: function () { self.flash('다음 단계에서 만들 화면이에요'); },
+      logout: function () { self.setState({ screen: 'login', editMe: false, showRrn: false }); },
+
+      noticeOk: ok, noticeNotOk: !ok, readCount: Math.max(0, scopeDrivers.length - 2) + (ok ? 1 : 0),
+      confirmNotice: function () { var m = Object.assign({}, s.noticeOk); m[scope] = true; self.setState({ noticeOk: m }); },
+
+      pushAria: s.pushOn ? 'true' : 'false',
+      togglePush: function () { self.setState({ pushOn: !s.pushOn }); },
+      switchStyle: { width: '52px', height: '32px', borderRadius: '16px', border: 'none', padding: '3px', cursor: 'pointer', background: s.pushOn ? '#1E4FD8' : '#9CA3AF', display: 'flex', justifyContent: s.pushOn ? 'flex-end' : 'flex-start', alignItems: 'center' },
+      knobStyle: { width: '26px', height: '26px', borderRadius: '13px', background: '#FFFFFF', display: 'block' },
+
+      me: this.view(meD),
+      meDocs: this.docItems(meD.docs, 'me', function (k, v) { self.setDriverDoc(meD.id, k, v); self.flash('서류 사진이 저장됐어요'); }),
+      editMe: s.editMe, viewMode: !s.editMe,
+      editLabel: s.editMe ? '저장' : '수정',
+      toggleEdit: function () {
+        if (s.editMe) { self.setState({ editMe: false }); self.flash('내 정보가 저장됐어요'); }
+        else self.setState({ editMe: true });
+      },
+      onMe: { phone: mkMe('phone'), sub: mkMe('sub'), addr: mkMe('addr') },
+      rrnBtn: s.showRrn ? '숨기기' : '보기',
+      toggleRrn: function () { self.setState({ showRrn: !s.showRrn }); },
+
+      company: s.company,
+      onCompany: function (e) { self.setState({ company: e.target.value, search: '' }); },
+      search: s.search,
+      onSearch: function (e) { self.setState({ search: e.target.value }); },
+      stats: stats, rows: rows, noRows: rows.length === 0,
+      pendingRows: pendingRows, noPending: pendingRows.length === 0,
+
+      sel: sel ? this.view(sel) : { name: '', initial: '', center: '', status: '', pending: false, phone: '', subText: '', addrText: '', rrnShown: '', docText: '', rd: reduceView(null) },
+      selDocs: sel ? this.docItems(sel.docs, 'sel', null) : [],
+      approve: function () { if (sel) { self.patchDriver(sel.id, { status: '활성' }); self.flash(sel.name + ' 기사 가입을 승인했어요'); } },
+      requestDocs: function () { self.flash('미제출 서류 첨부 요청 알림을 보냈어요'); },
+
+      reduceRows: reduceRows, noReduce: reduceRows.length === 0,
+      showReduceBtn: !meD.reduce || meD.reduce.status === '반려',
+      reduceOpen: s.reduceOpen,
+      reqPreview: fmtDate(today0()), endPreview: fmtDate(addDays(today0(), 60)),
+      openReduce: function () { self.setState({ reduceOpen: true }); },
+      closeReduce: function () { self.setState({ reduceOpen: false }); },
+      submitReduce: function () {
+        self.patchDriver(meD.id, { reduce: { req: today0().getTime(), status: '요청' } });
+        self.setState({ reduceOpen: false });
+        self.flash('감차 요청 접수 · 승인되면 그날부터 60일 카운트돼요');
+      },
+      approveReduce: function () {
+        if (!sel || !sel.reduce) return;
+        self.patchDriver(sel.id, { reduce: Object.assign({}, sel.reduce, { status: '승인', approvedAt: today0().getTime(), ack: false }) });
+        self.flash(sel.name + ' 기사 감차 승인 · 오늘부터 60일 카운트 시작');
+      },
+      rejectReduce: function () {
+        if (!sel || !sel.reduce) return;
+        self.patchDriver(sel.id, { reduce: Object.assign({}, sel.reduce, { status: '반려' }) });
+        self.flash(sel.name + ' 기사 감차 요청을 반려했어요');
+      },
+
+      hasToast: !!s.toast, toast: s.toast
+    };
+  }
+}
+
+(function () {
+  var comp = new Component({});
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
+  comp.state = Vue.reactive(comp.state);
+  var app = Vue.createApp({
+    template: '#tpl',
+    setup: function () {
+      var v = Vue.computed(function () { return comp.renderVals(); });
+      Vue.onMounted(function () {
+        if (saved && saved.drivers) { Object.assign(comp.state, saved); }
+        else if (comp.componentDidMount) { comp.componentDidMount(); }
+      });
+      return { v: v };
+    }
+  });
+  app.mount('#app');
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+}
+</script>
+</body>
+</html>

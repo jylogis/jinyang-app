@@ -1,0 +1,12 @@
+{
+  "name": "진양로지스틱스 기사앱",
+  "short_name": "진양 기사앱",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1E4FD8",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
