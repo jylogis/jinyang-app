@@ -495,28 +495,72 @@ a{color:#1E4FD8;text-decoration:none}
 
       <template v-if="v.tNotice">
         <div style="display: flex; flex-direction: column; gap: 12px">
-          <template v-if="v.canWriteNotice">
-            <button type="button" @click="v.openNotice" style="min-height: 48px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">+ {{ v.scopeName }} 공지 작성</button>
-          </template>
-          <article v-if="v.mustN" style="background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
-            <div style="display: flex; gap: 6px; align-items: center">
-              <span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 2px 6px; border-radius: 6px">필독</span>
-              <span style="margin-left: auto; font-size: 12px; color: #4B5563">{{ v.mustN.date }} · {{ v.scopeName }} 관리자</span>
-            </div>
-            <h2 style="margin: 0; font-size: 17px; font-weight: 700">{{ v.mustN.title }}</h2>
-            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-line">{{ v.mustN.body }}</p>
-            <div style="display: flex; align-items: center; justify-content: space-between">
-              <span style="font-size: 12px; color: #4B5563">{{ v.readCount }}명 / {{ v.readTotal }}명 확인</span>
-              <template v-if="v.noticeOk"><span style="min-height: 44px; display: flex; align-items: center; padding: 0 14px; border-radius: 12px; background: #DCFCE7; color: #15803D; font-size: 14px; font-weight: 700">✓ 확인 완료</span></template>
-              <template v-if="v.noticeNotOk"><button type="button" @click="v.confirmNotice" style="min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">확인했어요</button></template>
-            </div>
-          </article>
-          <template v-if="v.noNotices"><div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; text-align: center; font-size: 14px; color: #4B5563">아직 등록된 공지가 없어요</div></template>
-          <div v-if="v.otherNotices.length" style="background: #FFFFFF; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
-            <template v-for="(n, $index) in v.otherNotices" :key="$index">
-              <div :style="n.rowStyle"><span style="font-size: 12px; color: #4B5563">{{ n.tag }} · {{ n.date }}</span><span style="font-size: 15px; font-weight: 500">{{ n.title }}</span><span v-if="n.body" style="font-size: 13px; color: #374151; line-height: 1.6; white-space: pre-line">{{ n.body }}</span></div>
+
+          <template v-if="!v.nd">
+            <template v-if="v.canWriteNotice">
+              <button type="button" @click="v.openNotice" style="min-height: 50px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 15px">+ {{ v.scopeName }} 공지 작성</button>
             </template>
-          </div>
+            <template v-if="v.noNotices">
+              <div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; font-size: 14px; color: #64748B"><img :src="v.emo.mega" alt="" aria-hidden="true" class="e3d" style="width: 52px; height: 52px"><span>{{ v.isAdminRole ? '등록된 공지가 없어요' : '지금 게시 중인 공지가 없어요' }}</span></div>
+            </template>
+            <button v-for="n in v.noticeList" :key="n.id" type="button" @click="n.open" :style="n.cardStyle">
+              <span style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap; width: 100%">
+                <span v-if="n.must" style="font-size: 11px; font-weight: 800; color: #FFFFFF; background: linear-gradient(135deg,#F43F5E,#BE123C); padding: 3px 8px; border-radius: 999px">필독</span>
+                <span v-if="n.stateText" class="jy-pill" :style="n.stateStyle" style="padding-left: 9px">{{ n.stateText }}</span>
+                <span v-if="n.readText" class="jy-pill" :style="n.readStyle" style="padding-left: 9px">{{ n.readText }}</span>
+                <span style="margin-left: auto; font-size: 12px; color: #64748B">{{ n.dateText }}</span>
+              </span>
+              <span style="font-size: 16px; font-weight: 800; color: #0F172A; text-align: left; word-break: keep-all; width: 100%">{{ n.title }}</span>
+              <span v-if="n.preview" style="font-size: 13px; color: #64748B; text-align: left; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ n.preview }}</span>
+              <span style="display: flex; align-items: center; justify-content: space-between; width: 100%">
+                <span style="font-size: 12px; color: #64748B">{{ n.periodText }}</span>
+                <span v-if="n.statText" style="font-size: 12px; font-weight: 800; color: #2337B8">{{ n.statText }}</span>
+                <span v-else style="font-size: 18px; color: #94A3B8">›</span>
+              </span>
+            </button>
+          </template>
+
+          <template v-if="v.nd">
+            <button type="button" @click="v.nd.back" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 공지 목록</button>
+            <article style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; gap: 12px">
+              <span style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+                <span v-if="v.nd.must" style="font-size: 11px; font-weight: 800; color: #FFFFFF; background: linear-gradient(135deg,#F43F5E,#BE123C); padding: 3px 8px; border-radius: 999px">필독</span>
+                <span v-if="v.nd.stateText" class="jy-pill" :style="v.nd.stateStyle" style="padding-left: 9px">{{ v.nd.stateText }}</span>
+                <span style="margin-left: auto; font-size: 12px; color: #64748B">{{ v.nd.dateText }} · {{ v.scopeName }}</span>
+              </span>
+              <h2 style="margin: 0; font-size: 20px; font-weight: 800; line-height: 1.4; word-break: keep-all">{{ v.nd.title }}</h2>
+              <span style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #475569; background: #F1F5F9; border-radius: 10px; padding: 8px 10px"><img :src="v.emo.cal" alt="" aria-hidden="true" class="e3d" style="width: 18px; height: 18px">게시 기간 · {{ v.nd.periodText }}</span>
+              <p style="margin: 0; font-size: 15px; line-height: 1.75; color: #1F2937; white-space: pre-line; word-break: keep-all">{{ v.nd.body || '내용이 없어요' }}</p>
+            </article>
+
+            <template v-if="v.isDriverRole">
+              <button v-if="!v.nd.read" type="button" @click="v.nd.confirm" style="min-height: 56px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 17px; border-radius: 16px">✓ 확인했어요</button>
+              <div v-else style="min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 8px; border-radius: 16px; background: linear-gradient(135deg,#D1FAE5,#A7F3D0); color: #065F46; font-size: 16px; font-weight: 800"><img :src="v.emo.check" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">확인 완료 · {{ v.nd.readAt }}</div>
+            </template>
+
+            <template v-if="v.isAdminRole">
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+                <button type="button" @click="v.nd.edit" style="min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 14px">✏️ 수정</button>
+                <button type="button" @click="v.nd.toggleStatus" :style="v.nd.statusBtnStyle">📊 확인 현황</button>
+                <button v-if="!v.nd.delAsk" type="button" @click="v.nd.askDel" style="min-height: 48px; border: 1px solid #FCA5A5; border-radius: 12px; background: #FFFFFF; color: #B91C1C; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">삭제</button>
+                <button v-else type="button" @click="v.nd.del" style="min-height: 48px; border: none; border-radius: 12px; background: #B91C1C; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">정말 삭제</button>
+              </div>
+              <template v-if="v.nd.statusOpen">
+                <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+                  <div style="display: flex; align-items: center; justify-content: space-between">
+                    <span style="font-size: 15px; font-weight: 800">확인 현황</span>
+                    <span style="font-size: 14px; font-weight: 800; color: #2337B8">{{ v.nd.readN }} / {{ v.nd.totalN }}명 확인</span>
+                  </div>
+                  <div style="height: 8px; border-radius: 4px; background: #E2E8F0; overflow: hidden"><div :style="v.nd.barStyle"></div></div>
+                  <template v-if="!v.nd.people.length"><span style="font-size: 13px; color: #94A3B8">이 업체에 활성 기사가 없어요</span></template>
+                  <div v-for="pp in v.nd.people" :key="pp.id" style="display: flex; align-items: center; gap: 10px; min-height: 44px; border-top: 1px solid #EEF2F7">
+                    <span style="flex: 1; font-size: 14px; font-weight: 700">{{ pp.name }} <span style="font-size: 12px; font-weight: 500; color: #64748B">{{ pp.rank }}</span></span>
+                    <span class="jy-pill" :style="pp.style" style="padding-left: 9px">{{ pp.text }}</span>
+                  </div>
+                </div>
+              </template>
+            </template>
+          </template>
         </div>
       </template>
 
@@ -1045,16 +1089,22 @@ a{color:#1E4FD8;text-decoration:none}
 <template v-if="v.noticeOpen">
   <div style="position: absolute; inset: 0; background: rgba(17,24,39,0.55); display: flex; align-items: flex-end">
     <div role="dialog" aria-modal="true" aria-labelledby="nt-title" style="width: 100%; box-sizing: border-box; max-height: 92%; overflow-y: auto; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 12px">
-      <h2 id="nt-title" style="margin: 0; font-size: 19px; font-weight: 800">{{ v.scopeName }} 공지 작성</h2>
-      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-tag" style="font-size: 13px; font-weight: 700; color: #374151">분류</label>
-        <select id="nt-tag" :value="v.noticeForm.tag" @change="v.onNotice.tag" style="min-height: 46px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; background: #FFFFFF"><option>일반</option><option>라우트</option><option>정산</option><option>안전</option></select></div>
-      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-t" style="font-size: 13px; font-weight: 700; color: #374151">제목</label><input id="nt-t" type="text" :value="v.noticeForm.title" @input="v.onNotice.title" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"></div>
-      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-b" style="font-size: 13px; font-weight: 700; color: #374151">내용</label><textarea id="nt-b" rows="6" :value="v.noticeForm.body" @input="v.onNotice.body" style="border: 1px solid #D1D5DB; border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 15px; resize: vertical"></textarea></div>
-      <div style="display: flex; align-items: center; gap: 8px"><input id="nt-m" type="checkbox" :checked="v.noticeForm.must" @change="v.onNotice.must" style="width: 22px; height: 22px"><label for="nt-m" style="font-size: 15px">필독 (기사님 확인 받기)</label></div>
+      <h2 id="nt-title" style="margin: 0; font-size: 19px; font-weight: 800">{{ v.scopeName }} 공지 {{ v.noticeForm.id ? '수정' : '작성' }}</h2>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-t" style="font-size: 13px; font-weight: 700; color: #374151">제목</label><input id="nt-t" type="text" :value="v.noticeForm.title" @input="v.onNotice.title" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0; width: 100%"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-b" style="font-size: 13px; font-weight: 700; color: #374151">내용</label><textarea id="nt-b" rows="7" :value="v.noticeForm.body" @input="v.onNotice.body" style="border: 1px solid #D1D5DB; border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 15px; resize: vertical"></textarea></div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><label for="nt-s" style="font-size: 13px; font-weight: 700; color: #374151">게시 시작일</label><input id="nt-s" type="date" :value="v.noticeForm.starts" @input="v.onNotice.starts" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0; width: 100%"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px; min-width: 0"><label for="nt-e" style="font-size: 13px; font-weight: 700; color: #374151">게시 종료일</label><input id="nt-e" type="date" :value="v.noticeForm.ends" @input="v.onNotice.ends" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0; width: 100%"></div>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px">
+        <button v-for="pr in v.periodPresets" :key="pr.label" type="button" @click="pr.pick" style="min-height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid #CBD5E1; background: #FFFFFF; color: #334155; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">{{ pr.label }}</button>
+      </div>
+      <span style="font-size: 12px; color: #64748B">종료일을 비우면 지울 때까지 계속 게시돼요. 기사님께는 기간 안의 공지만 보여요.</span>
+      <div style="display: flex; align-items: center; gap: 8px"><input id="nt-m" type="checkbox" :checked="v.noticeForm.must" @change="v.onNotice.must" style="width: 22px; height: 22px"><label for="nt-m" style="font-size: 15px">필독 (홈 화면에 강조 표시)</label></div>
       <template v-if="v.noticeErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.noticeErr }}</span></template>
       <div style="display: flex; gap: 8px">
-        <button type="button" @click="v.closeNotice" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 14px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">취소</button>
-        <button type="button" @click="v.saveNotice" style="flex: 2; min-height: 50px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">공지 등록</button>
+        <button type="button" @click="v.closeNotice" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">취소</button>
+        <button type="button" @click="v.saveNotice" style="flex: 2; min-height: 50px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 800; cursor: pointer; font-size: 15px">{{ v.noticeForm.id ? '수정 저장' : '공지 등록' }}</button>
       </div>
     </div>
   </div>
@@ -1115,8 +1165,7 @@ var TAB_CONF = [
   { key: 'notice', label: '공지', emo: 'mega', view: '공지 탭을 보고 필독 공지를 확인할 수 있어요', edit: '소속 업체에 공지를 작성할 수 있어요' },
   { key: 'dispatch', label: '배차', emo: 'truck', view: '배차 탭에서 본인 배차를 보고 입차·픽업·완료를 기록해요', edit: '업체 배차 추가·수정 (다음 단계에서 연결 예정)' },
   { key: 'pay', label: '정산', emo: 'money', view: '내 정보 → 정산에서 본인 정산서·임대료를 봐요', edit: '정산 수정 (다음 단계에서 연결 예정)' },
-  { key: 'teams', label: '팀즈', emo: 'sat', view: '팀즈 탭에서 감지된 메시지를 봐요', edit: '감지 설정 (다음 단계에서 연결 예정)' },
-  { key: 'me', label: '내 정보', emo: 'user', view: '내 정보 탭(기본 정보·서류·감차 요청)을 써요', edit: '본인 서브폰·주소·서류 사진 수정' }
+  { key: 'teams', label: '팀즈', emo: 'sat', view: '팀즈 탭에서 감지된 메시지를 봐요', edit: '감지 설정 (다음 단계에서 연결 예정)' }
 ];
 var TAB_EMO_KEYS = { home: 'house', dispatch: 'truck', notice: 'mega', pay: 'money', teams: 'sat', me: 'user', settings: 'gear' };
 var EMO_BASE = 'https://cdn.jsdelivr.net/gh/microsoft/fluentui-emoji@main/assets/';
@@ -1180,13 +1229,13 @@ var S = Vue.reactive({
   drivers: [], rrn: {}, docs: {}, urls: {}, notices: [], myReads: {}, nstats: {}, teams: [], payslips: [], reduces: [], leases: [],
   adminView: 'menu', selId: null, search: '', showRrn: false, editMe: false, pushOn: true,
   reduceOpen: false, leaseOpen: false, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' },
-  noticeOpen: false, noticeErr: '', noticeForm: { tag: '일반', title: '', body: '', must: false },
+  noticeOpen: false, noticeErr: '', noticeForm: { id: null, title: '', body: '', must: false, starts: iso(today0()), ends: '' },
   addCoOpen: false, addCoName: '',
   splash: true, splashOut: false,
   routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
   routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
-  perms: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null, mgrMode: false, myMgr: null, managers: [], mgrOpen: false, mgrForm: { scope: 'none', ids: [] }, mgrErr: '', coEdit: null, coEditName: ''
+  perms: {}, noticeSel: null, noticeStatusOpen: false, noticeDelAsk: false, noticePeople: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null, mgrMode: false, myMgr: null, managers: [], mgrOpen: false, mgrForm: { scope: 'none', ids: [] }, mgrErr: '', coEdit: null, coEditName: ''
 });
 var toastTimer = null, armTimer = null, reduceTimer = null;
 function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
@@ -1204,7 +1253,7 @@ async function loadAll() {
     q(sb.from('driver_private').select('*')),
     q(sb.from('driver_docs').select('*')),
     q(sb.from('notices').select('*').order('created_at', { ascending: false })),
-    admin ? Promise.resolve([]) : q(sb.from('notice_reads').select('notice_id').eq('driver_id', S.uid)),
+    admin ? Promise.resolve([]) : q(sb.from('notice_reads').select('notice_id,read_at').eq('driver_id', S.uid)),
     q(sb.from('teams_messages').select('*').order('created_at', { ascending: false }).limit(50)),
     q(sb.from('payslips').select('*').order('month', { ascending: false })),
     q(sb.from('reduce_requests').select('*').order('created_at', { ascending: false })),
@@ -1214,7 +1263,7 @@ async function loadAll() {
   var rrn = {}; res[1].forEach(function (r) { rrn[r.driver_id] = r.rrn; }); S.rrn = rrn;
   var docs = {}; res[2].forEach(function (r) { (docs[r.driver_id] = docs[r.driver_id] || {})[r.kind] = r.path; }); S.docs = docs;
   S.notices = res[3];
-  var mr = {}; res[4].forEach(function (r) { mr[r.notice_id] = true; }); S.myReads = mr;
+  var mr = {}; res[4].forEach(function (r) { mr[r.notice_id] = r.read_at || true; }); S.myReads = mr;
   S.teams = res[5]; S.payslips = res[6]; S.reduces = res[7]; S.leases = res[8];
   S.routes = await q(sb.from('routes').select('*').order('sort').order('name'));
   var pm = {}; (await q(sb.from('rank_perms').select('*'))).forEach(function (r) { pm[r.rank] = r.can_clear_times; }); S.perms = pm;
@@ -1238,8 +1287,15 @@ async function refreshUrls() {
   if (r.error) return console.error(r.error);
   var u = Object.assign({}, S.urls); r.data.forEach(function (x) { if (x.signedUrl) u[x.path] = x.signedUrl; }); S.urls = u;
 }
+function openNoticeDetail(id) { S.noticeSel = id; S.noticeStatusOpen = false; S.noticeDelAsk = false; }
+async function loadNoticePeople(id) {
+  var r = await sb.from('notice_reads').select('driver_id,read_at').eq('notice_id', id);
+  if (r.error) return console.error(r.error);
+  var m = {}; r.data.forEach(function (x) { m[x.driver_id] = x.read_at; });
+  var np = Object.assign({}, S.noticePeople); np[id] = m; S.noticePeople = np;
+}
 async function refreshStats() {
-  var must = S.notices.filter(function (n) { return n.must; });
+  var must = S.notices;
   var st = {};
   await Promise.all(must.map(async function (n) {
     var r = await sb.rpc('notice_stats', { p_notice: n.id });
@@ -1353,7 +1409,7 @@ function build() {
     return !!t.enabled && !!(t.perms && t.perms[myRank] && t.perms[myRank][kind]);
   }
   var tabDefs = isDriver
-    ? [['home', '홈'], ['notice', '공지'], ['dispatch', '배차'], ['teams', '팀즈'], ['me', '내 정보']].filter(function (t) { return t[0] === 'home' || tabCan(t[0], 'view'); })
+    ? [['home', '홈'], ['notice', '공지'], ['dispatch', '배차'], ['teams', '팀즈'], ['me', '내 정보']].filter(function (t) { return t[0] === 'home' || t[0] === 'me' || tabCan(t[0], 'view'); })
     : [['home', '홈'], ['notice', '공지'], ['dispatch', '배차'], ['pay', '급여'], ['teams', '팀즈'], ['settings', '설정']];
   var tabs = tabDefs.map(function (t) {
     var on = s.tab === t[0];
@@ -1363,12 +1419,24 @@ function build() {
       iconWrap: { width: '40px', height: '32px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all .2s',
         background: on ? 'linear-gradient(135deg,#1E2E9E,#0B1533)' : 'transparent', boxShadow: on ? '0 8px 16px -8px rgba(11,21,51,.8)' : 'none', transform: on ? 'translateY(-2px)' : 'none' },
       emoStyle: { width: on ? '24px' : '22px', height: on ? '24px' : '22px', objectFit: 'contain', filter: on ? 'drop-shadow(0 2px 3px rgba(0,0,0,.35))' : 'grayscale(.85) opacity(.55)' },
-      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; if (t[0] === 'me') S.meSub = 'menu'; if (t[0] === 'dispatch') S.dispSel = null; S.armKey = null; S.editMe = false; S.showRrn = false; S.delAsk = null; } };
+      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; if (t[0] === 'me') S.meSub = 'menu'; if (t[0] === 'dispatch') S.dispSel = null; if (t[0] === 'notice') { S.noticeSel = null; S.noticeStatusOpen = false; S.noticeDelAsk = false; } S.armKey = null; S.editMe = false; S.showRrn = false; S.delAsk = null; } };
   });
   var titles = { home: '홈', dispatch: '배차', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
 
   // 공지
-  var scopeNotices = s.notices.filter(function (n) { return n.company_id === scopeId; });
+  var scopeNotices; scopeNotices = s.notices.filter(function (n) { return n.company_id === scopeId; });
+  var todayIso = iso(today0());
+  function nState(n) {
+    var st = String(n.starts_at || '').slice(0, 10), en = n.ends_at ? String(n.ends_at).slice(0, 10) : '';
+    if (st && st > todayIso) return ['게시 예정', '#92400E', 'linear-gradient(135deg,#FEF3C7,#FDE68A)'];
+    if (en && en < todayIso) return ['게시 종료', '#475569', 'linear-gradient(135deg,#F1F5F9,#E2E8F0)'];
+    return ['게시 중', '#065F46', 'linear-gradient(135deg,#D1FAE5,#A7F3D0)'];
+  }
+  function nPeriod(n) {
+    var st = n.starts_at ? fmtDate(parseD(n.starts_at)) : '';
+    return st + ' ~ ' + (n.ends_at ? fmtDate(parseD(n.ends_at)) : '계속');
+  }
+  if (isDriver) scopeNotices = scopeNotices.filter(function (n) { return nState(n)[0] === '게시 중'; });
   var mustRaw = scopeNotices.filter(function (n) { return n.must; })[0] || null;
   var others = scopeNotices.filter(function (n) { return n !== mustRaw; });
   var stat = mustRaw ? (s.nstats[mustRaw.id] || { reads: 0, total: 0 }) : { reads: 0, total: 0 };
@@ -1584,7 +1652,7 @@ function build() {
     sMenu: !isDriver && s.tab === 'settings' && s.adminView === 'menu',
     sList: !isDriver && s.tab === 'settings' && s.adminView === 'list',
     sDetail: !isDriver && s.tab === 'settings' && s.adminView === 'detail' && !!sel,
-    goPay: function () { if (S.role === 'driver') { S.tab = 'me'; S.meSub = 'pay'; } else S.tab = 'pay'; }, goTeams: function () { S.tab = 'teams'; }, goNotice: function () { S.tab = 'notice'; }, goMe: function () { S.tab = 'me'; },
+    goPay: function () { if (S.role === 'driver') { S.tab = 'me'; S.meSub = 'pay'; } else S.tab = 'pay'; }, goTeams: function () { S.tab = 'teams'; }, goNotice: function () { S.tab = 'notice'; S.noticeSel = mustRaw ? mustRaw.id : null; S.noticeStatusOpen = false; }, goMe: function () { S.tab = 'me'; },
     goMenu: function () { S.adminView = 'menu'; },
     goDriverList: function () { S.tab = 'settings'; S.adminView = 'list'; S.showRrn = false; },
 
@@ -1598,6 +1666,53 @@ function build() {
 
     // 공지
     mustN: mustRaw ? { title: mustRaw.title, body: mustRaw.body, date: fmtShort(new Date(mustRaw.created_at)) } : null,
+    noticeList: scopeNotices.map(function (n) {
+      var stt = nState(n), rd = s.myReads[n.id], ns = s.nstats[n.id];
+      return { id: n.id, must: n.must, title: n.title, preview: (n.body || '').split('\n')[0], dateText: fmtShort(new Date(n.created_at)), periodText: '게시 ' + nPeriod(n),
+        stateText: isDriver ? '' : stt[0], stateStyle: { color: stt[1], background: stt[2] },
+        readText: isDriver ? (rd ? '✓ 확인' : '미확인') : '', readStyle: rd ? { color: '#065F46', background: '#D1FAE5' } : { color: '#B91C1C', background: '#FEE2E2' },
+        statText: !isDriver && ns ? ns.reads + ' / ' + ns.total + '명 확인' : '',
+        cardStyle: { display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px', padding: '14px 16px', borderRadius: '16px', fontFamily: 'inherit', cursor: 'pointer', textAlign: 'left', background: '#FFFFFF',
+          border: n.must && isDriver && !rd ? '2px solid #F43F5E' : '1px solid rgba(15,23,42,.06)', boxShadow: '0 1px 2px rgba(15,23,42,.04), 0 10px 28px -14px rgba(15,23,42,.22)' },
+        open: function () { openNoticeDetail(n.id); } };
+    }),
+    nd: (function () {
+      var n = s.notices.find(function (x) { return x.id === s.noticeSel; });
+      if (!n || !s.tab || s.tab !== 'notice') return null;
+      var stt = nState(n), rd = s.myReads[n.id], ns = s.nstats[n.id] || { reads: 0, total: 0 };
+      var readers = s.noticePeople[n.id] || {};
+      var people = s.drivers.filter(function (d) { return d.company_id === n.company_id && d.status === '활성'; }).map(function (d) {
+        var at = readers[d.id];
+        return { id: d.id, name: d.name, rank: d.rank || '기사', text: at ? '✓ ' + fmtShort(new Date(at)) + ' ' + hm(at) : '미확인',
+          style: at ? { color: '#065F46', background: '#D1FAE5' } : { color: '#B91C1C', background: '#FEE2E2' }, read: !!at };
+      }).sort(function (a, b) { return (a.read === b.read) ? 0 : (a.read ? 1 : -1); });
+      var readN = people.filter(function (x) { return x.read; }).length;
+      return {
+        id: n.id, title: n.title, body: n.body, must: n.must, dateText: fmtShort(new Date(n.created_at)), periodText: nPeriod(n),
+        stateText: isDriver ? '' : stt[0], stateStyle: { color: stt[1], background: stt[2] },
+        read: !!rd, readAt: rd && rd !== true ? fmtShort(new Date(rd)) + ' ' + hm(rd) : '',
+        statusOpen: s.noticeStatusOpen, delAsk: s.noticeDelAsk, readN: readN, totalN: people.length,
+        barStyle: { width: (people.length ? Math.round(readN * 100 / people.length) : 0) + '%', height: '8px', background: 'linear-gradient(90deg,#4F6BFF,#2337B8)' },
+        statusBtnStyle: { minHeight: '48px', borderRadius: '12px', fontFamily: 'inherit', fontSize: '14px', fontWeight: 800, cursor: 'pointer', border: s.noticeStatusOpen ? 'none' : '1px solid #C7D2FE', background: s.noticeStatusOpen ? 'linear-gradient(135deg,#4F6BFF,#2337B8)' : '#EEF2FF', color: s.noticeStatusOpen ? '#FFFFFF' : '#1E3A8A' },
+        people: people,
+        back: function () { S.noticeSel = null; S.noticeStatusOpen = false; S.noticeDelAsk = false; },
+        confirm: function () {
+          run(async function () {
+            try { await q(sb.from('notice_reads').insert({ notice_id: n.id, driver_id: S.uid })); var m = Object.assign({}, S.myReads); m[n.id] = new Date().toISOString(); S.myReads = m; flash('확인했어요'); refreshStats(); }
+            catch (e) { fail(e, '확인 처리를 하지 못했어요'); }
+          });
+        },
+        edit: function () { S.noticeErr = ''; S.noticeForm = { id: n.id, title: n.title, body: n.body || '', must: !!n.must, starts: String(n.starts_at || '').slice(0, 10) || iso(today0()), ends: n.ends_at ? String(n.ends_at).slice(0, 10) : '' }; S.noticeOpen = true; },
+        toggleStatus: function () { S.noticeStatusOpen = !S.noticeStatusOpen; if (S.noticeStatusOpen) loadNoticePeople(n.id); },
+        askDel: function () { S.noticeDelAsk = true; },
+        del: function () {
+          run(async function () {
+            try { await q(sb.from('notices').delete().eq('id', n.id)); S.noticeSel = null; S.noticeDelAsk = false; await loadAll(); flash('공지를 삭제했어요'); }
+            catch (e) { fail(e, '삭제하지 못했어요'); }
+          });
+        }
+      };
+    })(),
     otherNotices: others.map(function (n, i) { return { tag: n.tag, date: fmtShort(new Date(n.created_at)), title: n.title, body: n.body,
       rowStyle: { padding: '14px 0', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '4px' } }; }),
     noNotices: scopeNotices.length === 0,
@@ -1610,15 +1725,24 @@ function build() {
       });
     },
     noticeOpen: s.noticeOpen, noticeForm: s.noticeForm, noticeErr: s.noticeErr,
-    openNotice: function () { S.noticeForm = { tag: '일반', title: '', body: '', must: false }; S.noticeErr = ''; S.noticeOpen = true; },
+    openNotice: function () { S.noticeForm = { id: null, title: '', body: '', must: false, starts: iso(today0()), ends: '' }; S.noticeErr = ''; S.noticeOpen = true; },
+    periodPresets: [['오늘만', 0], ['1주일', 6], ['1개월', 29], ['종료일 없음', -1]].map(function (x) {
+      return { label: x[0], pick: function () { var st = S.noticeForm.starts ? parseD(S.noticeForm.starts) : today0(); S.noticeForm.ends = x[1] < 0 ? '' : iso(addDays(st, x[1])); } };
+    }),
     closeNotice: function () { S.noticeOpen = false; },
-    onNotice: { tag: setF(s.noticeForm, 'tag'), title: setF(s.noticeForm, 'title'), body: setF(s.noticeForm, 'body'), must: function (e) { S.noticeForm.must = e.target.checked; } },
+    onNotice: { title: setF(s.noticeForm, 'title'), body: setF(s.noticeForm, 'body'), starts: setF(s.noticeForm, 'starts'), ends: setF(s.noticeForm, 'ends'), must: function (e) { S.noticeForm.must = e.target.checked; } },
     saveNotice: function () {
       var f = S.noticeForm;
       if (!f.title.trim()) { S.noticeErr = '제목을 입력해 주세요'; return; }
+      if (!f.starts) { S.noticeErr = '게시 시작일을 골라 주세요'; return; }
+      if (f.ends && f.ends < f.starts) { S.noticeErr = '종료일이 시작일보다 빨라요'; return; }
+      var row = { title: f.title.trim(), body: f.body.trim(), must: f.must, starts_at: f.starts, ends_at: f.ends || null };
       run(async function () {
-        try { await q(sb.from('notices').insert({ company_id: S.role === 'admin' ? S.company : scopeId, tag: f.tag, title: f.title.trim(), body: f.body.trim(), must: f.must })); S.noticeOpen = false; await loadAll(); flash('공지를 등록했어요'); }
-        catch (e) { fail(e, '공지를 등록하지 못했어요'); }
+        try {
+          if (f.id) { row.updated_at = new Date().toISOString(); await q(sb.from('notices').update(row).eq('id', f.id)); }
+          else { row.company_id = S.role === 'admin' ? S.company : scopeId; await q(sb.from('notices').insert(row)); }
+          S.noticeOpen = false; await loadAll(); flash(f.id ? '공지를 수정했어요' : '공지를 등록했어요');
+        } catch (e) { fail(e, '공지를 저장하지 못했어요'); }
       });
     },
 
