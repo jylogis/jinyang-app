@@ -277,3 +277,10 @@ grant usage on schema public to anon, authenticated;
 grant select on public.companies to anon;
 grant select, insert, update, delete on all tables in schema public to authenticated;
 grant execute on function public.is_admin(), public.my_company(), public.notice_stats(uuid) to authenticated;
+
+-- ---------- 관리자 가입 화면에서 '등록된 관리자 번호인지'만 확인 ----------
+create or replace function public.is_admin_phone(p_phone text) returns boolean
+language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.admin_phones where phone = p_phone);
+$$;
+grant execute on function public.is_admin_phone(text) to anon, authenticated;

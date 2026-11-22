@@ -19,6 +19,7 @@ a{color:#1E4FD8;text-decoration:none}
 #app{min-height:100dvh}
 </style>
 <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 <div id="app"></div>
@@ -26,29 +27,38 @@ a{color:#1E4FD8;text-decoration:none}
 <div style="width: 100%; max-width: 480px; margin: 0 auto; height: 100dvh; position: relative; overflow: hidden; background: #F4F6F9; font-family: 'Noto Sans KR', sans-serif; color: #111827">
 
 
+<template v-if="v.isBoot"><div style="height: 100dvh; display: flex; align-items: center; justify-content: center; font-size: 15px; color: #4B5563">불러오는 중…</div></template>
+
 <template v-if="v.isLogin">
   <div style="height: 100dvh; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; gap: 14px; padding: 32px 28px; background: #FFFFFF">
     <span style="font-size: 14px; font-weight: 800; color: #1E4FD8; letter-spacing: 1px">JINYANG LOGISTICS</span>
     <h1 style="margin: 0 0 10px; font-size: 26px; font-weight: 800; line-height: 1.4">기사님 전용 앱에<br>오신 걸 환영해요</h1>
     <div style="display: flex; flex-direction: column; gap: 4px">
       <label for="lg-phone" style="font-size: 13px; font-weight: 700; color: #374151">휴대폰 번호</label>
-      <input id="lg-phone" type="tel" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+      <input id="lg-phone" type="tel" inputmode="numeric" :value="v.login.phone" @input="v.onLogin.phone" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
     </div>
     <div style="display: flex; flex-direction: column; gap: 4px">
       <label for="lg-pw" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호</label>
-      <input id="lg-pw" type="password" placeholder="비밀번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+      <input id="lg-pw" type="password" :value="v.login.pw" @input="v.onLogin.pw" @keyup.enter="v.doLogin" placeholder="비밀번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
     </div>
-    <button type="button" @click="v.loginDriver" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">로그인</button>
+    <button type="button" @click="v.doLogin" :disabled="v.busy" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{ v.busy ? '확인 중…' : '로그인' }}</button>
     <button type="button" @click="v.goSignup" style="min-height: 52px; border: 1px solid #1E4FD8; border-radius: 14px; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">처음이에요 · 기사 회원가입</button>
-    <button type="button" @click="v.loginAdmin" style="min-height: 44px; border: none; background: transparent; color: #374151; font-family: inherit; font-size: 14px; font-weight: 500; text-decoration: underline; cursor: pointer">관리자로 로그인 (체험용)</button>
-    <p style="margin: 0; font-size: 12px; color: #4B5563; text-align: center">체험용 목업이라 아무 값이나 넣어도 로그인돼요</p>
-    <div style="border-top: 1px solid #E5E7EB; padding-top: 12px; display: flex; flex-direction: column; gap: 8px">
-      <span style="font-size: 12px; font-weight: 700; color: #4B5563">예시 기사 계정으로 보기</span>
-      <div style="display: flex; gap: 8px">
-        <button type="button" @click="v.loginReduced" style="flex: 1; min-height: 44px; border: 1px solid #FDBA74; border-radius: 12px; background: #FFF7ED; color: #9A3412; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">감차 승인된 기사</button>
-        <button type="button" @click="v.loginLease" style="flex: 1; min-height: 44px; border: 1px solid #D1D5DB; border-radius: 12px; background: #F3F4F6; color: #111827; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">넘버 임대 기사</button>
-      </div>
-    </div>
+    <template v-if="v.loginErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C; text-align: center">{{ v.loginErr }}</span></template>
+    <button type="button" @click="v.goAdminSignup" style="min-height: 44px; border: none; background: transparent; color: #374151; font-family: inherit; font-size: 14px; text-decoration: underline; cursor: pointer">관리자 계정 만들기</button>
+  </div>
+</template>
+
+<template v-if="v.isAdminSignup">
+  <div style="height: 100dvh; box-sizing: border-box; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 20px 28px 32px; background: #FFFFFF">
+    <button type="button" @click="v.backToLogin" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 15px; color: #374151; cursor: pointer">‹ 로그인으로</button>
+    <h1 style="margin: 0; font-size: 24px; font-weight: 800">관리자 계정 만들기</h1>
+    <p style="margin: 0; font-size: 14px; color: #4B5563; line-height: 1.6">관리자로 등록된 전화번호로만 만들 수 있어요.</p>
+    <div style="display: flex; flex-direction: column; gap: 4px"><label for="ad-name" style="font-size: 13px; font-weight: 700; color: #374151">이름</label><input id="ad-name" type="text" :value="v.adminForm.name" @input="v.onAdmin.name" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"></div>
+    <div style="display: flex; flex-direction: column; gap: 4px"><label for="ad-phone" style="font-size: 13px; font-weight: 700; color: #374151">휴대폰 번호 (로그인 아이디)</label><input id="ad-phone" type="tel" inputmode="numeric" :value="v.adminForm.phone" @input="v.onAdmin.phone" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"></div>
+    <div style="display: flex; flex-direction: column; gap: 4px"><label for="ad-pw" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호 (6자리 이상)</label><input id="ad-pw" type="password" :value="v.adminForm.pw" @input="v.onAdmin.pw" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"></div>
+    <div style="display: flex; flex-direction: column; gap: 4px"><label for="ad-pw2" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호 확인</label><input id="ad-pw2" type="password" :value="v.adminForm.pw2" @input="v.onAdmin.pw2" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"></div>
+    <template v-if="v.adminErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.adminErr }}</span></template>
+    <button type="button" @click="v.doAdminSignup" :disabled="v.busy" style="min-height: 52px; border: none; border-radius: 14px; background: #111827; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">관리자 계정 만들기</button>
   </div>
 </template>
 
@@ -79,8 +89,16 @@ a{color:#1E4FD8;text-decoration:none}
             </div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px">
-            <label for="su-phone" style="font-size: 13px; font-weight: 700; color: #374151">본폰 *</label>
+            <label for="su-phone" style="font-size: 13px; font-weight: 700; color: #374151">본폰 * (로그인 아이디로 써요)</label>
             <input id="su-phone" type="tel" :value="v.form.phone" @input="v.on.phone" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-pw" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호 * (6자리 이상)</label>
+            <input id="su-pw" type="password" :value="v.form.pw" @input="v.on.pw" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-pw2" style="font-size: 13px; font-weight: 700; color: #374151">비밀번호 확인 *</label>
+            <input id="su-pw2" type="password" :value="v.form.pw2" @input="v.on.pw2" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px">
             <label for="su-sub" style="font-size: 13px; font-weight: 700; color: #374151">서브폰 (선택)</label>
@@ -94,8 +112,7 @@ a{color:#1E4FD8;text-decoration:none}
             <label for="su-center" style="font-size: 13px; font-weight: 700; color: #374151">소속센터 *</label>
             <select id="su-center" :value="v.form.center" @change="v.on.center" style="min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 12px; font-family: inherit; font-size: 15px; background: #FFFFFF">
               <option value="">소속센터를 선택하세요</option>
-              <option value="진양로지스틱스">진양로지스틱스</option>
-              <option value="협력업체A">협력업체A</option>
+              <option v-for="c in v.companyOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
             </select>
           </div>
           <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6; background: #EEF2FF; border-radius: 10px; padding: 10px 12px">주민등록번호는 암호화해서 저장되고, 본인과 소속 업체 관리자만 볼 수 있어요.</p>
@@ -132,14 +149,14 @@ a{color:#1E4FD8;text-decoration:none}
             <svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
           </div>
           <h2 style="margin: 0; font-size: 22px; font-weight: 800">가입 신청 완료!</h2>
-          <p style="margin: 0; font-size: 15px; color: #374151; line-height: 1.6">{{ v.form.center }} 기사 명단에 등록됐어요.<br>관리자가 승인하면 모든 기능을 쓸 수 있어요.</p>
+          <p style="margin: 0; font-size: 15px; color: #374151; line-height: 1.6">{{ v.form.centerName }} 기사 명단에 등록됐어요.<br>관리자가 승인하면 모든 기능을 쓸 수 있어요.</p>
         </div>
       </template>
     </div>
 
     <div style="flex: none; padding: 12px 20px 20px; background: #FFFFFF; border-top: 1px solid #E5E7EB; display: flex; flex-direction: column; gap: 8px">
       <template v-if="v.hasErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.err }}</span></template>
-      <button type="button" @click="v.signupNext" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{ v.nextLabel }}</button>
+      <button type="button" @click="v.signupNext" style="min-height: 52px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 700; cursor: pointer">{{ v.busy ? '저장 중…' : v.nextLabel }}</button>
     </div>
   </div>
 </template>
@@ -150,6 +167,7 @@ a{color:#1E4FD8;text-decoration:none}
     <span style="font-size: 13px; font-weight: 800; color: #1E4FD8; letter-spacing: 1px">JINYANG LOGISTICS · 관리자</span>
     <h1 style="margin: 0; font-size: 24px; font-weight: 800; line-height: 1.4">관리할 업체를<br>선택하세요</h1>
     <p style="margin: 0 0 6px; font-size: 14px; color: #4B5563; line-height: 1.6">업체마다 공지사항, 급여, 팀즈 감지, 기사 정보가 따로 관리돼요.</p>
+    <template v-if="v.noCompanies"><p style="margin: 0; font-size: 14px; color: #4B5563">등록된 업체가 없어요. 아래에서 업체를 추가해 주세요.</p></template>
     <template v-for="(c, $index) in v.companyCards" :key="$index">
       <button type="button" @click="c.pick" style="display: flex; align-items: center; gap: 14px; min-height: 88px; padding: 16px; border: 1px solid #D1D5DB; border-radius: 16px; background: #FFFFFF; font-family: inherit; text-align: left; cursor: pointer">
         <span style="width: 48px; height: 48px; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-size: 20px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none">{{ c.initial }}</span>
@@ -161,7 +179,8 @@ a{color:#1E4FD8;text-decoration:none}
         <span style="font-size: 22px; color: #4B5563">›</span>
       </button>
     </template>
-    <button type="button" @click="v.soon" style="min-height: 56px; border: 1px dashed #9CA3AF; border-radius: 16px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer">+ 업체 추가</button>
+    <button type="button" @click="v.openAddCo" style="min-height: 56px; border: 1px dashed #9CA3AF; border-radius: 16px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 500; cursor: pointer">+ 업체 추가</button>
+    <template v-if="v.addCoOpen"><div style="display: flex; gap: 8px"><input aria-label="새 업체 이름" :value="v.addCoName" @input="v.onAddCo" placeholder="업체 이름" style="flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"><button type="button" @click="v.saveCo" style="min-height: 48px; padding: 0 18px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">추가</button></div></template>
     <div style="flex: 1"></div>
     <button type="button" @click="v.logout" style="min-height: 44px; border: none; background: transparent; color: #374151; font-family: inherit; font-size: 14px; text-decoration: underline; cursor: pointer">로그아웃</button>
   </div>
@@ -221,26 +240,26 @@ a{color:#1E4FD8;text-decoration:none}
           </template>
           <template v-if="v.homeNormal">
             <div style="background: #1E4FD8; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
-              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">11월 정산 · 10/26 ~ 11/25</span><span style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 10px">예시</span></div>
-              <span style="font-size: 13px">현재까지 예상 지급액</span>
-              <span style="font-size: 30px; font-weight: 800">₩3,842,000</span>
+              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">{{ v.myPay.title }}</span></div>
+              <span style="font-size: 13px">{{ v.myPay.label }}</span>
+              <span style="font-size: 30px; font-weight: 800">{{ v.myPay.totalText }}</span>
               <button type="button" @click="v.goPay" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">급여내역 자세히 보기 →</button>
             </div>
           </template>
           <template v-if="v.homeLease">
             <div style="background: #111827; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
-              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">넘버 임대 기사</span><span style="font-size: 11px; font-weight: 700; background: rgba(255,255,255,0.2); padding: 3px 8px; border-radius: 10px">예시</span></div>
+              <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">넘버 임대 기사</span></div>
               <span style="font-size: 13px">{{ v.lease.month }} 넘버 임대료</span>
               <span style="font-size: 30px; font-weight: 800">₩{{ v.lease.amountText }}</span>
               <span style="font-size: 13px">납부 기한 {{ v.lease.dueText }} · {{ v.lease.status }}</span>
               <button type="button" @click="v.goPay" style="align-self: flex-start; min-height: 44px; border: none; background: transparent; padding: 0; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">임대료 안내 보기 →</button>
             </div>
           </template>
-          <button type="button" @click="v.goTeams" style="text-align: left; display: flex; flex-direction: column; gap: 4px; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
+          <button v-if="v.latestMsg" type="button" @click="v.goTeams" style="text-align: left; display: flex; flex-direction: column; gap: 4px; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
             <span style="font-size: 12px; font-weight: 700; color: #C2410C">팀즈 감지 · {{ v.co.room }} · {{ v.latestMsg.time }}</span>
             <span style="font-size: 15px">"{{ v.latestMsg.text }}"</span>
           </button>
-          <button type="button" @click="v.goNotice" style="text-align: left; display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: none; border-radius: 16px; padding: 16px; font-family: inherit; color: #111827; cursor: pointer">
+          <button v-if="v.mustN" type="button" @click="v.goNotice" style="text-align: left; display: flex; align-items: center; gap: 8px; background: #FFFFFF; border: none; border-radius: 16px; padding: 16px; font-family: inherit; color: #111827; cursor: pointer">
             <span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 2px 6px; border-radius: 6px">필독</span>
             <span style="flex: 1; font-size: 15px">{{ v.mustN.title }}</span>
             <span style="font-size: 18px; color: #4B5563">›</span>
@@ -290,24 +309,25 @@ a{color:#1E4FD8;text-decoration:none}
       <template v-if="v.tNotice">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <template v-if="v.isAdminRole">
-            <button type="button" @click="v.soon" style="min-height: 48px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">+ {{ v.scopeName }} 공지 작성</button>
+            <button type="button" @click="v.openNotice" style="min-height: 48px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">+ {{ v.scopeName }} 공지 작성</button>
           </template>
-          <article style="background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+          <article v-if="v.mustN" style="background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
             <div style="display: flex; gap: 6px; align-items: center">
               <span style="font-size: 11px; font-weight: 700; color: #FFFFFF; background: #DC2626; padding: 2px 6px; border-radius: 6px">필독</span>
               <span style="margin-left: auto; font-size: 12px; color: #4B5563">{{ v.mustN.date }} · {{ v.scopeName }} 관리자</span>
             </div>
             <h2 style="margin: 0; font-size: 17px; font-weight: 700">{{ v.mustN.title }}</h2>
-            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151">{{ v.mustN.body }}</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151; white-space: pre-line">{{ v.mustN.body }}</p>
             <div style="display: flex; align-items: center; justify-content: space-between">
               <span style="font-size: 12px; color: #4B5563">{{ v.readCount }}명 / {{ v.readTotal }}명 확인</span>
               <template v-if="v.noticeOk"><span style="min-height: 44px; display: flex; align-items: center; padding: 0 14px; border-radius: 12px; background: #DCFCE7; color: #15803D; font-size: 14px; font-weight: 700">✓ 확인 완료</span></template>
               <template v-if="v.noticeNotOk"><button type="button" @click="v.confirmNotice" style="min-height: 44px; padding: 0 16px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">확인했어요</button></template>
             </div>
           </article>
-          <div style="background: #FFFFFF; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
+          <template v-if="v.noNotices"><div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; text-align: center; font-size: 14px; color: #4B5563">아직 등록된 공지가 없어요</div></template>
+          <div v-if="v.otherNotices.length" style="background: #FFFFFF; border-radius: 16px; padding: 0 16px; display: flex; flex-direction: column">
             <template v-for="(n, $index) in v.otherNotices" :key="$index">
-              <div :style="n.rowStyle"><span style="font-size: 12px; color: #4B5563">{{ n.tag }} · {{ n.date }}</span><span style="font-size: 15px">{{ n.title }}</span></div>
+              <div :style="n.rowStyle"><span style="font-size: 12px; color: #4B5563">{{ n.tag }} · {{ n.date }}</span><span style="font-size: 15px; font-weight: 500">{{ n.title }}</span><span v-if="n.body" style="font-size: 13px; color: #374151; line-height: 1.6; white-space: pre-line">{{ n.body }}</span></div>
             </template>
           </div>
         </div>
@@ -317,7 +337,7 @@ a{color:#1E4FD8;text-decoration:none}
       <template v-if="v.aPay">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <div style="background: #1E4FD8; border-radius: 18px; padding: 18px; color: #FFFFFF; display: flex; flex-direction: column; gap: 6px">
-            <span style="font-size: 13px">{{ v.scopeName }} · 11월 정산 (10/26~11/25) · 예시</span>
+            <span style="font-size: 13px">{{ v.scopeName }} · {{ v.payMonthLabel }}</span>
             <span style="font-size: 13px">기사 지급 예정 총액 (정산 기사)</span>
             <span style="font-size: 28px; font-weight: 800">₩{{ v.payTotal }}</span>
             <span style="font-size: 13px">넘버 임대료 수납 예정 ₩{{ v.leaseTotal }}</span>
@@ -342,7 +362,7 @@ a{color:#1E4FD8;text-decoration:none}
       <template v-if="v.dLease">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <div style="background: #111827; border-radius: 18px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
-            <span style="font-size: 13px; font-weight: 700">넘버 임대료 안내 · {{ v.lease.month }} · 예시</span>
+            <span style="font-size: 13px; font-weight: 700">넘버 임대료 안내 · {{ v.lease.month }}</span>
             <span style="font-size: 32px; font-weight: 800">₩{{ v.lease.amountText }}</span>
             <span style="font-size: 14px">납부 기한 {{ v.lease.dueText }}</span>
           </div>
@@ -362,24 +382,20 @@ a{color:#1E4FD8;text-decoration:none}
       
       <template v-if="v.dPay">
         <div style="display: flex; flex-direction: column; gap: 12px">
-          <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border-radius: 14px; padding: 4px">
-            <button type="button" aria-label="이전 달" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 20px; cursor: pointer">‹</button>
-            <div style="display: flex; flex-direction: column; align-items: center"><span style="font-size: 16px; font-weight: 700">2026년 11월 정산</span><span style="font-size: 12px; color: #4B5563">10/26 ~ 11/25 · 예시 데이터</span></div>
-            <button type="button" aria-label="다음 달" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 20px; color: #9CA3AF">›</button>
-          </div>
-          <div style="background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 9px">
-            <span style="font-size: 13px; color: #4B5563">실지급 예정액</span>
-            <span style="font-size: 30px; font-weight: 800; color: #1E4FD8">₩3,842,000</span>
-            <div style="height: 1px; background: #E5E7EB"></div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>배송 수당 (1,284건)</span><span>4,108,800</span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px"><span>백업·휴일 수당</span><span>300,000</span></div>
-            <div style="display: flex; justify-content: space-between; font-size: 14px; color: #B91C1C"><span>공제 합계</span><span>− 566,800</span></div>
-          </div>
-          <div style="background: #FFFFFF; border-radius: 16px; padding: 4px 16px">
-            <div style="display: flex; padding: 12px 0; border-bottom: 1px solid #E5E7EB; font-size: 14px"><span style="width: 84px; color: #4B5563">11/17 (월)</span><span style="flex: 1">62건</span><span>198,400</span></div>
-            <div style="display: flex; padding: 12px 0; border-bottom: 1px solid #E5E7EB; font-size: 14px"><span style="width: 84px; color: #4B5563">11/15 (토)</span><span style="flex: 1">58건 · 백업</span><span>185,600</span></div>
-            <div style="display: flex; padding: 12px 0; font-size: 14px"><span style="width: 84px; color: #4B5563">11/14 (금)</span><span style="flex: 1">65건</span><span>208,000</span></div>
-          </div>
+          <template v-if="v.myPay.has">
+            <div style="background: #FFFFFF; border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 9px">
+              <span style="font-size: 15px; font-weight: 700">{{ v.myPay.title }}</span>
+              <span style="font-size: 13px; color: #4B5563">실지급액</span>
+              <span style="font-size: 30px; font-weight: 800; color: #1E4FD8">{{ v.myPay.totalText }}</span>
+              <div style="height: 1px; background: #E5E7EB"></div>
+              <div v-for="(it, i) in v.myPay.items" :key="i" :style="it.style"><span>{{ it.label }}</span><span>{{ it.amountText }}</span></div>
+            </div>
+            <div v-if="v.myPay.history.length" style="background: #FFFFFF; border-radius: 16px; padding: 4px 16px">
+              <h2 style="margin: 12px 0 4px; font-size: 15px; font-weight: 700">지난 정산</h2>
+              <div v-for="(h, i) in v.myPay.history" :key="i" style="display: flex; justify-content: space-between; padding: 12px 0; border-top: 1px solid #E5E7EB; font-size: 14px"><span>{{ h.title }}</span><span style="font-weight: 500">{{ h.totalText }}</span></div>
+            </div>
+          </template>
+          <template v-if="!v.myPay.has"><div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; text-align: center; font-size: 14px; color: #4B5563; line-height: 1.6">아직 받은 정산서가 없어요.<br>정산이 올라오면 여기에 표시돼요.</div></template>
         </div>
       </template>
 
@@ -387,7 +403,7 @@ a{color:#1E4FD8;text-decoration:none}
       <template v-if="v.tTeams">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
-            <div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #16A34A"></span><span style="font-size: 15px; font-weight: 700">감지 중</span><span style="font-size: 13px; color: #4B5563">· {{ v.co.room }}</span></div>
+            <div style="display: flex; align-items: center; gap: 8px"><span style="width: 10px; height: 10px; border-radius: 5px; background: #9CA3AF"></span><span style="font-size: 15px; font-weight: 700">Teams 연결 준비 중</span><span style="font-size: 13px; color: #4B5563">· {{ v.co.room }}</span></div>
             <div style="display: flex; align-items: center; justify-content: space-between">
               <span id="push-lbl" style="font-size: 14px">감지되면 알림 받기</span>
               <button type="button" role="switch" aria-labelledby="push-lbl" :aria-checked="v.pushAria" @click="v.togglePush" :style="v.switchStyle"><span :style="v.knobStyle"></span></button>
@@ -396,6 +412,7 @@ a{color:#1E4FD8;text-decoration:none}
               <button type="button" @click="v.soon" style="min-height: 44px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; color: #111827; cursor: pointer">{{ v.scopeName }} 감지 방·키워드 설정</button>
             </template>
           </div>
+          <template v-if="!v.teamsMsgs.length"><div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; text-align: center; font-size: 14px; color: #4B5563">아직 감지된 메시지가 없어요</div></template>
           <template v-for="(m, $index) in v.teamsMsgs" :key="$index">
             <div :style="m.cardStyle">
               <span :style="m.kwStyle">{{ m.kw }} · {{ m.time }}</span>
@@ -445,13 +462,11 @@ a{color:#1E4FD8;text-decoration:none}
             </template>
             <template v-if="v.editMe">
               <div style="display: flex; flex-direction: column; gap: 10px">
-                <label for="me-phone" style="font-size: 12px; font-weight: 700; color: #374151">본폰</label>
-                <input id="me-phone" type="tel" :value="v.me.phone" @input="v.onMe.phone" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
                 <label for="me-sub" style="font-size: 12px; font-weight: 700; color: #374151">서브폰</label>
                 <input id="me-sub" type="tel" :value="v.me.sub" @input="v.onMe.sub" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
                 <label for="me-addr" style="font-size: 12px; font-weight: 700; color: #374151">주소</label>
                 <input id="me-addr" type="text" :value="v.me.addr" @input="v.onMe.addr" style="min-height: 44px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px">
-                <span style="font-size: 12px; color: #4B5563">이름·주민번호·소속센터 변경은 관리자에게 요청해 주세요</span>
+                <span style="font-size: 12px; color: #4B5563">본폰·이름·주민번호·소속센터 변경은 관리자에게 요청해 주세요</span>
               </div>
             </template>
           </div>
@@ -662,33 +677,44 @@ a{color:#1E4FD8;text-decoration:none}
   </div>
 </template>
 
+<template v-if="v.noticeOpen">
+  <div style="position: absolute; inset: 0; background: rgba(17,24,39,0.55); display: flex; align-items: flex-end">
+    <div role="dialog" aria-modal="true" aria-labelledby="nt-title" style="width: 100%; box-sizing: border-box; max-height: 92%; overflow-y: auto; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 12px">
+      <h2 id="nt-title" style="margin: 0; font-size: 19px; font-weight: 800">{{ v.scopeName }} 공지 작성</h2>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-tag" style="font-size: 13px; font-weight: 700; color: #374151">분류</label>
+        <select id="nt-tag" :value="v.noticeForm.tag" @change="v.onNotice.tag" style="min-height: 46px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; background: #FFFFFF"><option>일반</option><option>라우트</option><option>정산</option><option>안전</option></select></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-t" style="font-size: 13px; font-weight: 700; color: #374151">제목</label><input id="nt-t" type="text" :value="v.noticeForm.title" @input="v.onNotice.title" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="nt-b" style="font-size: 13px; font-weight: 700; color: #374151">내용</label><textarea id="nt-b" rows="6" :value="v.noticeForm.body" @input="v.onNotice.body" style="border: 1px solid #D1D5DB; border-radius: 10px; padding: 10px 12px; font-family: inherit; font-size: 15px; resize: vertical"></textarea></div>
+      <div style="display: flex; align-items: center; gap: 8px"><input id="nt-m" type="checkbox" :checked="v.noticeForm.must" @change="v.onNotice.must" style="width: 22px; height: 22px"><label for="nt-m" style="font-size: 15px">필독 (기사님 확인 받기)</label></div>
+      <template v-if="v.noticeErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.noticeErr }}</span></template>
+      <div style="display: flex; gap: 8px">
+        <button type="button" @click="v.closeNotice" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 14px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">취소</button>
+        <button type="button" @click="v.saveNotice" style="flex: 2; min-height: 50px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">공지 등록</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<template v-if="v.busy"><div role="status" style="position: absolute; inset: 0; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #1E4FD8">처리 중…</div></template>
+
 <template v-if="v.hasToast">
   <div role="status" style="position: absolute; left: 20px; right: 20px; bottom: 96px; background: #111827; color: #FFFFFF; border-radius: 12px; padding: 14px 16px; font-size: 14px; font-weight: 500; text-align: center">{{ v.toast }}</div>
 </template>
 </div>
 </script>
 <script>
-// ---- React식 setState를 Vue 반응형 상태로 연결하는 작은 어댑터 ----
-class DCLogic {
-  constructor(props) { this.props = props || {}; }
-  setState(patch) { Object.assign(this.state, patch); saveState(this.state); }
-}
-var STORE_KEY = 'jinyang-app-v1';
-function saveState(st) {
-  try {
-    var keep = { drivers: st.drivers, noticeOk: st.noticeOk, pushOn: st.pushOn };
-    localStorage.setItem(STORE_KEY, JSON.stringify(keep, function (k, val) {
-      return (typeof val === 'string' && val.indexOf('blob:') === 0) ? 'sample' : val;
-    }));
-  } catch (e) {}
-}
+// ===== 진양로지스틱스 기사앱 · 데이터 로직 (Supabase 저장/불러오기) =====
+var SB_URL = 'https://wairssqlnegtjehgvslc.supabase.co';
+var SB_KEY = 'sb_publishable_B8tJxEG2c5xcqshw907SBg_72MYP435'; // 공개용 키(만료 없음). 실제 접근 범위는 DB 보안 규칙(RLS)이 제한
+var sb = supabase.createClient(SB_URL, SB_KEY, { auth: { persistSession: true, autoRefreshToken: true } });
+var BUCKET = 'driver-docs';
+
 var DOCS = [
   { k: 'license', label: '운전면허증' },
   { k: 'cargo', label: '화물운송자격증' },
   { k: 'car', label: '차량등록증' },
   { k: 'biz', label: '사업자등록증' }
 ];
-var SAMPLE = 'sample';
 var ICONS = {
   home: 'M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3z',
   notice: 'M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4',
@@ -697,63 +723,41 @@ var ICONS = {
   me: 'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8M4 21c0-4 4-6 8-6s8 2 8 6',
   settings: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1'
 };
-function mkDriver(id, name, rrn, phone, sub, addr, center, status, keys) {
-  var docs = {};
-  DOCS.forEach(function (d) { docs[d.k] = keys.indexOf(d.k) >= 0 ? SAMPLE : null; });
-  return { id: id, name: name, rrn: rrn, phone: phone, sub: sub, addr: addr, center: center, status: status, docs: docs };
-}
-var ALL = ['license', 'cargo', 'car', 'biz'];
-var COMPANIES = ['진양로지스틱스', '협력업체A'];
-var CO = {
-  '진양로지스틱스': {
-    camp: '[캠프명]', room: '[캠프명] Teams방',
-    notices: [
-      { tag: '필독', must: true, date: '11/18', title: '11/20부터 라우트 변경 안내', body: '일부 라우트 번호가 변경됩니다. 본인 라우트 번호와 출차 웨이브를 꼭 확인해 주세요.' },
-      { tag: '정산', date: '11/15', title: '11월 정산 기간 안내 (10/26~11/25)' },
-      { tag: '안전', date: '11/12', title: '동절기 빙판길·언덕 배송 안전 수칙' },
-      { tag: '일반', date: '11/08', title: '연말 휴무 희망일 사전 조사' }
-    ],
-    teams: [
-      { kw: '웨이브 · 출차', time: '오늘 11:02', text: '내일 2웨이브 출차 30분 앞당겨 진행 예정입니다', hot: true },
-      { kw: '긴급', time: '오늘 07:48', text: '[긴급] 3번 도크 작업으로 진입 10분 지연' }
-    ],
-    pay: [3842000, 3615000, 2980000, 4012000]
-  },
-  '협력업체A': {
-    camp: '[캠프명]', room: '[캠프명] Teams방',
-    notices: [
-      { tag: '필독', must: true, date: '11/17', title: '12월 휴무 신청 마감 안내', body: '12월 휴무 희망일은 11/25까지 관리자에게 신청해 주세요.' },
-      { tag: '정산', date: '11/14', title: '11월 정산 명세서 발송 일정' },
-      { tag: '일반', date: '11/10', title: '차량 정기점검 일정 안내' }
-    ],
-    teams: [
-      { kw: '물량', time: '오늘 09:30', text: '오늘 물량 평소 대비 증가, 프레시백 회수 협조 부탁드립니다', hot: true },
-      { kw: '라우트', time: '어제 18:20', text: '내일부터 B구역 라우트 일부 조정 예정' }
-    ],
-    pay: [3721000, 2450000, 3988000, 3100000]
-  }
-};
-function won(n) { return n.toLocaleString('ko-KR'); }
+
+// ---------- 작은 도우미 ----------
+function won(n) { return Number(n || 0).toLocaleString('ko-KR'); }
+function pad(n) { return (n < 10 ? '0' : '') + n; }
 function today0() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }
 function addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); return x; }
-function pad(n) { return (n < 10 ? '0' : '') + n; }
-function fmtDate(d) { return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' (' + '일월화수목금토'.charAt(d.getDay()) + ')'; }
-function fmtShort(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
-function mkReduce(daysAgo) { var r = addDays(today0(), -daysAgo); return { req: r.getTime(), status: '요청' }; }
 function iso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
 function eom() { var t = today0(); return new Date(t.getFullYear(), t.getMonth() + 1, 0); }
+function parseD(s) { if (!s) return null; var p = String(s).slice(0, 10).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+function fmtDate(d) { return d.getFullYear() + '.' + pad(d.getMonth() + 1) + '.' + pad(d.getDate()) + ' (' + '일월화수목금토'.charAt(d.getDay()) + ')'; }
+function fmtShort(d) { return (d.getMonth() + 1) + '/' + d.getDate(); }
+function fmtWhen(ts) {
+  var d = new Date(ts), t = today0(), day = new Date(d); day.setHours(0, 0, 0, 0);
+  var hm = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  var diff = Math.round((t - day) / 86400000);
+  return diff === 0 ? '오늘 ' + hm : (diff === 1 ? '어제 ' + hm : fmtShort(d) + ' ' + hm);
+}
+function digits(s) { return String(s || '').replace(/\D/g, ''); }
+function fmtPhone(s) { var d = digits(s); return d.length === 11 ? d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7) : (d.length === 10 ? d.slice(0, 3) + '-' + d.slice(3, 6) + '-' + d.slice(6) : s); }
+function loginEmail(phone) { return digits(phone) + '@jinyang.app'; }
+function mask(r) { return r ? r.slice(0, 8) + '******' : '미입력'; }
+function monthLabel(m) { if (!m) return ''; var p = m.split('-'); return p[0] + '년 ' + (+p[1]) + '월 정산'; }
+
 function reduceView(rd) {
   var v = { has: false, pending: false, approved: false, needAck: false, statusText: '', reqText: '', startText: '—', endText: '', periodText: '', dday: '', reqShort: '', endShort: '', progress: '', barStyle: { width: '0%', height: '8px' } };
   if (!rd) return v;
-  var req = new Date(rd.req), t = today0();
+  var req = parseD(rd.requested_at), t = today0();
   v.has = true; v.pending = rd.status === '요청'; v.approved = rd.status === '승인';
   v.needAck = v.approved && !rd.ack;
   v.statusText = v.pending ? '관리자 승인 대기' : (v.approved ? '승인 완료' : '반려됨');
   v.reqText = fmtDate(req); v.reqShort = fmtShort(req);
   if (v.approved) {
-    var st = new Date(rd.approvedAt), en = addDays(st, 60);
-    var left = Math.round((en.getTime() - t.getTime()) / 86400000);
-    var dayN = Math.min(60, Math.max(1, Math.round((t.getTime() - st.getTime()) / 86400000) + 1));
+    var st = parseD(rd.approved_at), en = addDays(st, 60);
+    var left = Math.round((en - t) / 86400000);
+    var dayN = Math.min(60, Math.max(1, Math.round((t - st) / 86400000) + 1));
     v.startText = fmtDate(st); v.endText = fmtDate(en); v.endShort = fmtShort(en);
     v.periodText = fmtDate(st) + ' ~ ' + fmtDate(en);
     v.dday = left > 0 ? 'D-' + left : (left === 0 ? 'D-DAY' : '완료');
@@ -763,362 +767,483 @@ function reduceView(rd) {
     var ex = addDays(t, 60);
     v.startText = '승인 전'; v.endShort = fmtShort(ex);
     v.endText = '승인일 +60일 (오늘 승인 시 ' + fmtDate(ex) + ')';
-    v.periodText = '승인일부터 60일 (승인 후 확정)';
-    v.dday = '승인 대기';
-  } else {
-    v.periodText = '반려되어 의무 근무 기간이 없어요'; v.dday = '반려';
-  }
+    v.periodText = '승인일부터 60일 (승인 후 확정)'; v.dday = '승인 대기';
+  } else { v.periodText = '반려되어 의무 근무 기간이 없어요'; v.dday = '반려'; }
   return v;
 }
 function leaseView(l) {
   if (!l) return { amountText: '', dueText: '', status: '', month: '', memo: '', canPay: false, statusStyle: {} };
-  var p = l.due.split('-'), d = new Date(+p[0], +p[1] - 1, +p[2]);
+  var d = parseD(l.due);
   return { amountText: won(l.amount), dueText: fmtDate(d), status: l.status, month: (d.getMonth() + 1) + '월', memo: l.memo || '', canPay: l.status === '납부 대기',
     statusStyle: { fontSize: '14px', fontWeight: 700, color: l.status === '납부 대기' ? '#B45309' : (l.status === '납부 완료' ? '#15803D' : '#1E4FD8') } };
 }
-function emptyForm() {
-  return { name: '', rrn1: '', rrn2: '', phone: '', sub: '', addr: '', center: '', docs: { license: null, cargo: null, car: null, biz: null } };
+
+// ---------- 앱 상태 ----------
+function emptyForm() { return { name: '', rrn1: '', rrn2: '', phone: '', pw: '', pw2: '', sub: '', addr: '', center: '', centerName: '', docs: { license: null, cargo: null, car: null, biz: null } }; }
+var FILES = {}; // 가입 중 고른 사진 파일 (화면 상태와 분리)
+
+var S = Vue.reactive({
+  screen: 'boot', role: 'driver', uid: null, tab: 'home', busy: false, toast: '',
+  login: { phone: '', pw: '' }, loginErr: '',
+  adminForm: { name: '', phone: '', pw: '', pw2: '' }, adminErr: '',
+  step: 1, err: '', form: emptyForm(),
+  companies: [], company: null,
+  drivers: [], rrn: {}, docs: {}, urls: {}, notices: [], myReads: {}, nstats: {}, teams: [], payslips: [], reduces: [], leases: [],
+  adminView: 'menu', selId: null, search: '', showRrn: false, editMe: false, pushOn: true,
+  reduceOpen: false, leaseOpen: false, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' },
+  noticeOpen: false, noticeErr: '', noticeForm: { tag: '일반', title: '', body: '', must: false },
+  addCoOpen: false, addCoName: ''
+});
+var toastTimer = null;
+function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
+function fail(e, fallback) { console.error(e); flash(fallback || '문제가 생겼어요. 잠시 후 다시 시도해 주세요'); }
+async function run(fn) { if (S.busy) return; S.busy = true; try { await fn(); } finally { S.busy = false; } }
+
+// ---------- 데이터 불러오기 ----------
+async function q(p) { var r = await p; if (r.error) throw r.error; return r.data; }
+
+async function loadAll() {
+  var admin = S.role === 'admin';
+  S.companies = await q(sb.from('companies').select('*').order('created_at'));
+  var res = await Promise.all([
+    q(sb.from('drivers').select('*').order('created_at')),
+    q(sb.from('driver_private').select('*')),
+    q(sb.from('driver_docs').select('*')),
+    q(sb.from('notices').select('*').order('created_at', { ascending: false })),
+    admin ? Promise.resolve([]) : q(sb.from('notice_reads').select('notice_id').eq('driver_id', S.uid)),
+    q(sb.from('teams_messages').select('*').order('created_at', { ascending: false }).limit(50)),
+    q(sb.from('payslips').select('*').order('month', { ascending: false })),
+    q(sb.from('reduce_requests').select('*').order('created_at', { ascending: false })),
+    q(sb.from('leases').select('*').order('created_at', { ascending: false }))
+  ]);
+  S.drivers = res[0];
+  var rrn = {}; res[1].forEach(function (r) { rrn[r.driver_id] = r.rrn; }); S.rrn = rrn;
+  var docs = {}; res[2].forEach(function (r) { (docs[r.driver_id] = docs[r.driver_id] || {})[r.kind] = r.path; }); S.docs = docs;
+  S.notices = res[3];
+  var mr = {}; res[4].forEach(function (r) { mr[r.notice_id] = true; }); S.myReads = mr;
+  S.teams = res[5]; S.payslips = res[6]; S.reduces = res[7]; S.leases = res[8];
+  await refreshUrls();
+  await refreshStats();
+}
+async function refreshUrls() {
+  var paths = [];
+  Object.keys(S.docs).forEach(function (id) { Object.keys(S.docs[id]).forEach(function (k) { paths.push(S.docs[id][k]); }); });
+  if (!paths.length) return;
+  var r = await sb.storage.from(BUCKET).createSignedUrls(paths, 60 * 60 * 6);
+  if (r.error) return console.error(r.error);
+  var u = Object.assign({}, S.urls); r.data.forEach(function (x) { if (x.signedUrl) u[x.path] = x.signedUrl; }); S.urls = u;
+}
+async function refreshStats() {
+  var must = S.notices.filter(function (n) { return n.must; });
+  var st = {};
+  await Promise.all(must.map(async function (n) {
+    var r = await sb.rpc('notice_stats', { p_notice: n.id });
+    if (!r.error && r.data && r.data[0]) st[n.id] = r.data[0];
+  }));
+  S.nstats = st;
 }
 
-class Component extends DCLogic {
-  constructor(props) {
-    super(props);
-    this.state = {
-      screen: 'login', role: 'driver', tab: 'home', step: 1, err: '',
-      form: emptyForm(), me: 'd1',
-      drivers: [
-        mkDriver('d1', '홍길동', '810415-1000000', '010-1234-5678', '010-9876-5432', '서울 서대문구 홍제동 ○○로 12', '진양로지스틱스', '활성', ALL),
-        mkDriver('d2', '김민수', '880921-1000000', '010-2345-6789', '', '서울 은평구 응암동 ○○길 5', '진양로지스틱스', '활성', ['license', 'cargo', 'car']),
-        mkDriver('d3', '이영호', '920107-1000000', '010-3456-7890', '010-1111-2222', '경기 고양시 덕양구 ○○로 33', '진양로지스틱스', '승인 대기', ['license', 'cargo']),
-        mkDriver('d4', '박정훈', '850630-1000000', '010-4567-8901', '', '서울 마포구 ○○동 7', '진양로지스틱스', '활성', ALL),
-        mkDriver('d8', '오준석', '870512-1000000', '010-8901-2345', '', '서울 서대문구 ○○로 40', '진양로지스틱스', '활성', ALL),
-        mkDriver('d5', '최성진', '790222-1000000', '010-5678-9012', '', '서울 강서구 ○○로 88', '협력업체A', '활성', ALL),
-        mkDriver('d6', '정대현', '950814-1000000', '010-6789-0123', '010-3333-4444', '경기 부천시 ○○로 21', '협력업체A', '승인 대기', ['license']),
-        mkDriver('d7', '한지훈', '900303-1000000', '010-7890-1234', '', '서울 양천구 ○○로 9', '협력업체A', '활성', ALL)
-      ],
-      company: '진양로지스틱스', search: '', adminView: 'menu', selId: null,
-      showRrn: false, editMe: false, noticeOk: {}, pushOn: true, toast: '', reduceOpen: false, leaseOpen: false, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' }
-    };
-  }
-  componentDidMount() {
-    var ds = this.state.drivers.map(function (d) {
-      if (d.id === 'd2') return Object.assign({}, d, { reduce: mkReduce(8) });
-      if (d.id === 'd7') return Object.assign({}, d, { reduce: mkReduce(3) });
-      if (d.id === 'd4') return Object.assign({}, d, { reduce: { req: addDays(today0(), -15).getTime(), approvedAt: addDays(today0(), -12).getTime(), status: '승인', ack: false } });
-      if (d.id === 'd8') return Object.assign({}, d, { lease: { amount: 300000, due: iso(eom()), memo: '', status: '납부 대기' } });
-      return d;
-    });
-    this.setState({ drivers: ds });
-  }
-  componentWillUnmount() { clearTimeout(this._t); }
-  flash(msg) {
-    this.setState({ toast: msg });
-    clearTimeout(this._t);
-    this._t = setTimeout(() => this.setState({ toast: '' }), 2200);
-  }
-  setForm(k, v) {
-    var f = Object.assign({}, this.state.form); f[k] = v;
-    this.setState({ form: f, err: '' });
-  }
-  setFormDoc(k, v) {
-    var f = Object.assign({}, this.state.form); f.docs = Object.assign({}, f.docs); f.docs[k] = v;
-    this.setState({ form: f });
-  }
-  patchDriver(id, patch) {
-    this.setState({ drivers: this.state.drivers.map(function (d) { return d.id === id ? Object.assign({}, d, patch) : d; }) });
-  }
-  setDriverDoc(id, k, v) {
-    var d = this.state.drivers.find(function (x) { return x.id === id; });
-    var docs = Object.assign({}, d.docs); docs[k] = v;
-    this.patchDriver(id, { docs: docs });
-  }
-  fileUrl(e) {
-    var f = e && e.target && e.target.files && e.target.files[0];
-    return f ? URL.createObjectURL(f) : SAMPLE;
-  }
-  docCount(docs) { return DOCS.filter(function (d) { return !!docs[d.k]; }).length; }
-  mask(r) { return r.slice(0, 8) + '******'; }
-  docItems(docs, prefix, onSet) {
-    var self = this;
-    return DOCS.map(function (d) {
-      var v = docs[d.k];
-      return {
-        label: d.label, none: !v, isSample: v === SAMPLE, isUrl: !!v && v !== SAMPLE,
-        url: (v && v !== SAMPLE) ? v : '',
-        inputId: 'file-' + prefix + '-' + d.k,
-        btn: v ? '다시 첨부' : '사진 첨부',
-        status: v ? '첨부됨' : '미첨부',
-        statusStyle: { fontSize: '12px', fontWeight: 700, color: v ? '#15803D' : '#B91C1C' },
-        onFile: onSet ? function (e) { onSet(d.k, self.fileUrl(e)); } : null
-      };
-    });
-  }
-  view(d) {
-    var n = this.docCount(d.docs);
-    return {
-      name: d.name, initial: d.name.charAt(0), center: d.center, status: d.status,
-      pending: d.status === '승인 대기', phone: d.phone, sub: d.sub, addr: d.addr,
-      subText: d.sub || '없음', addrText: d.addr || '미입력',
-      rrnShown: this.state.showRrn ? d.rrn : this.mask(d.rrn),
-      docText: n + '/4 제출',
-      rd: reduceView(d.reduce)
-    };
-  }
-  row(d) {
-    var n = this.docCount(d.docs);
-    return {
-      name: d.name, initial: d.name.charAt(0), phone: d.phone,
-      pending: d.status === '승인 대기',
-      reduce: !!d.reduce && d.reduce.status === '요청',
-      docText: '서류 ' + n + '/4',
-      docStyle: { fontSize: '12px', fontWeight: 700, color: n === 4 ? '#15803D' : '#B91C1C' },
-      open: () => this.setState({ tab: 'settings', adminView: 'detail', selId: d.id, showRrn: false })
-    };
-  }
-  renderVals() {
-    var s = this.state, self = this;
-    var isApp = s.screen === 'app';
-    var isDriver = s.role === 'driver';
-    var meD = s.drivers.find(function (d) { return d.id === s.me; }) || s.drivers[0];
-    var sel = s.drivers.find(function (d) { return d.id === s.selId; });
-
-    var tabDefs = isDriver
-      ? [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['me', '내 정보']]
-      : [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['settings', '설정']];
-    var tabs = tabDefs.map(function (t) {
-      var on = s.tab === t[0];
-      return {
-        label: t[1], d: ICONS[t[0]],
-        style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minHeight: '52px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: on ? 700 : 500, color: on ? '#1E4FD8' : '#4B5563' },
-        go: function () { self.setState({ tab: t[0], adminView: t[0] === 'settings' ? 'menu' : s.adminView, editMe: false, showRrn: false }); }
-      };
-    });
-    var titles = { home: '홈', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
-
-    var companyDrivers = s.drivers.filter(function (d) { return d.center === s.company; });
-    var q = s.search.trim();
-    var rows = companyDrivers.filter(function (d) { return !q || d.name.indexOf(q) >= 0 || d.phone.indexOf(q) >= 0; }).map(function (d) { return self.row(d); });
-    var pendingRows = companyDrivers.filter(function (d) { return d.status === '승인 대기'; }).map(function (d) { return self.row(d); });
-    var reduceDrivers = companyDrivers.filter(function (d) { return d.reduce && d.reduce.status === '요청'; });
-    var reduceRows = reduceDrivers.map(function (d) {
-      var r = self.row(d), v = reduceView(d.reduce);
-      r.reqShort = v.reqShort; r.endShort = v.endShort; r.dday = v.dday;
-      return r;
-    });
-    var stats = {
-      reduce: reduceDrivers.length,
-      total: companyDrivers.length,
-      pending: pendingRows.length,
-      missing: companyDrivers.filter(function (d) { return self.docCount(d.docs) < 4; }).length
-    };
-
-    var scope = isDriver ? meD.center : s.company;
-    var co = CO[scope] || CO['진양로지스틱스'];
-    var scopeDrivers = s.drivers.filter(function (d) { return d.center === scope; });
-    var mustN = co.notices.filter(function (n) { return n.must; })[0];
-    var others = co.notices.filter(function (n) { return !n.must; });
-    var rowLine = function (i) { return { padding: '14px 0', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '4px' }; };
-    var ok = !!s.noticeOk[scope];
-    var payRows = scopeDrivers.map(function (d, i) {
-      var amt = co.pay[i % co.pay.length];
-      if (d.status === '승인 대기' || d.lease) amt = 0;
-      return { name: d.name, isLease: !!d.lease, lease: d.lease ? d.lease.amount : 0,
-        count: d.lease ? d.lease.status : (d.status === '승인 대기' ? '승인 대기' : Math.round(amt / 3000) + '건'),
-        amount: d.lease ? '임대 ' + won(d.lease.amount) : (amt ? won(amt) : '—'), amt: amt,
-        rowStyle: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '52px', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB' } };
-    });
-    var companyCards = COMPANIES.map(function (name) {
-      var ds = s.drivers.filter(function (d) { return d.center === name; });
-      var p = ds.filter(function (d) { return d.status === '승인 대기'; }).length;
-      return { name: name, initial: name.charAt(0), camp: CO[name].camp, total: ds.length, pending: p, hasPending: p > 0,
-        pick: function () { self.setState({ screen: 'app', role: 'admin', company: name, tab: 'home', adminView: 'menu', search: '', selId: null }); } };
-    });
-
-    var mkSet = function (k) { return function (e) { self.setForm(k, e.target.value); }; };
-    var mkMe = function (k) { return function (e) { var p = {}; p[k] = e.target.value; self.patchDriver(meD.id, p); }; };
-
-    return {
-      isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isApp: isApp,
-      loginDriver: function () { self.setState({ screen: 'app', role: 'driver', me: 'd1', tab: 'home' }); },
-      loginAdmin: function () { self.setState({ screen: 'pick', role: 'admin' }); },
-      isPick: s.screen === 'pick', companyCards: companyCards,
-      goPick: function () { self.setState({ screen: 'pick', showRrn: false }); },
-      isAdminRole: !isDriver, isDriverRole: isDriver,
-      scopeName: scope, co: co,
-      mustN: mustN,
-      otherNotices: others.map(function (n, i) { return { tag: n.tag, date: n.date, title: n.title, rowStyle: rowLine(i) }; }),
-      readTotal: scopeDrivers.length,
-      teamsMsgs: co.teams.map(function (m) {
-        return { kw: m.kw, time: m.time, text: m.text,
-          cardStyle: { background: '#FFFFFF', border: m.hot ? '1px solid #FDBA74' : '1px solid #FFFFFF', borderRadius: '16px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '6px' },
-          kwStyle: { fontSize: '12px', fontWeight: 700, color: m.hot ? '#C2410C' : '#991B1B' } };
-      }),
-      latestMsg: co.teams[0],
-      dPay: isDriver && s.tab === 'pay' && !meD.lease, dLease: isDriver && s.tab === 'pay' && !!meD.lease,
-      aPay: !isDriver && s.tab === 'pay',
-      homeNormal: !meD.lease, homeLease: !!meD.lease, lease: leaseView(meD.lease),
-      leaseTotal: won(payRows.reduce(function (a, r) { return a + r.lease; }, 0)),
-      markPaid: function () { self.patchDriver(meD.id, { lease: Object.assign({}, meD.lease, { status: '입금 확인 중' }) }); self.flash('입금 확인을 요청했어요'); },
-      loginReduced: function () { self.setState({ screen: 'app', role: 'driver', me: 'd4', tab: 'home' }); },
-      loginLease: function () { self.setState({ screen: 'app', role: 'driver', me: 'd8', tab: 'home' }); },
-      goMe: function () { self.setState({ tab: 'me' }); },
-      ackReduce: function () { self.patchDriver(meD.id, { reduce: Object.assign({}, meD.reduce, { ack: true }) }); self.flash('확인했어요. 의무 근무 종료일까지 함께해요'); },
-      leaseOpen: s.leaseOpen, leaseForm: s.leaseForm, hasLeaseErr: !!s.leaseErr, leaseErr: s.leaseErr,
-      openLease: function () { self.setState({ leaseOpen: true, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' } }); },
-      closeLease: function () { self.setState({ leaseOpen: false }); },
-      onLease: {
-        amount: function (e) { self.setState({ leaseErr: '', leaseForm: Object.assign({}, self.state.leaseForm, { amount: e.target.value.replace(/[^0-9]/g, '') }) }); },
-        due: function (e) { self.setState({ leaseForm: Object.assign({}, self.state.leaseForm, { due: e.target.value }) }); },
-        memo: function (e) { self.setState({ leaseForm: Object.assign({}, self.state.leaseForm, { memo: e.target.value }) }); }
-      },
-      leasePick: scopeDrivers.filter(function (d) { return d.status !== '승인 대기'; }).map(function (d) {
-        var on = s.leaseForm.driverId === d.id;
-        return { name: d.name, phone: d.phone, isLease: !!d.lease, on: on, pressed: on ? 'true' : 'false',
-          style: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '56px', padding: '8px 12px', borderRadius: '12px', border: on ? '2px solid #1E4FD8' : '1px solid #E5E7EB', background: on ? '#EEF2FF' : '#FFFFFF', fontFamily: 'inherit', color: '#111827', cursor: 'pointer' },
-          pick: function () { self.setState({ leaseErr: '', leaseForm: Object.assign({}, self.state.leaseForm, { driverId: d.id, amount: d.lease ? String(d.lease.amount) : self.state.leaseForm.amount }) }); } };
-      }),
-      sendLease: function () {
-        var f = s.leaseForm;
-        if (!f.driverId) { self.setState({ leaseErr: '임대료를 보낼 기사를 선택해 주세요' }); return; }
-        if (!f.amount || +f.amount <= 0) { self.setState({ leaseErr: '임대료 금액을 입력해 주세요' }); return; }
-        if (!f.due) { self.setState({ leaseErr: '납부 기한을 선택해 주세요' }); return; }
-        var d = s.drivers.find(function (x) { return x.id === f.driverId; });
-        self.patchDriver(f.driverId, { lease: { amount: +f.amount, due: f.due, memo: f.memo.trim(), status: '납부 대기' } });
-        self.setState({ leaseOpen: false });
-        self.flash(d.name + ' 기사에게 임대료 안내를 보냈어요 (푸시 발송)');
-      },
-      payRows: payRows,
-      payTotal: won(payRows.reduce(function (a, r) { return a + r.amt; }, 0)),
-      goSignup: function () { self.setState({ screen: 'signup', step: 1, form: emptyForm(), err: '' }); },
-
-      step1: s.step === 1, step2: s.step === 2, step3: s.step === 3,
-      stepText: s.step + ' / 3',
-      stepBar: { width: (s.step * 100 / 3) + '%', height: '4px', background: '#1E4FD8' },
-      nextLabel: s.step === 1 ? '다음' : (s.step === 2 ? '가입 신청하기' : '앱 시작하기'),
-      form: s.form,
-      on: { name: mkSet('name'), rrn1: mkSet('rrn1'), rrn2: mkSet('rrn2'), phone: mkSet('phone'), sub: mkSet('sub'), addr: mkSet('addr'), center: mkSet('center') },
-      draftDocs: this.docItems(s.form.docs, 'su', function (k, v) { self.setFormDoc(k, v); }),
-      hasErr: !!s.err, err: s.err,
-      signupBack: function () {
-        if (s.step === 2) self.setState({ step: 1 });
-        else if (s.step === 1) self.setState({ screen: 'login' });
-      },
-      signupNext: function () {
-        var f = s.form;
-        if (s.step === 1) {
-          if (!f.name.trim() || f.rrn1.length < 6 || f.rrn2.length < 7 || !f.phone.trim() || !f.center) {
-            self.setState({ err: '이름, 주민번호(13자리), 본폰, 소속센터는 꼭 입력해 주세요' });
-            return;
-          }
-          self.setState({ step: 2, err: '' });
-        } else if (s.step === 2) {
-          var id = 'n' + Date.now();
-          var d = { id: id, name: f.name.trim(), rrn: f.rrn1 + '-' + f.rrn2, phone: f.phone.trim(), sub: f.sub.trim(), addr: f.addr.trim(), center: f.center, status: '승인 대기', docs: Object.assign({}, f.docs) };
-          self.setState({ drivers: s.drivers.concat([d]), me: id, step: 3 });
-        } else {
-          self.setState({ screen: 'app', role: 'driver', tab: 'me' });
-          self.flash('가입 신청이 접수됐어요');
-        }
-      },
-
-      headerTitle: titles[s.tab],
-      roleBadge: isDriver ? meD.center : '관리자',
-      roleBadgeStyle: { fontSize: '12px', fontWeight: 700, padding: '5px 10px', borderRadius: '12px', background: isDriver ? '#E0E7FF' : '#111827', color: isDriver ? '#1E3A8A' : '#FFFFFF' },
-      tabs: tabs,
-
-      dHome: isDriver && s.tab === 'home',
-      aHome: !isDriver && s.tab === 'home',
-      tNotice: s.tab === 'notice', tTeams: s.tab === 'teams',
-      tMe: isDriver && s.tab === 'me',
-      sMenu: !isDriver && s.tab === 'settings' && s.adminView === 'menu',
-      sList: !isDriver && s.tab === 'settings' && s.adminView === 'list',
-      sDetail: !isDriver && s.tab === 'settings' && s.adminView === 'detail' && !!sel,
-
-      goPay: function () { self.setState({ tab: 'pay' }); },
-      goTeams: function () { self.setState({ tab: 'teams' }); },
-      goNotice: function () { self.setState({ tab: 'notice' }); },
-      goMenu: function () { self.setState({ adminView: 'menu' }); },
-      goDriverList: function () { self.setState({ tab: 'settings', adminView: 'list', showRrn: false }); },
-      soon: function () { self.flash('다음 단계에서 만들 화면이에요'); },
-      logout: function () { self.setState({ screen: 'login', editMe: false, showRrn: false }); },
-
-      noticeOk: ok, noticeNotOk: !ok, readCount: Math.max(0, scopeDrivers.length - 2) + (ok ? 1 : 0),
-      confirmNotice: function () { var m = Object.assign({}, s.noticeOk); m[scope] = true; self.setState({ noticeOk: m }); },
-
-      pushAria: s.pushOn ? 'true' : 'false',
-      togglePush: function () { self.setState({ pushOn: !s.pushOn }); },
-      switchStyle: { width: '52px', height: '32px', borderRadius: '16px', border: 'none', padding: '3px', cursor: 'pointer', background: s.pushOn ? '#1E4FD8' : '#9CA3AF', display: 'flex', justifyContent: s.pushOn ? 'flex-end' : 'flex-start', alignItems: 'center' },
-      knobStyle: { width: '26px', height: '26px', borderRadius: '13px', background: '#FFFFFF', display: 'block' },
-
-      me: this.view(meD),
-      meDocs: this.docItems(meD.docs, 'me', function (k, v) { self.setDriverDoc(meD.id, k, v); self.flash('서류 사진이 저장됐어요'); }),
-      editMe: s.editMe, viewMode: !s.editMe,
-      editLabel: s.editMe ? '저장' : '수정',
-      toggleEdit: function () {
-        if (s.editMe) { self.setState({ editMe: false }); self.flash('내 정보가 저장됐어요'); }
-        else self.setState({ editMe: true });
-      },
-      onMe: { phone: mkMe('phone'), sub: mkMe('sub'), addr: mkMe('addr') },
-      rrnBtn: s.showRrn ? '숨기기' : '보기',
-      toggleRrn: function () { self.setState({ showRrn: !s.showRrn }); },
-
-      company: s.company,
-      onCompany: function (e) { self.setState({ company: e.target.value, search: '' }); },
-      search: s.search,
-      onSearch: function (e) { self.setState({ search: e.target.value }); },
-      stats: stats, rows: rows, noRows: rows.length === 0,
-      pendingRows: pendingRows, noPending: pendingRows.length === 0,
-
-      sel: sel ? this.view(sel) : { name: '', initial: '', center: '', status: '', pending: false, phone: '', subText: '', addrText: '', rrnShown: '', docText: '', rd: reduceView(null) },
-      selDocs: sel ? this.docItems(sel.docs, 'sel', null) : [],
-      approve: function () { if (sel) { self.patchDriver(sel.id, { status: '활성' }); self.flash(sel.name + ' 기사 가입을 승인했어요'); } },
-      requestDocs: function () { self.flash('미제출 서류 첨부 요청 알림을 보냈어요'); },
-
-      reduceRows: reduceRows, noReduce: reduceRows.length === 0,
-      showReduceBtn: !meD.reduce || meD.reduce.status === '반려',
-      reduceOpen: s.reduceOpen,
-      reqPreview: fmtDate(today0()), endPreview: fmtDate(addDays(today0(), 60)),
-      openReduce: function () { self.setState({ reduceOpen: true }); },
-      closeReduce: function () { self.setState({ reduceOpen: false }); },
-      submitReduce: function () {
-        self.patchDriver(meD.id, { reduce: { req: today0().getTime(), status: '요청' } });
-        self.setState({ reduceOpen: false });
-        self.flash('감차 요청 접수 · 승인되면 그날부터 60일 카운트돼요');
-      },
-      approveReduce: function () {
-        if (!sel || !sel.reduce) return;
-        self.patchDriver(sel.id, { reduce: Object.assign({}, sel.reduce, { status: '승인', approvedAt: today0().getTime(), ack: false }) });
-        self.flash(sel.name + ' 기사 감차 승인 · 오늘부터 60일 카운트 시작');
-      },
-      rejectReduce: function () {
-        if (!sel || !sel.reduce) return;
-        self.patchDriver(sel.id, { reduce: Object.assign({}, sel.reduce, { status: '반려' }) });
-        self.flash(sel.name + ' 기사 감차 요청을 반려했어요');
-      },
-
-      hasToast: !!s.toast, toast: s.toast
-    };
+// ---------- 로그인 흐름 ----------
+async function afterAuth(user) {
+  S.uid = user.id;
+  var a = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
+  S.role = a.data ? 'admin' : 'driver';
+  await loadAll();
+  if (S.role === 'admin') { S.screen = 'pick'; }
+  else {
+    if (!S.drivers.find(function (d) { return d.id === user.id; })) { await sb.auth.signOut(); S.screen = 'login'; S.loginErr = '기사 정보가 없는 계정이에요. 관리자에게 문의해 주세요'; return; }
+    S.screen = 'app'; S.tab = 'home';
   }
 }
+async function boot() {
+  try {
+    var r = await sb.auth.getSession();
+    if (r.data && r.data.session) await afterAuth(r.data.session.user);
+    else S.screen = 'login';
+  } catch (e) { console.error(e); S.screen = 'login'; }
+}
 
-(function () {
-  var comp = new Component({});
-  var saved = null;
-  try { saved = JSON.parse(localStorage.getItem(STORE_KEY) || 'null'); } catch (e) {}
-  comp.state = Vue.reactive(comp.state);
-  var app = Vue.createApp({
-    template: '#tpl',
-    setup: function () {
-      var v = Vue.computed(function () { return comp.renderVals(); });
-      Vue.onMounted(function () {
-        if (saved && saved.drivers) { Object.assign(comp.state, saved); }
-        else if (comp.componentDidMount) { comp.componentDidMount(); }
-      });
-      return { v: v };
-    }
+async function uploadDoc(uid, kind, file) {
+  var ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+  var path = uid + '/' + kind + '-' + Date.now() + '.' + ext;
+  var up = await sb.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type || 'image/jpeg' });
+  if (up.error) throw up.error;
+  await q(sb.from('driver_docs').upsert({ driver_id: uid, kind: kind, path: path, uploaded_at: new Date().toISOString() }));
+  return path;
+}
+
+// ---------- 화면에 넘길 값 ----------
+function companyName(id) { var c = S.companies.find(function (x) { return x.id === id; }); return c ? c.name : '미지정'; }
+function latestReduce(id) { return S.reduces.find(function (r) { return r.driver_id === id && r.status !== '반려'; }) || S.reduces.find(function (r) { return r.driver_id === id; }) || null; }
+function latestLease(id) { return S.leases.find(function (l) { return l.driver_id === id; }) || null; }
+function docCount(id) { var d = S.docs[id] || {}; return DOCS.filter(function (x) { return !!d[x.k]; }).length; }
+
+function viewDriver(d) {
+  var n = docCount(d.id), r = S.rrn[d.id] || '';
+  return { id: d.id, name: d.name, initial: (d.name || '?').charAt(0), center: companyName(d.company_id), status: d.status,
+    pending: d.status === '승인 대기', phone: d.phone, sub: d.sub_phone, addr: d.address,
+    subText: d.sub_phone || '없음', addrText: d.address || '미입력',
+    rrnShown: S.showRrn ? (r || '미입력') : mask(r), docText: n + '/4 제출', rd: reduceView(latestReduce(d.id)) };
+}
+function docItems(docsMap, prefix, onSet) {
+  return DOCS.map(function (d) {
+    var v = docsMap[d.k];
+    var isBlob = typeof v === 'string' && v.indexOf('blob:') === 0;
+    var url = isBlob ? v : (v ? S.urls[v] || '' : '');
+    return {
+      label: d.label, none: !v, isUrl: !!url, isSample: !!v && !url, url: url,
+      inputId: 'file-' + prefix + '-' + d.k, btn: v ? '다시 첨부' : '사진 첨부', status: v ? '첨부됨' : '미첨부',
+      statusStyle: { fontSize: '12px', fontWeight: 700, color: v ? '#15803D' : '#B91C1C' },
+      onFile: onSet ? function (e) { var f = e && e.target && e.target.files && e.target.files[0]; if (f) onSet(d.k, f); e.target.value = ''; } : null
+    };
   });
-  app.mount('#app');
-})();
+}
+function rowOf(d) {
+  var n = docCount(d.id), rr = latestReduce(d.id);
+  return {
+    name: d.name, initial: (d.name || '?').charAt(0), phone: d.phone,
+    pending: d.status === '승인 대기', reduce: !!rr && rr.status === '요청',
+    docText: '서류 ' + n + '/4', docStyle: { fontSize: '12px', fontWeight: 700, color: n === 4 ? '#15803D' : '#B91C1C' },
+    open: function () { S.tab = 'settings'; S.adminView = 'detail'; S.selId = d.id; S.showRrn = false; }
+  };
+}
+function payView(p) {
+  if (!p) return null;
+  var items = (Array.isArray(p.items) ? p.items : []).map(function (it) {
+    var a = Number(it.amount || 0);
+    return { label: it.label, amountText: (a < 0 ? '− ' : '') + won(Math.abs(a)),
+      style: { display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: a < 0 ? '#B91C1C' : '#111827' } };
+  });
+  return { title: monthLabel(p.month) + (p.period ? ' · ' + p.period : ''), totalText: '₩' + won(p.total), items: items };
+}
+
+function build() {
+  var s = S, isDriver = s.role === 'driver';
+  var meD = isDriver ? (s.drivers.find(function (d) { return d.id === s.uid; }) || null) : null;
+  var scopeId = isDriver ? (meD && meD.company_id) : s.company;
+  var scopeName = scopeId ? companyName(scopeId) : '';
+  var co = s.companies.find(function (c) { return c.id === scopeId; }) || { teams_room: '', camp: '' };
+  var sel = s.drivers.find(function (d) { return d.id === s.selId; });
+  var scopeDrivers = s.drivers.filter(function (d) { return d.company_id === scopeId; });
+
+  var tabDefs = isDriver
+    ? [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['me', '내 정보']]
+    : [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['settings', '설정']];
+  var tabs = tabDefs.map(function (t) {
+    var on = s.tab === t[0];
+    return { label: t[1], d: ICONS[t[0]],
+      style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minHeight: '52px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: on ? 700 : 500, color: on ? '#1E4FD8' : '#4B5563' },
+      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; S.editMe = false; S.showRrn = false; } };
+  });
+  var titles = { home: '홈', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
+
+  // 공지
+  var scopeNotices = s.notices.filter(function (n) { return n.company_id === scopeId; });
+  var mustRaw = scopeNotices.filter(function (n) { return n.must; })[0] || null;
+  var others = scopeNotices.filter(function (n) { return n !== mustRaw; });
+  var stat = mustRaw ? (s.nstats[mustRaw.id] || { reads: 0, total: 0 }) : { reads: 0, total: 0 };
+  var ok = mustRaw ? (isDriver ? !!s.myReads[mustRaw.id] : false) : false;
+
+  // 팀즈
+  var teamsMsgs = s.teams.filter(function (m) { return m.company_id === scopeId; }).map(function (m) {
+    return { kw: m.keyword || '감지', time: fmtWhen(m.created_at), text: m.message,
+      cardStyle: { background: '#FFFFFF', border: m.hot ? '1px solid #FDBA74' : '1px solid #FFFFFF', borderRadius: '16px', padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '6px' },
+      kwStyle: { fontSize: '12px', fontWeight: 700, color: m.hot ? '#C2410C' : '#991B1B' } };
+  });
+
+  // 관리자 기사 목록
+  var qq = s.search.trim();
+  var rows = scopeDrivers.filter(function (d) { return !qq || d.name.indexOf(qq) >= 0 || d.phone.indexOf(qq) >= 0; }).map(rowOf);
+  var pendingRows = scopeDrivers.filter(function (d) { return d.status === '승인 대기'; }).map(rowOf);
+  var reduceDrivers = scopeDrivers.filter(function (d) { var r = latestReduce(d.id); return r && r.status === '요청'; });
+  var reduceRows = reduceDrivers.map(function (d) { var r = rowOf(d), v = reduceView(latestReduce(d.id)); r.reqShort = v.reqShort; r.endShort = v.endShort; r.dday = v.dday; return r; });
+  var stats = { total: scopeDrivers.length, pending: pendingRows.length, reduce: reduceDrivers.length,
+    missing: scopeDrivers.filter(function (d) { return docCount(d.id) < 4; }).length };
+
+  // 급여 (관리자: 업체 최신 정산월)
+  var scopePays = s.payslips.filter(function (p) { return p.company_id === scopeId; });
+  var lastMonth = scopePays.length ? scopePays[0].month : '';
+  var payRows = scopeDrivers.map(function (d, i) {
+    var l = latestLease(d.id), p = scopePays.find(function (x) { return x.driver_id === d.id && x.month === lastMonth; });
+    var amt = p ? Number(p.total) : 0;
+    return { name: d.name, isLease: !!l, lease: l ? Number(l.amount) : 0, amt: l ? 0 : amt,
+      count: l ? l.status : (d.status === '승인 대기' ? '승인 대기' : (p ? '정산 완료' : '정산 없음')),
+      amount: l ? '임대 ' + won(l.amount) : (p ? won(amt) : '—'),
+      rowStyle: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '52px', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB' } };
+  });
+
+  // 기사 본인 급여
+  var myPays = meD ? s.payslips.filter(function (p) { return p.driver_id === meD.id; }) : [];
+  var cur = payView(myPays[0]);
+  var myPay = cur ? { has: true, title: cur.title, label: '실지급액', totalText: cur.totalText, items: cur.items, history: myPays.slice(1, 7).map(payView) }
+                  : { has: false, title: '정산서', label: '아직 받은 정산서가 없어요', totalText: '—', items: [], history: [] };
+  var myLease = meD ? latestLease(meD.id) : null;
+
+  var meView = meD ? viewDriver(meD) : { name: '', center: '', rd: reduceView(null), pending: false };
+  var meRd = meD ? latestReduce(meD.id) : null;
+  var draftDocs = docItems(s.form.docs, 'su', function (k, f) {
+    FILES[k] = f; var d = Object.assign({}, S.form.docs); if (d[k] && d[k].indexOf('blob:') === 0) URL.revokeObjectURL(d[k]); d[k] = URL.createObjectURL(f); S.form.docs = d;
+  });
+  var meDocs = meD ? docItems(s.docs[meD.id] || {}, 'me', function (k, f) {
+    run(async function () {
+      try { await uploadDoc(meD.id, k, f); await loadAll(); flash('서류 사진이 저장됐어요'); }
+      catch (e) { fail(e, '사진 저장에 실패했어요'); }
+    });
+  }) : [];
+
+  function setF(obj, key, trans) { return function (e) { var v = e.target.value; obj[key] = trans ? trans(v) : v; }; }
+
+  return {
+    busy: s.busy,
+    isBoot: s.screen === 'boot', isLogin: s.screen === 'login', isSignup: s.screen === 'signup', isAdminSignup: s.screen === 'adminSignup',
+    isPick: s.screen === 'pick', isApp: s.screen === 'app' && (s.role === 'admin' ? !!s.company : !!meD),
+
+    // 로그인
+    login: s.login, loginErr: s.loginErr,
+    onLogin: { phone: setF(s.login, 'phone'), pw: setF(s.login, 'pw') },
+    doLogin: function () {
+      S.loginErr = '';
+      if (digits(S.login.phone).length < 10 || !S.login.pw) { S.loginErr = '휴대폰 번호와 비밀번호를 입력해 주세요'; return; }
+      run(async function () {
+        var r = await sb.auth.signInWithPassword({ email: loginEmail(S.login.phone), password: S.login.pw });
+        if (r.error) { S.loginErr = '휴대폰 번호 또는 비밀번호가 맞지 않아요'; return; }
+        S.login.pw = '';
+        try { await afterAuth(r.data.user); } catch (e) { fail(e, '정보를 불러오지 못했어요'); }
+      });
+    },
+    goSignup: function () { S.screen = 'signup'; S.step = 1; S.form = emptyForm(); FILES = {}; S.err = ''; },
+    goAdminSignup: function () { S.screen = 'adminSignup'; S.adminErr = ''; S.adminForm = { name: '', phone: '', pw: '', pw2: '' }; },
+    backToLogin: function () { S.screen = 'login'; },
+    adminForm: s.adminForm, adminErr: s.adminErr,
+    onAdmin: { name: setF(s.adminForm, 'name'), phone: setF(s.adminForm, 'phone'), pw: setF(s.adminForm, 'pw'), pw2: setF(s.adminForm, 'pw2') },
+    doAdminSignup: function () {
+      var f = S.adminForm; S.adminErr = '';
+      if (!f.name.trim() || digits(f.phone).length < 10) { S.adminErr = '이름과 휴대폰 번호를 입력해 주세요'; return; }
+      if (f.pw.length < 6 || f.pw !== f.pw2) { S.adminErr = '비밀번호는 6자리 이상, 두 칸이 같아야 해요'; return; }
+      run(async function () {
+        var chk = await sb.rpc('is_admin_phone', { p_phone: fmtPhone(f.phone) });
+        if (chk.error || !chk.data) { S.adminErr = '관리자로 등록된 번호가 아니에요'; return; }
+        var r = await sb.auth.signUp({ email: loginEmail(f.phone), password: f.pw, options: { data: { name: f.name.trim(), phone: fmtPhone(f.phone) } } });
+        if (r.error) { S.adminErr = /registered|exists/i.test(r.error.message) ? '이미 가입된 번호예요. 로그인해 주세요' : '계정을 만들지 못했어요'; return; }
+        try { await afterAuth(r.data.user); flash('관리자 계정이 만들어졌어요'); } catch (e) { fail(e); }
+      });
+    },
+
+    // 회원가입
+    step1: s.step === 1, step2: s.step === 2, step3: s.step === 3,
+    stepText: s.step + ' / 3', stepBar: { width: (s.step * 100 / 3) + '%', height: '4px', background: '#1E4FD8' },
+    nextLabel: s.step === 1 ? '다음' : (s.step === 2 ? '가입 신청하기' : '앱 시작하기'),
+    form: s.form, companyOptions: s.companies.map(function (c) { return { id: c.id, name: c.name }; }),
+    on: {
+      name: setF(s.form, 'name'), rrn1: setF(s.form, 'rrn1', digits), rrn2: setF(s.form, 'rrn2', digits),
+      phone: setF(s.form, 'phone'), pw: setF(s.form, 'pw'), pw2: setF(s.form, 'pw2'),
+      sub: setF(s.form, 'sub'), addr: setF(s.form, 'addr'),
+      center: function (e) { S.form.center = e.target.value; S.form.centerName = companyName(e.target.value); }
+    },
+    draftDocs: draftDocs, hasErr: !!s.err, err: s.err,
+    signupBack: function () { if (S.step === 2) S.step = 1; else if (S.step === 1) S.screen = 'login'; },
+    signupNext: function () {
+      var f = S.form; S.err = '';
+      if (S.step === 1) {
+        if (!f.name.trim() || f.rrn1.length !== 6 || f.rrn2.length !== 7 || digits(f.phone).length < 10 || !f.center) { S.err = '이름, 주민번호(13자리), 본폰, 소속센터는 꼭 입력해 주세요'; return; }
+        if (f.pw.length < 6) { S.err = '비밀번호는 6자리 이상으로 정해 주세요'; return; }
+        if (f.pw !== f.pw2) { S.err = '비밀번호 확인이 달라요'; return; }
+        S.step = 2; return;
+      }
+      if (S.step === 2) {
+        run(async function () {
+          var r = await sb.auth.signUp({ email: loginEmail(f.phone), password: f.pw,
+            options: { data: { name: f.name.trim(), phone: fmtPhone(f.phone), sub_phone: f.sub.trim() ? fmtPhone(f.sub) : '', address: f.addr.trim(), company_id: f.center } } });
+          if (r.error) { S.err = /registered|exists/i.test(r.error.message) ? '이미 가입된 전화번호예요. 로그인해 주세요' : '가입하지 못했어요: ' + r.error.message; return; }
+          var uid = r.data.user.id;
+          try {
+            await q(sb.from('driver_private').insert({ driver_id: uid, rrn: f.rrn1 + '-' + f.rrn2 }));
+            for (var i = 0; i < DOCS.length; i++) { var k = DOCS[i].k; if (FILES[k]) await uploadDoc(uid, k, FILES[k]); }
+          } catch (e) { console.error(e); flash('일부 정보 저장에 실패했어요. 내 정보에서 다시 확인해 주세요'); }
+          FILES = {}; S.form.pw = ''; S.form.pw2 = ''; S.form.rrn2 = '';
+          S.step = 3; S.uid = uid;
+        });
+        return;
+      }
+      run(async function () {
+        var u = await sb.auth.getUser();
+        try { await afterAuth(u.data.user); S.tab = 'me'; flash('가입 신청이 접수됐어요'); } catch (e) { fail(e); }
+      });
+    },
+
+    // 업체 선택 (관리자)
+    companyCards: s.companies.map(function (c) {
+      var ds = s.drivers.filter(function (d) { return d.company_id === c.id; });
+      var p = ds.filter(function (d) { return d.status === '승인 대기'; }).length;
+      return { name: c.name, initial: c.name.charAt(0), camp: c.camp || '캠프 미지정', total: ds.length, pending: p, hasPending: p > 0,
+        pick: function () { S.company = c.id; S.screen = 'app'; S.tab = 'home'; S.adminView = 'menu'; S.search = ''; S.selId = null; } };
+    }),
+    noCompanies: s.companies.length === 0,
+    addCoOpen: s.addCoOpen, addCoName: s.addCoName,
+    openAddCo: function () { S.addCoOpen = !S.addCoOpen; },
+    onAddCo: function (e) { S.addCoName = e.target.value; },
+    saveCo: function () {
+      var n = S.addCoName.trim(); if (!n) return;
+      run(async function () {
+        try { await q(sb.from('companies').insert({ name: n })); S.addCoName = ''; S.addCoOpen = false; await loadAll(); flash(n + ' 업체를 추가했어요'); }
+        catch (e) { fail(e, '업체를 추가하지 못했어요 (같은 이름이 있는지 확인해 주세요)'); }
+      });
+    },
+    goPick: function () { S.screen = 'pick'; S.showRrn = false; },
+    soon: function () { flash('다음 단계에서 만들 기능이에요'); },
+    logout: function () {
+      run(async function () {
+        await sb.auth.signOut();
+        S.screen = 'login'; S.uid = null; S.company = null; S.drivers = []; S.rrn = {}; S.docs = {}; S.urls = {}; S.editMe = false; S.showRrn = false;
+      });
+    },
+
+    // 공통 머리
+    scopeName: scopeName, company: scopeName, co: { room: co.teams_room || '[캠프명] Teams방' },
+    headerTitle: titles[s.tab], isAdminRole: !isDriver, isDriverRole: isDriver, tabs: tabs,
+    dHome: isDriver && s.tab === 'home', aHome: !isDriver && s.tab === 'home',
+    tNotice: s.tab === 'notice', tTeams: s.tab === 'teams', tMe: isDriver && s.tab === 'me',
+    sMenu: !isDriver && s.tab === 'settings' && s.adminView === 'menu',
+    sList: !isDriver && s.tab === 'settings' && s.adminView === 'list',
+    sDetail: !isDriver && s.tab === 'settings' && s.adminView === 'detail' && !!sel,
+    goPay: function () { S.tab = 'pay'; }, goTeams: function () { S.tab = 'teams'; }, goNotice: function () { S.tab = 'notice'; }, goMe: function () { S.tab = 'me'; },
+    goMenu: function () { S.adminView = 'menu'; },
+    goDriverList: function () { S.tab = 'settings'; S.adminView = 'list'; S.showRrn = false; },
+
+    // 홈
+    me: meView, stats: stats, rows: rows, noRows: rows.length === 0, pendingRows: pendingRows, noPending: pendingRows.length === 0,
+    reduceRows: reduceRows, noReduce: reduceRows.length === 0,
+    myPay: myPay, homeNormal: !myLease, homeLease: !!myLease, lease: leaseView(myLease),
+    latestMsg: teamsMsgs[0] || null,
+
+    // 공지
+    mustN: mustRaw ? { title: mustRaw.title, body: mustRaw.body, date: fmtShort(new Date(mustRaw.created_at)) } : null,
+    otherNotices: others.map(function (n, i) { return { tag: n.tag, date: fmtShort(new Date(n.created_at)), title: n.title, body: n.body,
+      rowStyle: { padding: '14px 0', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', gap: '4px' } }; }),
+    noNotices: scopeNotices.length === 0,
+    readCount: stat.reads, readTotal: stat.total, noticeOk: ok, noticeNotOk: isDriver && !ok,
+    confirmNotice: function () {
+      if (!mustRaw) return;
+      run(async function () {
+        try { await q(sb.from('notice_reads').insert({ notice_id: mustRaw.id, driver_id: S.uid })); S.myReads = Object.assign({}, S.myReads, { [mustRaw.id]: true }); await refreshStats(); }
+        catch (e) { fail(e); }
+      });
+    },
+    noticeOpen: s.noticeOpen, noticeForm: s.noticeForm, noticeErr: s.noticeErr,
+    openNotice: function () { S.noticeForm = { tag: '일반', title: '', body: '', must: false }; S.noticeErr = ''; S.noticeOpen = true; },
+    closeNotice: function () { S.noticeOpen = false; },
+    onNotice: { tag: setF(s.noticeForm, 'tag'), title: setF(s.noticeForm, 'title'), body: setF(s.noticeForm, 'body'), must: function (e) { S.noticeForm.must = e.target.checked; } },
+    saveNotice: function () {
+      var f = S.noticeForm;
+      if (!f.title.trim()) { S.noticeErr = '제목을 입력해 주세요'; return; }
+      run(async function () {
+        try { await q(sb.from('notices').insert({ company_id: S.company, tag: f.tag, title: f.title.trim(), body: f.body.trim(), must: f.must })); S.noticeOpen = false; await loadAll(); flash('공지를 등록했어요'); }
+        catch (e) { fail(e, '공지를 등록하지 못했어요'); }
+      });
+    },
+
+    // 급여
+    dPay: isDriver && s.tab === 'pay' && !myLease, dLease: isDriver && s.tab === 'pay' && !!myLease, aPay: !isDriver && s.tab === 'pay',
+    payRows: payRows, payMonthLabel: lastMonth ? monthLabel(lastMonth) : '등록된 정산 없음',
+    payTotal: won(payRows.reduce(function (a, r) { return a + r.amt; }, 0)),
+    leaseTotal: won(payRows.reduce(function (a, r) { return a + r.lease; }, 0)),
+    markPaid: function () {
+      run(async function () {
+        try { await q(sb.from('leases').update({ status: '입금 확인 중' }).eq('id', myLease.id)); await loadAll(); flash('입금 확인을 요청했어요'); } catch (e) { fail(e); }
+      });
+    },
+    leaseOpen: s.leaseOpen, leaseForm: s.leaseForm, hasLeaseErr: !!s.leaseErr, leaseErr: s.leaseErr,
+    openLease: function () { S.leaseErr = ''; S.leaseForm = { driverId: null, amount: '', due: iso(eom()), memo: '' }; S.leaseOpen = true; },
+    closeLease: function () { S.leaseOpen = false; },
+    onLease: { amount: setF(s.leaseForm, 'amount', digits), due: setF(s.leaseForm, 'due'), memo: setF(s.leaseForm, 'memo') },
+    leasePick: scopeDrivers.filter(function (d) { return d.status !== '승인 대기'; }).map(function (d) {
+      var on = s.leaseForm.driverId === d.id, l = latestLease(d.id);
+      return { name: d.name, phone: d.phone, isLease: !!l, on: on, pressed: on ? 'true' : 'false',
+        style: { display: 'flex', alignItems: 'center', gap: '10px', minHeight: '56px', padding: '8px 12px', borderRadius: '12px', border: on ? '2px solid #1E4FD8' : '1px solid #E5E7EB', background: on ? '#EEF2FF' : '#FFFFFF', fontFamily: 'inherit', color: '#111827', cursor: 'pointer' },
+        pick: function () { S.leaseErr = ''; S.leaseForm.driverId = d.id; if (l && !S.leaseForm.amount) S.leaseForm.amount = String(l.amount); } };
+    }),
+    sendLease: function () {
+      var f = S.leaseForm;
+      if (!f.driverId) { S.leaseErr = '임대료를 보낼 기사를 선택해 주세요'; return; }
+      if (!f.amount || +f.amount <= 0) { S.leaseErr = '임대료 금액을 입력해 주세요'; return; }
+      if (!f.due) { S.leaseErr = '납부 기한을 선택해 주세요'; return; }
+      var d = S.drivers.find(function (x) { return x.id === f.driverId; });
+      run(async function () {
+        try { await q(sb.from('leases').insert({ driver_id: f.driverId, company_id: d.company_id, amount: +f.amount, due: f.due, memo: f.memo.trim() })); S.leaseOpen = false; await loadAll(); flash(d.name + ' 기사에게 임대료 안내를 보냈어요'); }
+        catch (e) { fail(e, '임대료 안내를 저장하지 못했어요'); }
+      });
+    },
+
+    // 팀즈
+    teamsMsgs: teamsMsgs, pushAria: s.pushOn ? 'true' : 'false',
+    togglePush: function () { S.pushOn = !S.pushOn; },
+    switchStyle: { width: '52px', height: '32px', borderRadius: '16px', border: 'none', padding: '3px', cursor: 'pointer', background: s.pushOn ? '#1E4FD8' : '#9CA3AF', display: 'flex', justifyContent: s.pushOn ? 'flex-end' : 'flex-start', alignItems: 'center' },
+    knobStyle: { width: '26px', height: '26px', borderRadius: '13px', background: '#FFFFFF', display: 'block' },
+
+    // 내 정보
+    meDocs: meDocs, editMe: s.editMe, viewMode: !s.editMe, editLabel: s.editMe ? '저장' : '수정',
+    onMe: {
+      sub: function (e) { if (meD) meD.sub_phone = e.target.value; },
+      addr: function (e) { if (meD) meD.address = e.target.value; }
+    },
+    toggleEdit: function () {
+      if (!S.editMe) { S.editMe = true; return; }
+      run(async function () {
+        try { await q(sb.from('drivers').update({ sub_phone: meD.sub_phone ? fmtPhone(meD.sub_phone) : '', address: meD.address }).eq('id', meD.id)); S.editMe = false; await loadAll(); flash('내 정보가 저장됐어요'); }
+        catch (e) { fail(e, '저장하지 못했어요'); }
+      });
+    },
+    rrnBtn: s.showRrn ? '숨기기' : '보기', toggleRrn: function () { S.showRrn = !S.showRrn; },
+    showReduceBtn: !!meD && (!meRd || meRd.status === '반려'),
+    reduceOpen: s.reduceOpen, reqPreview: fmtDate(today0()), endPreview: fmtDate(addDays(today0(), 60)),
+    openReduce: function () { S.reduceOpen = true; }, closeReduce: function () { S.reduceOpen = false; },
+    submitReduce: function () {
+      run(async function () {
+        try { await q(sb.from('reduce_requests').insert({ driver_id: meD.id, company_id: meD.company_id, requested_at: iso(today0()) })); S.reduceOpen = false; await loadAll(); flash('감차 요청 접수 · 승인되면 그날부터 60일 카운트돼요'); }
+        catch (e) { fail(e, '감차 요청을 보내지 못했어요'); }
+      });
+    },
+    ackReduce: function () {
+      run(async function () {
+        try { await q(sb.from('reduce_requests').update({ ack: true }).eq('id', meRd.id)); await loadAll(); flash('확인했어요'); } catch (e) { fail(e); }
+      });
+    },
+
+    // 관리자: 기사 상세
+    search: s.search, onSearch: function (e) { S.search = e.target.value; },
+    sel: sel ? viewDriver(sel) : { name: '', initial: '', center: '', status: '', pending: false, phone: '', subText: '', addrText: '', rrnShown: '', docText: '', rd: reduceView(null) },
+    selDocs: sel ? docItems(s.docs[sel.id] || {}, 'sel', null) : [],
+    approve: function () {
+      run(async function () {
+        try { await q(sb.from('drivers').update({ status: '활성' }).eq('id', sel.id)); await loadAll(); flash(sel.name + ' 기사 가입을 승인했어요'); } catch (e) { fail(e); }
+      });
+    },
+    requestDocs: function () { flash('서류 보완 요청 알림은 푸시 기능 연결 후 동작해요'); },
+    approveReduce: function () {
+      var r = latestReduce(sel.id);
+      run(async function () {
+        try { await q(sb.from('reduce_requests').update({ status: '승인', approved_at: iso(today0()), ack: false }).eq('id', r.id)); await loadAll(); flash(sel.name + ' 기사 감차 승인 · 오늘부터 60일 카운트 시작'); } catch (e) { fail(e); }
+      });
+    },
+    rejectReduce: function () {
+      var r = latestReduce(sel.id);
+      run(async function () {
+        try { await q(sb.from('reduce_requests').update({ status: '반려' }).eq('id', r.id)); await loadAll(); flash(sel.name + ' 기사 감차 요청을 반려했어요'); } catch (e) { fail(e); }
+      });
+    },
+
+    hasToast: !!s.toast, toast: s.toast
+  };
+}
+
+Vue.createApp({
+  template: '#tpl',
+  setup: function () {
+    var v = Vue.computed(build);
+    Vue.onMounted(boot);
+    return { v: v };
+  }
+}).mount('#app');
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
