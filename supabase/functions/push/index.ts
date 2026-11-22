@@ -5,8 +5,17 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import webpush from 'npm:web-push@3.6.7';
 
 const URL_ = Deno.env.get('SUPABASE_URL')!;
-const SERVICE = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || Deno.env.get('SUPABASE_SECRET_KEY') || '';
-const ANON_ENV = Deno.env.get('SUPABASE_ANON_KEY') || '';
+function secretKey(): string {
+  // 새 키 체계(sb_secret_…)를 먼저, 없으면 예전 service_role 키
+  try { const j = JSON.parse(Deno.env.get('SUPABASE_SECRET_KEYS') || '{}'); const v = j.default || Object.values(j)[0]; if (v) return String(v); } catch (_) { /* ignore */ }
+  return Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+}
+function publishableKey(): string {
+  try { const j = JSON.parse(Deno.env.get('SUPABASE_PUBLISHABLE_KEYS') || '{}'); const v = j.default || Object.values(j)[0]; if (v) return String(v); } catch (_) { /* ignore */ }
+  return Deno.env.get('SUPABASE_ANON_KEY') || '';
+}
+const SERVICE = secretKey();
+const ANON_ENV = publishableKey();
 const admin = createClient(URL_, SERVICE, { auth: { persistSession: false } });
 const CORS = {
   'Access-Control-Allow-Origin': '*',
@@ -16,12 +25,14 @@ const CORS = {
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, 'Content-Type': 'application/json' } });
 
 async function vapid() {
-  const { data } = await admin.from('app_secrets').select('k,v').in('k', ['vapid_public', 'vapid_private']);
+  const { data, error } = await admin.from('app_secrets').select('k,v').in('k', ['vapid_public', 'vapid_private']);
+  if (error) throw new Error('secrets read: ' + error.message);
   const m: Record<string, string> = {};
   (data || []).forEach((r: { k: string; v: string }) => (m[r.k] = r.v));
   if (m.vapid_public && m.vapid_private) return { pub: m.vapid_public, priv: m.vapid_private };
   const k = webpush.generateVAPIDKeys();
-  await admin.from('app_secrets').upsert([{ k: 'vapid_public', v: k.publicKey }, { k: 'vapid_private', v: k.privateKey }]);
+  const up = await admin.from('app_secrets').upsert([{ k: 'vapid_public', v: k.publicKey }, { k: 'vapid_private', v: k.privateKey }]);
+  if (up.error) throw new Error('secrets write: ' + up.error.message);
   return { pub: k.publicKey, priv: k.privateKey };
 }
 
