@@ -250,6 +250,10 @@ a{color:#1E4FD8;text-decoration:none}
           <template v-if="v.me.rd.pending">
             <button type="button" @click="v.goMe" style="text-align: left; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 14px; padding: 12px 14px; font-family: inherit; font-size: 14px; color: #9A3412; font-weight: 700; cursor: pointer">감차 요청 승인 대기 중 · 승인되면 그날부터 60일 카운트가 시작돼요 ›</button>
           </template>
+          <button v-if="v.todayDisp" type="button" @click="v.goDispatch" style="text-align: left; display: flex; align-items: center; gap: 12px; background: #FFFFFF; border: 2px solid #1E4FD8; border-radius: 16px; padding: 14px 16px; font-family: inherit; color: #111827; cursor: pointer">
+            <span style="flex: 1; display: flex; flex-direction: column; gap: 3px"><span style="font-size: 12px; font-weight: 700; color: #1E4FD8">오늘 배차</span><span style="font-size: 18px; font-weight: 800">{{ v.todayDisp.route }}</span><span style="font-size: 13px; color: #374151">{{ v.todayDisp.summary }}</span></span>
+            <span :style="v.todayDisp.statusStyle">{{ v.todayDisp.statusText }}</span>
+          </button>
           <template v-if="v.homeNormal">
             <div style="background: #1E4FD8; border-radius: 20px; padding: 20px; color: #FFFFFF; display: flex; flex-direction: column; gap: 8px">
               <div style="display: flex; justify-content: space-between"><span style="font-size: 14px">{{ v.myPay.title }}</span></div>
@@ -318,6 +322,66 @@ a{color:#1E4FD8;text-decoration:none}
       </template>
 
       
+      <template v-if="v.tDispatch">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; border-radius: 14px; padding: 4px">
+            <button type="button" aria-label="전날" @click="v.dayPrev" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 22px; cursor: pointer">‹</button>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+              <span style="font-size: 16px; font-weight: 700">{{ v.dispDateText }}</span>
+              <button v-if="!v.isToday" type="button" @click="v.dayToday" style="border: none; background: transparent; padding: 0; font-family: inherit; font-size: 12px; font-weight: 700; color: #1E4FD8; cursor: pointer">오늘로</button>
+              <span v-else style="font-size: 12px; color: #4B5563">오늘</span>
+            </div>
+            <button type="button" aria-label="다음날" @click="v.dayNext" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 22px; cursor: pointer">›</button>
+          </div>
+
+          <template v-if="v.isAdminRole">
+            <div style="display: flex; gap: 8px; align-items: stretch">
+              <div style="flex: 1; background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column"><span style="font-size: 12px; color: #4B5563">배차</span><span style="font-size: 18px; font-weight: 800">{{ v.dispStats.count }}건</span></div>
+              <div style="flex: 1; background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column"><span style="font-size: 12px; color: #4B5563">완료</span><span style="font-size: 18px; font-weight: 800; color: #15803D">{{ v.dispStats.done }}건</span></div>
+              <div style="flex: 1.4; background: #FFFFFF; border-radius: 14px; padding: 10px 12px; display: flex; flex-direction: column"><span style="font-size: 12px; color: #4B5563">배송료 합계</span><span style="font-size: 18px; font-weight: 800">{{ v.dispStats.feeText }}</span></div>
+            </div>
+            <button type="button" @click="v.openDispAdd" style="min-height: 50px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">+ 배차 추가</button>
+            <template v-if="v.noRoutes"><p style="margin: 0; font-size: 13px; color: #B45309; background: #FEF3C7; border-radius: 10px; padding: 10px 12px">먼저 설정 → 노선 설정에서 노선을 만들어 주세요.</p></template>
+          </template>
+
+          <template v-if="!v.dispRows.length"><div style="background: #FFFFFF; border-radius: 16px; padding: 28px 16px; text-align: center; font-size: 14px; color: #4B5563">{{ v.isAdminRole ? '이 날짜에 배차가 없어요' : '이 날짜에 내 배차가 없어요' }}</div></template>
+
+          <div v-for="d in v.dispRows" :key="d.id" :style="d.cardStyle">
+            <button type="button" @click="d.toggle" :aria-expanded="d.isOpen ? 'true' : 'false'" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 60px; padding: 12px 14px; border: none; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 3px">
+                <span style="font-size: 17px; font-weight: 800; color: #111827">{{ d.route }}</span>
+                <span style="font-size: 13px; color: #374151">{{ d.driverText }}</span>
+              </span>
+              <span :style="d.statusStyle">{{ d.statusText }}</span>
+              <span style="font-size: 18px; color: #4B5563">{{ d.isOpen ? '⌃' : '⌄' }}</span>
+            </button>
+            <template v-if="d.isOpen">
+              <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 10px">
+                <div style="display: flex; justify-content: space-between; font-size: 14px; padding-top: 10px; border-top: 1px solid #E5E7EB"><span style="color: #4B5563">담당 기사</span><span style="font-weight: 700">{{ d.driverText }}</span></div>
+                <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+                  <div v-for="st in d.steps" :key="st.key" style="display: flex; flex-direction: column; gap: 4px">
+                    <button type="button" @click="st.stamp" :disabled="!d.canStamp" :style="st.style">
+                      <span style="font-size: 12px; font-weight: 700">{{ st.label }}</span>
+                      <span style="font-size: 18px; font-weight: 800">{{ st.timeText }}</span>
+                    </button>
+                    <button v-if="st.has && d.canStamp" type="button" @click="st.clear" style="min-height: 32px; border: none; background: transparent; font-family: inherit; font-size: 12px; color: #4B5563; text-decoration: underline; cursor: pointer">기록 취소</button>
+                  </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 14px"><span style="color: #4B5563">배송료</span><span style="font-size: 18px; font-weight: 800">{{ d.feeText }}</span></div>
+                <div v-if="d.memo" style="font-size: 13px; color: #374151; background: #F3F4F6; border-radius: 10px; padding: 10px 12px; white-space: pre-line">{{ d.memo }}</div>
+                <template v-if="v.isAdminRole">
+                  <div style="display: flex; gap: 8px">
+                    <button type="button" @click="d.edit" style="flex: 1; min-height: 44px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 14px">수정</button>
+                    <button v-if="!d.delAsk" type="button" @click="d.askDel" style="flex: 1; min-height: 44px; border: 1px solid #FCA5A5; border-radius: 12px; background: #FFFFFF; color: #B91C1C; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">삭제</button>
+                    <button v-else type="button" @click="d.del" style="flex: 1; min-height: 44px; border: none; border-radius: 12px; background: #B91C1C; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer">정말 삭제</button>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </template>
+
       <template v-if="v.tNotice">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <template v-if="v.isAdminRole">
@@ -518,6 +582,11 @@ a{color:#1E4FD8;text-decoration:none}
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">기사 정보 관리</span><span style="font-size: 12px; color: #4B5563">업체별 기사 명단·개인정보·서류</span></span>
               <span style="font-size: 18px; color: #4B5563">›</span>
             </button>
+            <button type="button" @click="v.goRoutes" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
+              <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4FD8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="2"></circle><circle cx="18" cy="5" r="2"></circle><path d="M8 19h8a3 3 0 0 0 0-6H8a3 3 0 0 1 0-6h8"></path></svg>
+              <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">노선 설정</span><span style="font-size: 12px; color: #4B5563">배차에 쓰는 노선 이름·기본 배송료</span></span>
+              <span style="font-size: 18px; color: #4B5563">›</span>
+            </button>
             <button type="button" @click="v.soon" style="display: flex; align-items: center; gap: 12px; min-height: 60px; border: none; border-bottom: 1px solid #E5E7EB; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
               <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4B5563" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"></path></svg>
               <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 700; color: #111827">업체·센터 관리</span><span style="font-size: 12px; color: #4B5563">업체 추가, 업체별 관리자 지정</span></span>
@@ -539,6 +608,36 @@ a{color:#1E4FD8;text-decoration:none}
       </template>
 
       
+      <template v-if="v.sRoutes">
+        <div style="display: flex; flex-direction: column; gap: 12px">
+          <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
+          <h2 style="margin: 0; font-size: 18px; font-weight: 800">{{ v.scopeName }} 노선 설정</h2>
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+            <span style="font-size: 14px; font-weight: 700">{{ v.routeForm.id ? '노선 수정' : '새 노선 추가' }}</span>
+            <div style="display: flex; gap: 8px">
+              <div style="flex: 1.3; display: flex; flex-direction: column; gap: 4px"><label for="rt-name" style="font-size: 13px; font-weight: 700; color: #374151">노선 이름</label><input id="rt-name" type="text" :value="v.routeForm.name" @input="v.onRoute.name" placeholder="예: A01" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+              <div style="flex: 1; display: flex; flex-direction: column; gap: 4px"><label for="rt-fee" style="font-size: 13px; font-weight: 700; color: #374151">기본 배송료(원)</label><input id="rt-fee" type="text" inputmode="numeric" :value="v.routeForm.fee" @input="v.onRoute.fee" placeholder="0" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px"><label for="rt-memo" style="font-size: 13px; font-weight: 700; color: #374151">메모 (선택)</label><input id="rt-memo" type="text" :value="v.routeForm.memo" @input="v.onRoute.memo" placeholder="예: 홍제동 일대" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+            <template v-if="v.routeErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.routeErr }}</span></template>
+            <div style="display: flex; gap: 8px">
+              <button v-if="v.routeForm.id" type="button" @click="v.cancelRoute" style="flex: 1; min-height: 46px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 14px">취소</button>
+              <button type="button" @click="v.saveRoute" style="flex: 2; min-height: 46px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">{{ v.routeForm.id ? '수정 저장' : '+ 노선 추가' }}</button>
+            </div>
+          </div>
+          <template v-if="v.noRoutes"><div style="background: #FFFFFF; border-radius: 16px; padding: 24px 16px; text-align: center; font-size: 14px; color: #4B5563">아직 등록된 노선이 없어요</div></template>
+          <div v-if="!v.noRoutes" style="background: #FFFFFF; border-radius: 16px; padding: 0 16px">
+            <div v-for="(r, i) in v.routeRows" :key="r.id" :style="r.rowStyle">
+              <span style="flex: 1; display: flex; flex-direction: column; gap: 2px"><span style="font-size: 16px; font-weight: 800">{{ r.name }}</span><span style="font-size: 12px; color: #4B5563">기본 배송료 {{ r.feeText }}<template v-if="r.memo"> · {{ r.memo }}</template></span></span>
+              <button type="button" @click="r.edit" style="min-height: 40px; padding: 0 12px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 13px">수정</button>
+              <button v-if="!r.delAsk" type="button" @click="r.askDel" style="min-height: 40px; padding: 0 12px; border: 1px solid #FCA5A5; border-radius: 12px; background: #FFFFFF; color: #B91C1C; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">삭제</button>
+              <button v-else type="button" @click="r.del" style="min-height: 40px; padding: 0 12px; border: none; border-radius: 12px; background: #B91C1C; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">정말 삭제</button>
+            </div>
+          </div>
+          <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6">노선을 지워도 이미 만든 배차 기록은 노선 이름 그대로 남아요.</p>
+        </div>
+      </template>
+
       <template v-if="v.sList">
         <div style="display: flex; flex-direction: column; gap: 12px">
           <button type="button" @click="v.goMenu" style="align-self: flex-start; min-height: 40px; border: none; background: transparent; padding: 0; font-family: inherit; font-size: 14px; color: #374151; cursor: pointer">‹ 설정</button>
@@ -696,6 +795,26 @@ a{color:#1E4FD8;text-decoration:none}
   </div>
 </template>
 
+<template v-if="v.dispOpen">
+  <div style="position: absolute; inset: 0; background: rgba(17,24,39,0.55); display: flex; align-items: flex-end">
+    <div role="dialog" aria-modal="true" aria-labelledby="dp-title" style="width: 100%; box-sizing: border-box; max-height: 92%; overflow-y: auto; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 12px">
+      <h2 id="dp-title" style="margin: 0; font-size: 19px; font-weight: 800">{{ v.dispForm.id ? '배차 수정' : '배차 추가' }}</h2>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-date" style="font-size: 13px; font-weight: 700; color: #374151">날짜</label><input id="dp-date" type="date" :value="v.dispForm.work_date" @input="v.onDisp.work_date" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-route" style="font-size: 13px; font-weight: 700; color: #374151">노선</label>
+        <select id="dp-route" :value="v.dispForm.route_id" @change="v.onDisp.route_id" style="min-height: 46px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; background: #FFFFFF; min-width: 0"><option value="">노선을 선택하세요</option><option v-for="o in v.routeOptions" :key="o.id" :value="o.id">{{ o.label }}</option></select></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-driver" style="font-size: 13px; font-weight: 700; color: #374151">담당 기사</label>
+        <select id="dp-driver" :value="v.dispForm.driver_id" @change="v.onDisp.driver_id" style="min-height: 46px; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 10px; font-family: inherit; font-size: 15px; background: #FFFFFF; min-width: 0"><option value="">미배정</option><option v-for="o in v.driverOptions" :key="o.id" :value="o.id">{{ o.label }}</option></select></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-fee" style="font-size: 13px; font-weight: 700; color: #374151">배송료 (원)</label><input id="dp-fee" type="text" inputmode="numeric" :value="v.dispForm.fee" @input="v.onDisp.fee" placeholder="노선 기본값이 들어가요" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px"><label for="dp-memo" style="font-size: 13px; font-weight: 700; color: #374151">메모 (선택)</label><input id="dp-memo" type="text" :value="v.dispForm.memo" @input="v.onDisp.memo" style="min-height: 46px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 10px; padding: 0 12px; font-family: inherit; font-size: 15px; min-width: 0"></div>
+      <template v-if="v.dispErr"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.dispErr }}</span></template>
+      <div style="display: flex; gap: 8px">
+        <button type="button" @click="v.closeDisp" style="flex: 1; min-height: 50px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">취소</button>
+        <button type="button" @click="v.saveDisp" style="flex: 2; min-height: 50px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-weight: 700; cursor: pointer; font-size: 15px">{{ v.dispForm.id ? '수정 저장' : '배차 추가' }}</button>
+      </div>
+    </div>
+  </div>
+</template>
+
 <template v-if="v.noticeOpen">
   <div style="position: absolute; inset: 0; background: rgba(17,24,39,0.55); display: flex; align-items: flex-end">
     <div role="dialog" aria-modal="true" aria-labelledby="nt-title" style="width: 100%; box-sizing: border-box; max-height: 92%; overflow-y: auto; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 12px">
@@ -740,6 +859,7 @@ var ICONS = {
   pay: 'M3 6h18v14H3zM3 10h18M16 15h.01',
   teams: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10M12 12h.01',
   me: 'M12 12a4 4 0 1 0 0-8a4 4 0 1 0 0 8M4 21c0-4 4-6 8-6s8 2 8 6',
+  dispatch: 'M2 6h12v10H2zM14 9h4l4 4v3h-8M6 19a2 2 0 1 0 0-.01M18 19a2 2 0 1 0 0-.01',
   settings: 'M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1'
 };
 
@@ -813,7 +933,10 @@ var S = Vue.reactive({
   reduceOpen: false, leaseOpen: false, leaseErr: '', leaseForm: { driverId: null, amount: '', due: iso(eom()), memo: '' },
   noticeOpen: false, noticeErr: '', noticeForm: { tag: '일반', title: '', body: '', must: false },
   addCoOpen: false, addCoName: '',
-  splash: true, splashOut: false
+  splash: true, splashOut: false,
+  routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
+  dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
+  routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null
 });
 var toastTimer = null;
 function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
@@ -843,9 +966,16 @@ async function loadAll() {
   S.notices = res[3];
   var mr = {}; res[4].forEach(function (r) { mr[r.notice_id] = true; }); S.myReads = mr;
   S.teams = res[5]; S.payslips = res[6]; S.reduces = res[7]; S.leases = res[8];
+  S.routes = await q(sb.from('routes').select('*').order('sort').order('name'));
+  await loadDispatches();
   await refreshUrls();
   await refreshStats();
 }
+async function loadDispatches() {
+  var days = [iso(today0())]; if (S.dispDate !== days[0]) days.push(S.dispDate);
+  S.dispatches = await q(sb.from('dispatches').select('*').in('work_date', days).order('created_at'));
+}
+function hm(ts) { if (!ts) return ''; var d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 async function refreshUrls() {
   var paths = [];
   Object.keys(S.docs).forEach(function (id) { Object.keys(S.docs[id]).forEach(function (k) { paths.push(S.docs[id][k]); }); });
@@ -955,15 +1085,15 @@ function build() {
   var scopeDrivers = s.drivers.filter(function (d) { return d.company_id === scopeId; });
 
   var tabDefs = isDriver
-    ? [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['me', '내 정보']]
-    : [['home', '홈'], ['notice', '공지사항'], ['pay', '급여내역'], ['teams', '팀즈 감지'], ['settings', '설정']];
+    ? [['home', '홈'], ['dispatch', '배차'], ['notice', '공지'], ['pay', '급여'], ['teams', '팀즈'], ['me', '내 정보']]
+    : [['home', '홈'], ['dispatch', '배차'], ['notice', '공지'], ['pay', '급여'], ['teams', '팀즈'], ['settings', '설정']];
   var tabs = tabDefs.map(function (t) {
     var on = s.tab === t[0];
     return { label: t[1], d: ICONS[t[0]],
       style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', minHeight: '52px', border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit', fontSize: '12px', fontWeight: on ? 700 : 500, color: on ? '#1E4FD8' : '#4B5563' },
-      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; S.editMe = false; S.showRrn = false; } };
+      go: function () { S.tab = t[0]; if (t[0] === 'settings') S.adminView = 'menu'; S.editMe = false; S.showRrn = false; S.delAsk = null; } };
   });
-  var titles = { home: '홈', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
+  var titles = { home: '홈', dispatch: '배차', notice: '공지사항', pay: '급여내역', teams: '팀즈 감지', me: '내 정보', settings: '설정' };
 
   // 공지
   var scopeNotices = s.notices.filter(function (n) { return n.company_id === scopeId; });
@@ -1018,6 +1148,54 @@ function build() {
       catch (e) { fail(e, '사진 저장에 실패했어요'); }
     });
   }) : [];
+
+  // ---------- 배차 ----------
+  var STEPS = [['arrive_at', '입차'], ['pickup_at', '픽업'], ['done_at', '완료']];
+  function dispStatus(d) {
+    if (d.done_at) return ['완료', '#15803D', '#DCFCE7'];
+    if (d.pickup_at) return ['배송 중', '#1E4FD8', '#E0E7FF'];
+    if (d.arrive_at) return ['입차', '#B45309', '#FEF3C7'];
+    return ['대기', '#374151', '#F3F4F6'];
+  }
+  function stStyle(c) { return { fontSize: '12px', fontWeight: 700, color: c[1], background: c[2], padding: '4px 10px', borderRadius: '10px', whiteSpace: 'nowrap' }; }
+  function driverName(id) { var d = s.drivers.find(function (x) { return x.id === id; }); return d ? d.name + ' ' + (d.rank || '기사') : '미배정'; }
+  function setTime(d, field, val) {
+    run(async function () {
+      try { var p = {}; p[field] = val; await q(sb.from('dispatches').update(p).eq('id', d.id)); await loadDispatches(); flash(val ? '시간을 기록했어요' : '기록을 취소했어요'); }
+      catch (e) { fail(e, '기록하지 못했어요'); }
+    });
+  }
+  function dispView(d) {
+    var stt = dispStatus(d), canStamp = !isDriver || d.driver_id === s.uid, open = s.dispSel === d.id;
+    return {
+      id: d.id, route: d.route_name, driverText: driverName(d.driver_id), feeText: '₩' + won(d.fee), memo: d.memo,
+      statusText: stt[0], statusStyle: stStyle(stt), isOpen: open, canStamp: canStamp, delAsk: s.delAsk === d.id,
+      summary: STEPS.map(function (x) { return x[1] + ' ' + (hm(d[x[0]]) || '—'); }).join(' · '),
+      cardStyle: { background: '#FFFFFF', borderRadius: '16px', border: open ? '2px solid #1E4FD8' : '2px solid #FFFFFF', overflow: 'hidden' },
+      toggle: function () { S.dispSel = open ? null : d.id; S.delAsk = null; },
+      steps: STEPS.map(function (x) {
+        var t = d[x[0]];
+        return { key: x[0], label: x[1], has: !!t, timeText: t ? hm(t) : '누르면 기록',
+          style: { width: '100%', minHeight: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2px', borderRadius: '12px', fontFamily: 'inherit', cursor: canStamp ? 'pointer' : 'default',
+            border: t ? '2px solid #1E4FD8' : '1px dashed #9CA3AF', background: t ? '#EEF2FF' : '#FFFFFF', color: t ? '#1E3A8A' : '#4B5563' },
+          stamp: function () { if (!canStamp || t) return; setTime(d, x[0], new Date().toISOString()); },
+          clear: function () { setTime(d, x[0], null); } };
+      }),
+      edit: function () { S.dispErr = ''; S.dispForm = { id: d.id, work_date: d.work_date, route_id: d.route_id || '', driver_id: d.driver_id || '', fee: String(d.fee || ''), memo: d.memo || '' }; S.dispOpen = true; },
+      askDel: function () { S.delAsk = d.id; },
+      del: function () {
+        run(async function () {
+          try { await q(sb.from('dispatches').delete().eq('id', d.id)); S.delAsk = null; S.dispSel = null; await loadDispatches(); flash(d.route_name + ' 배차를 삭제했어요'); }
+          catch (e) { fail(e, '삭제하지 못했어요'); }
+        });
+      }
+    };
+  }
+  var dayDisp = s.dispatches.filter(function (d) { return d.work_date === s.dispDate && (isDriver ? d.driver_id === s.uid : d.company_id === scopeId); });
+  var dispRows = dayDisp.map(dispView);
+  var todayRaw = isDriver ? s.dispatches.find(function (d) { return d.work_date === iso(today0()) && d.driver_id === s.uid; }) : null;
+  var scopeRoutes = s.routes.filter(function (r) { return r.company_id === scopeId; });
+  function shiftDay(n) { var p = S.dispDate.split('-'); S.dispDate = iso(addDays(new Date(+p[0], +p[1] - 1, +p[2]), n)); S.dispSel = null; run(loadDispatches); }
 
   function setF(obj, key, trans) { return function (e) { var v = e.target.value; obj[key] = trans ? trans(v) : v; }; }
 
@@ -1257,6 +1435,77 @@ function build() {
         try { await q(sb.from('reduce_requests').update({ status: '반려' }).eq('id', r.id)); await loadAll(); flash(sel.name + ' 기사 감차 요청을 반려했어요'); } catch (e) { fail(e); }
       });
     },
+
+    // 배차
+    tDispatch: s.tab === 'dispatch',
+    dispRows: dispRows,
+    dispDateText: fmtDate(parseD(s.dispDate)), isToday: s.dispDate === iso(today0()),
+    dayPrev: function () { shiftDay(-1); }, dayNext: function () { shiftDay(1); }, dayToday: function () { S.dispDate = iso(today0()); S.dispSel = null; run(loadDispatches); },
+    dispStats: { count: dayDisp.length, done: dayDisp.filter(function (d) { return d.done_at; }).length, feeText: '₩' + won(dayDisp.reduce(function (a, d) { return a + Number(d.fee || 0); }, 0)) },
+    todayDisp: todayRaw ? dispView(todayRaw) : null,
+    goDispatch: function () { S.tab = 'dispatch'; S.dispDate = iso(today0()); S.dispSel = todayRaw ? todayRaw.id : null; },
+    noRoutes: scopeRoutes.length === 0,
+    dispOpen: s.dispOpen, dispForm: s.dispForm, dispErr: s.dispErr,
+    routeOptions: scopeRoutes.map(function (r) { return { id: r.id, label: r.name + (r.fee ? ' · ' + won(r.fee) + '원' : '') }; }),
+    driverOptions: scopeDrivers.map(function (d) { return { id: d.id, label: d.name + ' ' + (d.rank || '기사') + (d.status === '승인 대기' ? ' (승인 대기)' : '') }; }),
+    openDispAdd: function () { S.dispErr = ''; S.dispForm = { id: null, work_date: S.dispDate, route_id: '', driver_id: '', fee: '', memo: '' }; S.dispOpen = true; },
+    closeDisp: function () { S.dispOpen = false; },
+    onDisp: {
+      work_date: setF(s.dispForm, 'work_date'), fee: setF(s.dispForm, 'fee', digits), memo: setF(s.dispForm, 'memo'), driver_id: setF(s.dispForm, 'driver_id'),
+      route_id: function (e) {
+        var old = S.routes.find(function (r) { return r.id === S.dispForm.route_id; });
+        var nw = S.routes.find(function (r) { return r.id === e.target.value; });
+        S.dispForm.route_id = e.target.value;
+        if (nw && (!S.dispForm.fee || (old && String(old.fee) === S.dispForm.fee))) S.dispForm.fee = String(nw.fee || '');
+      }
+    },
+    saveDisp: function () {
+      var f = S.dispForm, r = S.routes.find(function (x) { return x.id === f.route_id; });
+      if (!f.work_date) { S.dispErr = '날짜를 선택해 주세요'; return; }
+      if (!r) { S.dispErr = '노선을 선택해 주세요'; return; }
+      var row = { company_id: S.company, route_id: r.id, route_name: r.name, driver_id: f.driver_id || null, work_date: f.work_date, fee: +(f.fee || 0), memo: f.memo.trim() };
+      run(async function () {
+        try {
+          if (f.id) await q(sb.from('dispatches').update(row).eq('id', f.id));
+          else await q(sb.from('dispatches').insert(row));
+          S.dispOpen = false; S.dispDate = f.work_date; await loadDispatches();
+          flash(f.id ? '배차를 수정했어요' : r.name + ' 배차를 추가했어요');
+        } catch (e) { fail(e, '배차를 저장하지 못했어요'); }
+      });
+    },
+
+    // 노선 설정
+    sRoutes: !isDriver && s.tab === 'settings' && s.adminView === 'routes',
+    goRoutes: function () { S.adminView = 'routes'; S.routeForm = { id: null, name: '', fee: '', memo: '' }; S.routeErr = ''; S.routeDel = null; },
+    routeForm: s.routeForm, routeErr: s.routeErr,
+    onRoute: { name: setF(s.routeForm, 'name'), fee: setF(s.routeForm, 'fee', digits), memo: setF(s.routeForm, 'memo') },
+    cancelRoute: function () { S.routeForm = { id: null, name: '', fee: '', memo: '' }; S.routeErr = ''; },
+    saveRoute: function () {
+      var f = S.routeForm, name = f.name.trim();
+      if (!name) { S.routeErr = '노선 이름을 입력해 주세요'; return; }
+      var row = { company_id: S.company, name: name, fee: +(f.fee || 0), memo: f.memo.trim() };
+      run(async function () {
+        try {
+          if (f.id) await q(sb.from('routes').update(row).eq('id', f.id));
+          else await q(sb.from('routes').insert(row));
+          S.routeForm = { id: null, name: '', fee: '', memo: '' }; S.routeErr = '';
+          S.routes = await q(sb.from('routes').select('*').order('sort').order('name'));
+          flash(f.id ? name + ' 노선을 수정했어요' : name + ' 노선을 추가했어요');
+        } catch (e) { S.routeErr = /duplicate|unique/i.test(e.message || '') ? '같은 이름의 노선이 이미 있어요' : '저장하지 못했어요'; }
+      });
+    },
+    routeRows: scopeRoutes.map(function (r, i) {
+      return { id: r.id, name: r.name, memo: r.memo, feeText: won(r.fee) + '원', delAsk: s.routeDel === r.id,
+        rowStyle: { display: 'flex', alignItems: 'center', gap: '8px', minHeight: '64px', borderTop: i === 0 ? 'none' : '1px solid #E5E7EB' },
+        edit: function () { S.routeForm = { id: r.id, name: r.name, fee: String(r.fee || ''), memo: r.memo || '' }; S.routeErr = ''; },
+        askDel: function () { S.routeDel = r.id; },
+        del: function () {
+          run(async function () {
+            try { await q(sb.from('routes').delete().eq('id', r.id)); S.routeDel = null; S.routes = await q(sb.from('routes').select('*').order('sort').order('name')); flash(r.name + ' 노선을 삭제했어요'); }
+            catch (e) { fail(e, '삭제하지 못했어요'); }
+          });
+        } };
+    }),
 
     hasToast: !!s.toast, toast: s.toast
   };
