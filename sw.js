@@ -1,5 +1,5 @@
 // 진양 기사앱 서비스워커: 항상 최신 버전을 먼저 받고, 인터넷이 끊기면 저장해 둔 화면을 보여줘요.
-var CACHE = 'jinyang-app-v2';
+var CACHE = 'jinyang-app-v3';
 self.addEventListener('install', function (e) { self.skipWaiting(); });
 self.addEventListener('activate', function (e) { e.waitUntil(self.clients.claim()); });
 self.addEventListener('fetch', function (e) {
