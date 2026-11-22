@@ -20,4 +20,8 @@ drop policy if exists push_logs_admin_read on public.push_logs;
 create policy push_logs_admin_read on public.push_logs for select to authenticated using (public.is_admin());
 grant select on public.push_logs to authenticated;
 grant all on public.push_logs to service_role;
+-- 알림 서버가 '지금 요청한 사람이 누구인지' 확인할 때 쓰는 함수 (앱이 DB를 쓸 때와 똑같은 방식으로 로그인 확인)
+create or replace function public.whoami() returns uuid language sql stable as $$ select auth.uid() $$;
+grant execute on function public.whoami() to authenticated;
+
 select 'ok 011' as result;

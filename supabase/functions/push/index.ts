@@ -46,8 +46,10 @@ Deno.serve(async (req) => {
     const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
     if (!token) return json({ error: 'login required' }, 401);
     const userDb = createClient(URL_, ANON_ENV || req.headers.get('apikey') || '', { global: { headers: { Authorization: 'Bearer ' + token } }, auth: { persistSession: false } });
-    const { data: u } = await admin.auth.getUser(token);
-    if (!u?.user) return json({ error: 'login required' }, 401);
+    // 앱이 DB를 쓸 때와 같은 방식(토큰 서명 확인)으로 사람 확인 → 다른 기기 로그아웃 등으로 세션이 끊겨도 앱이 쓰는 동안은 동작
+    const who = await userDb.rpc('whoami');
+    if (who.error || !who.data) return json({ error: 'login required', detail: who.error?.message || 'no user' }, 401);
+    const u = { user: { id: String(who.data) } };
 
     const body = await req.json().catch(() => ({}));
     if (body.test) {
