@@ -1,0 +1,48 @@
+/* 진양 설치 화면 · 검정 + 금색 */
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100dvh;color:#F8FAFC;font-family:'Pretendard Variable',Pretendard,'Noto Sans KR',sans-serif;
+  background:radial-gradient(700px 380px at 50% -8%,rgba(212,175,55,.25),rgba(212,175,55,0) 60%),linear-gradient(180deg,#0B1533 0%,#05070F 100%)}
+.wrap{max-width:480px;margin:0 auto;padding:28px 20px calc(28px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
+.brand{display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;padding:8px 0 4px}
+.logo{width:96px;height:96px;border-radius:24px;box-shadow:0 0 0 1px rgba(212,175,55,.5),0 18px 40px -14px rgba(212,175,55,.55);animation:pop .7s cubic-bezier(.2,.8,.2,1) both}
+.gold{background:linear-gradient(110deg,#7a5a12 0%,#bf953f 18%,#fcf6ba 32%,#b38728 46%,#fbf5b7 60%,#aa771c 76%,#7a5a12 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 3s linear infinite}
+.title{font-family:'Cinzel',serif;font-size:40px;font-weight:700;letter-spacing:.05em;margin-top:12px;line-height:1.1}
+.sub{font-family:'Cinzel',serif;font-size:14px;letter-spacing:.55em;padding-left:.55em}
+.lead{margin:10px 0 0;font-size:15px;color:#CBD5E1}
+.lead b{color:#FCF6BA}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.card h2{margin:0;font-size:19px}
+.card p{margin:0;font-size:15px;line-height:1.6;color:#E2E8F0}
+.tip p{font-size:14px}
+.steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.step{background:#FFFFFF;color:#0F172A;border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;border:2px solid transparent;transition:border-color .2s,box-shadow .2s}
+.step.focus{border-color:#D4AF37;box-shadow:0 0 0 4px rgba(212,175,55,.25)}
+.step.done{opacity:.85}
+.step-head{display:flex;align-items:center;gap:10px}
+.num{width:30px;height:30px;flex:none;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;color:#1A1305;background:linear-gradient(135deg,#F7E7A1,#D4AF37)}
+.step-title{font-size:17px;font-weight:800;flex:1}
+.must{font-style:normal;font-size:11px;font-weight:800;color:#fff;background:#E11D48;padding:2px 7px;border-radius:999px;vertical-align:2px}
+.state{font-size:12px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+.state:empty{display:none}
+.state.ok{color:#065F46;background:#D1FAE5}.state.need{color:#92400E;background:#FEF3C7}.state.bad{color:#B91C1C;background:#FEE2E2}
+.desc{margin:0;font-size:14px;line-height:1.6;color:#334155}
+.hint{margin:0;font-size:12px;color:#94A3B8;line-height:1.5}
+.btn{display:flex;align-items:center;justify-content:center;min-height:54px;border-radius:16px;font-family:inherit;font-size:16px;font-weight:800;text-decoration:none;cursor:pointer;border:none;width:100%}
+.btn:disabled{opacity:.6}
+.gold-btn{color:#1A1305;background:linear-gradient(135deg,#F7E7A1 0%,#D4AF37 45%,#A8801F 100%);box-shadow:0 12px 26px -12px rgba(212,175,55,.8)}
+.ghost{color:#0F172A;background:#F1F5F9;border:1px solid #E2E8F0}
+.card .ghost{color:#F8FAFC;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.25)}
+.manual{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;color:#0F172A}
+.card .manual{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.15);color:#E2E8F0}
+.manual p{margin:0;font-size:14px}
+.manual ol{margin:0;padding-left:20px;font-size:14px;line-height:1.7}
+.manual.warn{background:#FFF7ED;border-color:#FDBA74}
+.pic{display:flex;align-items:center;gap:10px;background:#F1F5F9;border-radius:14px;padding:10px 14px;font-size:15px;font-weight:700;color:#1C1C1E}
+.share-ico{width:44px;height:44px;border-radius:12px;background:#FFFFFF;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.foot{text-align:center;font-size:12px;color:#64748B;margin:4px 0 0}
+.toast{position:fixed;left:16px;right:16px;bottom:calc(20px + env(safe-area-inset-bottom));max-width:448px;margin:0 auto;background:#111827;color:#fff;border:1px solid rgba(212,175,55,.5);border-radius:14px;padding:14px 16px;font-size:14px;font-weight:600;text-align:center;z-index:9}
+@keyframes pop{from{opacity:0;transform:scale(.7) rotate(-8deg)}to{opacity:1;transform:none}}
+@keyframes shine{from{background-position:200% 0}to{background-position:-50% 0}}
+@media (prefers-reduced-motion:reduce){.logo,.gold{animation:none}}

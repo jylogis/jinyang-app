@@ -1,12 +1,18 @@
 {
-  "name": "진양로지스틱스 기사앱",
-  "short_name": "진양 기사앱",
-  "start_url": "./",
+  "id": "./",
+  "name": "진양로지스틱스",
+  "short_name": "진양",
+  "description": "진양로지스틱스 기사 전용 앱",
+  "lang": "ko",
+  "start_url": "./?source=pwa",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#FFFFFF",
-  "theme_color": "#1E4FD8",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#0B1533",
   "icons": [
-    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }

@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#000000">
+<title>진양로지스틱스 앱 설치 (안드로이드)</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="install.css">
+</head>
+<body>
+<main class="wrap">
+  <header class="brand">
+    <img src="icon-192.png" alt="" class="logo">
+    <div class="gold title">Jin Yang</div>
+    <div class="gold sub">logistics</div>
+    <p class="lead">기사님 전용 앱 설치 · <b>안드로이드</b></p>
+  </header>
+
+  <!-- 카카오톡 등 앱 안 브라우저: 크롬으로 이동 -->
+  <section id="v-redirect" class="card" hidden>
+    <h2>크롬으로 여는 중이에요…</h2>
+    <p>설치는 <b>크롬</b>에서만 할 수 있어요. 크롬이 자동으로 열리지 않으면 아래 버튼을 눌러 주세요.</p>
+    <a id="btn-chrome" class="btn gold-btn" href="#">크롬으로 열기</a>
+    <button id="btn-copy" class="btn ghost" type="button">링크 복사하기</button>
+    <p class="hint">크롬이 없다면 Play 스토어에서 "Chrome"을 설치한 뒤 다시 열어 주세요.</p>
+  </section>
+
+  <!-- 아이폰으로 들어온 경우 -->
+  <section id="v-ios" class="card" hidden>
+    <h2>아이폰이시군요</h2>
+    <p>아이폰은 전용 설치 화면에서 진행해 주세요.</p>
+    <a class="btn gold-btn" href="install-ios.html">아이폰 설치 화면으로</a>
+  </section>
+
+  <!-- PC로 들어온 경우 -->
+  <section id="v-pc" class="card" hidden>
+    <h2>휴대폰에서 열어 주세요</h2>
+    <p>이 링크를 카카오톡으로 받아 <b>휴대폰</b>에서 눌러 주세요.</p>
+  </section>
+
+  <!-- 크롬: 설치 → 알림 허용 → 시작 -->
+  <section id="v-steps" hidden>
+    <ol class="steps">
+      <li class="step" id="s-install">
+        <div class="step-head"><span class="num">1</span><span class="step-title">앱 설치하기</span><span class="state" id="st-install"></span></div>
+        <p class="desc">설치하면 휴대폰 홈 화면에 <b>JY 아이콘</b>이 생겨요.</p>
+        <button id="btn-install" class="btn gold-btn" type="button">📲 앱 설치하기</button>
+        <div id="install-manual" class="manual" hidden>
+          <p><b>설치 버튼이 안 보이면</b> 이렇게 해 주세요.</p>
+          <ol>
+            <li>크롬 오른쪽 위 <b>⋮ (점 3개)</b>를 눌러요</li>
+            <li><b>"앱 설치"</b> 또는 <b>"홈 화면에 추가"</b>를 눌러요</li>
+            <li><b>"설치"</b>를 눌러요</li>
+          </ol>
+          <button id="btn-installed" class="btn ghost" type="button">설치했어요 →</button>
+        </div>
+      </li>
+      <li class="step" id="s-noti">
+        <div class="step-head"><span class="num">2</span><span class="step-title">알림 허용하기 <em class="must">필수</em></span><span class="state" id="st-noti"></span></div>
+        <p class="desc">배차·공지·감차 승인 소식을 알림으로 받아요. 꼭 <b>"허용"</b>을 눌러 주세요.</p>
+        <button id="btn-noti" class="btn gold-btn" type="button">🔔 알림 허용하기</button>
+        <div id="noti-denied" class="manual warn" hidden>
+          <p><b>알림이 차단되어 있어요.</b> 이렇게 다시 켜 주세요.</p>
+          <ol>
+            <li>주소창 왼쪽 <b>설정(자물쇠) 아이콘</b>을 눌러요</li>
+            <li><b>"권한"</b> 또는 <b>"사이트 설정"</b> → <b>"알림"</b></li>
+            <li><b>"허용"</b>으로 바꾼 뒤 아래 버튼을 눌러요</li>
+          </ol>
+          <button id="btn-recheck" class="btn ghost" type="button">다시 확인</button>
+        </div>
+      </li>
+      <li class="step" id="s-start">
+        <div class="step-head"><span class="num">3</span><span class="step-title">시작하기</span></div>
+        <p class="desc">홈 화면의 <b>JY 아이콘</b>을 눌러 앱을 열고 로그인해 주세요.</p>
+        <a class="btn ghost" href="./?source=install">지금 바로 열기</a>
+      </li>
+    </ol>
+  </section>
+  <p class="foot">문의: 진양로지스틱스 관리자</p>
+</main>
+<div id="toast" class="toast" role="status" hidden></div>
+<script>
+(function () {
+  var APP = location.origin + location.pathname.replace(/install-android\.html$/, '');
+  var ua = navigator.userAgent;
+  var isAndroid = /Android/i.test(ua);
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var inApp = /KAKAOTALK|NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|; wv\)/i.test(ua);
+  var isChrome = /Chrome\/\d+/i.test(ua) && !/SamsungBrowser|EdgA|OPR\/|Whale|NAVER|KAKAOTALK|; wv\)|DaumApps|Firefox/i.test(ua);
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var params = new URLSearchParams(location.search);
+  function $(id) { return document.getElementById(id); }
+  function show(id) { ['v-redirect', 'v-ios', 'v-pc', 'v-steps'].forEach(function (x) { $(x).hidden = x !== id; }); }
+  function toast(t) { var el = $('toast'); el.textContent = t; el.hidden = false; clearTimeout(toast._t); toast._t = setTimeout(function () { el.hidden = true; }, 2600); }
+
+  // 설치된 앱으로 열렸으면 바로 앱으로
+  if (standalone) { location.replace(APP); return; }
+
+  if (isIOS) { show('v-ios'); return; }
+  if (!isAndroid) { show('v-pc'); return; }
+
+  // 카카오톡·네이버 등 앱 안 브라우저 / 삼성 인터넷 등 → 크롬으로 열기
+  if (!isChrome) {
+    var here = location.href.split('#')[0];
+    var fallback = here.indexOf('nochrome=1') >= 0 ? here : here + (here.indexOf('?') >= 0 ? '&' : '?') + 'nochrome=1';
+    var intent = 'intent://' + location.host + location.pathname + location.search + '#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(fallback) + ';end';
+    $('btn-chrome').href = intent;
+    $('btn-copy').onclick = function () {
+      (navigator.clipboard ? navigator.clipboard.writeText(here) : Promise.reject()).then(function () { toast('링크를 복사했어요. 크롬 주소창에 붙여 넣어 주세요'); }, function () { prompt('아래 링크를 길게 눌러 복사해 주세요', here); });
+    };
+    show('v-redirect');
+    if (!params.has('nochrome')) { setTimeout(function () { location.href = intent; }, 300); }
+    return;
+  }
+
+  // ---------- 크롬 ----------
+  show('v-steps');
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function () {});
+
+  var deferred = null, installed = localStorage.getItem('jy-installed') === '1';
+  function setState(id, text, cls) { var el = $(id); el.textContent = text; el.className = 'state ' + (cls || ''); }
+  function markInstalled() {
+    installed = true; try { localStorage.setItem('jy-installed', '1'); } catch (e) {}
+    setState('st-install', '✓ 설치 완료', 'ok'); $('btn-install').hidden = true; $('install-manual').hidden = true;
+    $('s-install').classList.add('done'); $('s-noti').classList.add('focus');
+    $('s-noti').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function refreshNoti() {
+    if (!('Notification' in window)) { setState('st-noti', '지원 안 됨', 'bad'); $('btn-noti').hidden = true; return; }
+    var p = Notification.permission;
+    if (p === 'granted') { setState('st-noti', '✓ 허용됨', 'ok'); $('btn-noti').hidden = true; $('noti-denied').hidden = true; $('s-noti').classList.add('done'); $('s-noti').classList.remove('focus'); $('s-start').classList.add('focus'); }
+    else if (p === 'denied') { setState('st-noti', '차단됨', 'bad'); $('btn-noti').hidden = true; $('noti-denied').hidden = false; }
+    else { setState('st-noti', '허용 필요', 'need'); $('btn-noti').hidden = false; $('noti-denied').hidden = true; }
+  }
+
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); deferred = e; $('btn-install').disabled = false; $('install-manual').hidden = true; });
+  window.addEventListener('appinstalled', function () { markInstalled(); toast('설치됐어요! 이제 알림을 허용해 주세요'); });
+
+  if (installed) markInstalled();
+  else {
+    setState('st-install', '설치 필요', 'need');
+    // 크롬이 설치 준비를 못 하면(이미 설치됨·조건 미충족) 수동 안내
+    setTimeout(function () { if (!deferred && !installed) $('install-manual').hidden = false; }, 3500);
+  }
+
+  $('btn-install').onclick = function () {
+    if (!deferred) { $('install-manual').hidden = false; $('install-manual').scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    deferred.prompt();
+    deferred.userChoice.then(function (c) {
+      deferred = null;
+      if (c.outcome === 'accepted') { markInstalled(); toast('설치 중이에요. 이제 알림을 허용해 주세요'); }
+      else { toast('설치가 취소됐어요. 다시 눌러 주세요'); $('install-manual').hidden = false; }
+    });
+  };
+  $('btn-installed').onclick = function () { markInstalled(); };
+  $('btn-noti').onclick = function () {
+    Notification.requestPermission().then(function (p) {
+      refreshNoti();
+      toast(p === 'granted' ? '알림이 허용됐어요 🎉' : '알림이 허용되지 않았어요. 안내대로 다시 켜 주세요');
+      if (p === 'granted' && navigator.serviceWorker) navigator.serviceWorker.ready.then(function (r) { r.showNotification('진양로지스틱스', { body: '알림이 켜졌어요. 배차·공지 소식을 알려드릴게요.', icon: 'icon-192.png', badge: 'icon-192.png' }); }).catch(function () {});
+    });
+  };
+  $('btn-recheck').onclick = refreshNoti;
+  refreshNoti();
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) refreshNoti(); });
+})();
+</script>
+</body>
+</html>

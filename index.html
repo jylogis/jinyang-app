@@ -3,14 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1E4FD8">
+<meta name="theme-color" content="#0B1533">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="진양 기사앱">
+<meta name="apple-mobile-web-app-title" content="진양">
 <title>진양로지스틱스 기사앱</title>
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="icon.svg">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Noto+Sans+KR:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
@@ -1110,6 +1111,21 @@ a{color:#1E4FD8;text-decoration:none}
   </div>
 </template>
 
+<template v-if="v.notiPop">
+  <div style="position: absolute; inset: 0; z-index: 50; background: rgba(5,7,15,0.72); display: flex; align-items: center; justify-content: center; padding: 20px">
+    <div role="dialog" aria-modal="true" aria-labelledby="np-title" style="width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 24px; padding: 24px 20px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; box-shadow: 0 30px 60px -20px rgba(0,0,0,.6)">
+      <img :src="v.emo.bell" alt="" aria-hidden="true" class="e3d" style="width: 64px; height: 64px">
+      <h2 id="np-title" style="margin: 0; font-size: 20px; font-weight: 800">{{ v.notiPop.title }}</h2>
+      <p style="margin: 0; font-size: 14px; line-height: 1.65; color: #334155; white-space: pre-line">{{ v.notiPop.body }}</p>
+      <ol v-if="v.notiPop.steps" style="margin: 0; padding: 12px 14px 12px 32px; width: 100%; box-sizing: border-box; text-align: left; font-size: 14px; line-height: 1.7; color: #0F172A; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 14px">
+        <li v-for="st in v.notiPop.steps" :key="st">{{ st }}</li>
+      </ol>
+      <button v-if="v.notiPop.primary" type="button" @click="v.notiPop.primary.go" style="width: 100%; min-height: 54px; border: none; border-radius: 16px; background: linear-gradient(135deg,#F7E7A1 0%,#D4AF37 45%,#A8801F 100%); color: #1A1305; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 12px 26px -12px rgba(212,175,55,.8)">{{ v.notiPop.primary.label }}</button>
+      <button type="button" @click="v.notiPop.later" style="min-height: 40px; border: none; background: transparent; font-family: inherit; font-size: 14px; color: #64748B; text-decoration: underline; cursor: pointer">나중에 (다음 접속 때 다시 알려드려요)</button>
+    </div>
+  </div>
+</template>
+
 <template v-if="v.busy"><div role="status" style="position: absolute; inset: 0; background: rgba(255,255,255,0.5); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #1E4FD8">처리 중…</div></template>
 
 <template v-if="v.hasToast">
@@ -1177,7 +1193,7 @@ var EMO = {
   clip: emo('Clipboard/3D/clipboard_3d.png'), hour: emo('Hourglass not done/3D/hourglass_not_done_3d.png'), memo: emo('Memo/3D/memo_3d.png'),
   office: emo('Office building/3D/office_building_3d.png'), cal: emo('Calendar/3D/calendar_3d.png'), key: emo('Key/3D/key_3d.png'),
   warn: emo('Warning/3D/warning_3d.png'), card: emo('Identification card/3D/identification_card_3d.png'), crown: emo('Crown/3D/crown_3d.png'),
-  wave: emo('Waving hand/Default/3D/waving_hand_3d_default.png'), stop: emo('Stopwatch/3D/stopwatch_3d.png'), bank: emo('Bank/3D/bank_3d.png'), shield: emo('Locked/3D/locked_3d.png'),
+  wave: emo('Waving hand/Default/3D/waving_hand_3d_default.png'), stop: emo('Stopwatch/3D/stopwatch_3d.png'), bank: emo('Bank/3D/bank_3d.png'), bell: emo('Bell/3D/bell_3d.png'), shield: emo('Locked/3D/locked_3d.png'),
   cal2: emo('Spiral calendar/3D/spiral_calendar_3d.png')
 };
 var TAB_EMO = {}; Object.keys(TAB_EMO_KEYS).forEach(function (k) { TAB_EMO[k] = EMO[TAB_EMO_KEYS[k]]; });
@@ -1235,8 +1251,20 @@ var S = Vue.reactive({
   routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
   routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
-  perms: {}, noticeSel: null, noticeStatusOpen: false, noticeDelAsk: false, noticePeople: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null, mgrMode: false, myMgr: null, managers: [], mgrOpen: false, mgrForm: { scope: 'none', ids: [] }, mgrErr: '', coEdit: null, coEditName: ''
+  perms: {}, notiShow: false, notiDismissed: false, notiPerm: 'default', noticeSel: null, noticeStatusOpen: false, noticeDelAsk: false, noticePeople: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null, mgrMode: false, myMgr: null, managers: [], mgrOpen: false, mgrForm: { scope: 'none', ids: [] }, mgrErr: '', coEdit: null, coEditName: ''
 });
+function notiEnv() {
+  var ua = navigator.userAgent;
+  var isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var standalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+  var supported = 'Notification' in window;
+  return { isIOS: isIOS, standalone: standalone, supported: supported, perm: supported ? Notification.permission : 'unsupported' };
+}
+function checkNoti() {
+  var e = notiEnv(); S.notiPerm = e.perm;
+  if (S.notiDismissed) return;
+  S.notiShow = e.perm !== 'granted';
+}
 var toastTimer = null, armTimer = null, reduceTimer = null;
 function flash(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(function () { S.toast = ''; }, 2600); }
 function fail(e, fallback) { console.error(e); flash(fallback || '문제가 생겼어요. 잠시 후 다시 시도해 주세요'); }
@@ -1318,6 +1346,7 @@ async function afterAuth(user) {
   var a = await sb.from('admins').select('user_id').eq('user_id', user.id).maybeSingle();
   S.role = a.data ? 'admin' : 'driver';
   await loadAll();
+  setTimeout(checkNoti, 600);
   if (S.role === 'admin') { S.screen = 'pick'; }
   else {
     if (!S.drivers.find(function (d) { return d.id === user.id; })) { await sb.auth.signOut(); S.screen = 'login'; S.loginErr = '기사 정보가 없는 계정이에요. 관리자에게 문의해 주세요'; return; }
@@ -1856,6 +1885,24 @@ function build() {
 
     // 배차
     tDispatch: s.tab === 'dispatch',
+    notiPop: (function () {
+      if (!s.notiShow || (s.screen !== 'app' && s.screen !== 'pick') || s.splash) return null;
+      var e = notiEnv(), later = function () { S.notiShow = false; S.notiDismissed = true; };
+      if (e.isIOS && !e.standalone) return { title: '홈 화면에 설치해 주세요', body: '아이폰은 홈 화면에 설치한 앱에서만\n알림을 받을 수 있어요.',
+        steps: ['사파리 아래 가운데 공유 버튼을 눌러요', '"홈 화면에 추가"를 눌러요', '홈 화면의 JY 아이콘으로 열어 알림을 허용해요'],
+        primary: { label: '설치 방법 자세히 보기', go: function () { location.href = 'install-ios.html'; } }, later: later };
+      if (!e.supported) return { title: '알림을 쓸 수 없는 환경이에요', body: '크롬(안드로이드) 또는 홈 화면에 설치한 앱(아이폰)에서 열어 주세요.', steps: null, primary: null, later: later };
+      if (e.perm === 'denied') return { title: '알림이 꺼져 있어요', body: '배차·공지 소식을 받으려면 알림을 켜 주세요.',
+        steps: e.isIOS ? ['아이폰 설정 앱을 열어요', '아래로 내려 "진양" 앱을 눌러요', '알림 → "알림 허용"을 켜요'] : ['주소창 왼쪽 설정(자물쇠) 아이콘을 눌러요 (설치한 앱이면 휴대폰 설정 → 애플리케이션 → 진양)', '권한(또는 사이트 설정) → 알림', '"허용"으로 바꿔요'],
+        primary: { label: '켰어요, 다시 확인', go: function () { checkNoti(); if (Notification.permission === 'granted') flash('알림이 허용됐어요 🎉'); } }, later: later };
+      return { title: '알림을 허용해 주세요', body: '배차·공지·감차 승인 소식을\n바로 알려드릴게요.', steps: null,
+        primary: { label: '🔔 알림 허용하기', go: function () {
+          Notification.requestPermission().then(function (p) {
+            checkNoti();
+            if (p === 'granted') { flash('알림이 허용됐어요 🎉'); if (navigator.serviceWorker) navigator.serviceWorker.ready.then(function (r) { r.showNotification('진양로지스틱스', { body: '알림이 켜졌어요. 배차·공지 소식을 알려드릴게요.', icon: 'icon-192.png', badge: 'icon-192.png' }); }).catch(function () {}); }
+          });
+        } }, later: later };
+    })(),
     isRealAdmin: !isDriver && !s.mgrMode, isMgrMode: !!s.mgrMode,
     toDriverMode: function () { toDriverModeFn(); },
     sCompanies: !isDriver && s.tab === 'settings' && s.adminView === 'companies',
