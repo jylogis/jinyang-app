@@ -356,6 +356,11 @@ a{color:#1E4FD8;text-decoration:none}
           <template v-if="v.me.rd.pending">
             <button type="button" @click="v.goMe" style="text-align: left; background: #FFF7ED; border: 1px solid #FDBA74; border-radius: 14px; padding: 12px 14px; font-family: inherit; font-size: 14px; color: #9A3412; font-weight: 700; cursor: pointer">감차 요청 승인 대기 중 · 승인되면 그날부터 60일 카운트가 시작돼요 ›</button>
           </template>
+          <button v-if="v.openCount" type="button" @click="v.goOpen" style="display: flex; align-items: center; gap: 10px; text-align: left; background: linear-gradient(135deg,#FFF7ED,#FFEDD5); border: 1px solid #FDBA74; border-radius: 16px; padding: 12px 14px; font-family: inherit; cursor: pointer">
+            <span style="font-size: 26px" aria-hidden="true">🙋</span>
+            <span style="flex: 1; display: flex; flex-direction: column"><span style="font-size: 15px; font-weight: 800; color: #9A3412">신청할 수 있는 배차 {{ v.openCount }}건</span><span style="font-size: 12px; color: #9A3412">미배정 배차를 신청하면 담당자에게 알림이 가요</span></span>
+            <span aria-hidden="true" style="font-size: 18px; color: #9A3412">›</span>
+          </button>
           <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
             <button v-for="hd in v.homeDays" :key="hd.key" type="button" @click="hd.go" :style="hd.cardStyle">
               <span style="display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%">
@@ -475,8 +480,13 @@ a{color:#1E4FD8;text-decoration:none}
 
           <div v-for="d in v.dispRows" :key="d.id" :style="d.cardStyle">
             <button type="button" @click="d.toggle" :aria-expanded="d.isOpen ? 'true' : 'false'" style="display: flex; align-items: center; gap: 10px; width: 100%; min-height: 64px; padding: 12px 14px; border: none; background: transparent; font-family: inherit; text-align: left; cursor: pointer">
-              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px">
-                <span style="font-size: 16px; font-weight: 800; color: #0F172A; line-height: 1.35; word-break: keep-all">{{ d.title }}</span>
+              <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                <span style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap">
+                  <span class="jy-pill" :style="d.badgeStyle"><span aria-hidden="true">{{ d.badgeIcon }}</span>{{ d.badgeText }}</span>
+                  <span v-if="d.reqCount" class="jy-pill" style="background: #FEE2E2; color: #B91C1C; padding: 4px 10px">🙋 신청 {{ d.reqCount }}명</span>
+                  <span v-if="d.myReqPending" class="jy-pill" style="background: #DBEAFE; color: #1D4ED8; padding: 4px 10px">✋ 신청함 · 대기</span>
+                </span>
+                <span style="font-size: 16px; font-weight: 800; color: #0F172A; line-height: 1.35; word-break: keep-all">{{ d.route }}</span>
                 <span v-if="d.memo" style="font-size: 12px; color: #64748B; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{ d.memo }}</span>
               </span>
               <span style="display: flex; flex-direction: column; align-items: center; gap: 3px; flex: none; min-width: 72px">
@@ -487,13 +497,28 @@ a{color:#1E4FD8;text-decoration:none}
             </button>
             <template v-if="d.isOpen">
               <div style="padding: 0 14px 14px; display: flex; flex-direction: column; gap: 12px">
-                <div style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid #EEF2F7">
+                <template v-if="!d.assigned">
+                  <div style="margin-top: 12px; background: linear-gradient(135deg,#FFF7ED,#FFEDD5); border: 1px solid #FDBA74; border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px">
+                    <span style="font-size: 14px; font-weight: 800; color: #9A3412">🙋 배정 신청 {{ d.reqs.length }}명</span>
+                    <span v-if="!d.reqs.length" style="font-size: 13px; color: #9A3412">아직 신청한 기사가 없어요</span>
+                    <div v-for="r in d.reqs" :key="r.id" style="display: flex; align-items: center; gap: 8px; background: #FFFFFF; border-radius: 12px; padding: 8px 10px">
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+                        <span style="font-size: 15px; font-weight: 800; color: #0F172A">{{ r.name }} <span style="font-size: 12px; font-weight: 700; color: #64748B">{{ r.rank }}</span><span v-if="r.mine" style="font-size: 12px; font-weight: 800; color: #1D4ED8"> · 나</span></span>
+                        <span style="font-size: 12px; color: #64748B">{{ r.when }} 신청</span>
+                      </span>
+                      <button v-if="d.canAssign" type="button" @click="r.assign" :style="r.assignStyle">{{ r.armed ? '한 번 더 누르면 배정' : '배정하기' }}</button>
+                    </div>
+                  </div>
+                  <button v-if="d.canRequest" type="button" @click="d.request" style="min-height: 56px; border: none; border-radius: 14px; background: linear-gradient(135deg,#F97316,#EA580C); color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer; box-shadow: 0 12px 24px -14px rgba(234,88,12,.9)">🙋 이 배차 신청하기</button>
+                  <button v-if="d.myReqPending" type="button" @click="d.cancelReq" style="min-height: 48px; border: 1px solid #D1D5DB; border-radius: 14px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">신청 취소</button>
+                </template>
+                <div v-if="d.assigned" style="display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid #EEF2F7">
                   <img :src="v.emo.user" alt="" aria-hidden="true" class="e3d" style="width: 30px; height: 30px">
                   <span style="font-size: 16px; font-weight: 800; color: #0F172A">{{ d.driverNameOnly }}</span>
                   <a v-if="d.driverPhone" :href="'tel:' + d.driverPhone" style="margin-left: auto; display: flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 12px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 13px; font-weight: 800; text-decoration: none; white-space: nowrap">📞 전화</a>
                 </div>
 
-                <div>
+                <div v-if="d.assigned">
                   <span style="display: block; font-size: 12px; font-weight: 800; color: #475569; margin-bottom: 6px">현황</span>
                   <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
                     <div v-for="st in d.steps" :key="st.key" class="jy-step" style="display: flex; flex-direction: column; gap: 4px">
@@ -1679,7 +1704,7 @@ var S = Vue.reactive({
   noticeOpen: false, noticeErr: '', noticeForm: { id: null, title: '', body: '', must: false, starts: iso(today0()), ends: '' },
   addCoOpen: false, addCoName: '',
   splash: true, splashOut: false,
-  routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
+  routes: [], dispatches: [], dreqs: [], dispDate: iso(today0()), dispSel: null, delAsk: null, reqArm: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
   routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
   lic: {}, veh: {}, contracts: [], dx: null, ctrForm: null, ctrView: null, ctrUrls: {}, ctrDel: null, pdfBusy: false,
@@ -1785,6 +1810,8 @@ async function loadAll() {
 async function loadDispatches() {
   var days = [iso(today0()), iso(addDays(today0(), 1))]; if (days.indexOf(S.dispDate) < 0) days.push(S.dispDate);
   S.dispatches = await q(sb.from('dispatches').select('*').in('work_date', days).order('created_at'));
+  var ids = S.dispatches.filter(function (d) { return !d.driver_id; }).map(function (d) { return d.id; });
+  S.dreqs = ids.length ? await q(sb.from('dispatch_requests').select('*').in('dispatch_id', ids).order('created_at')) : [];
 }
 function hm(ts) { if (!ts) return ''; var d = new Date(ts); return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
 async function refreshUrls() {
@@ -1794,6 +1821,40 @@ async function refreshUrls() {
   var r = await sb.storage.from(BUCKET).createSignedUrls(paths, 60 * 60 * 6);
   if (r.error) return console.error(r.error);
   var u = Object.assign({}, S.urls); r.data.forEach(function (x) { if (x.signedUrl) u[x.path] = x.signedUrl; }); S.urls = u;
+}
+// ---------- 배차 배정 신청 ----------
+async function requestDispatch(d) {
+  await run(async function () {
+    var r = await sb.rpc('request_dispatch', { p_dispatch: d.id });
+    if (r.error) { flash(r.error.message || '신청하지 못했어요'); return; }
+    await loadDispatches();
+    var p = await pushCall({ kind: 'dispatch_request', request_id: r.data });
+    flash(p && p.ok && !p.skipped ? '배정 신청했어요 · 담당자 ' + (p.people || 0) + '명에게 알림을 보냈어요' : '배정 신청했어요');
+  });
+}
+async function cancelDispatchReq(rid) {
+  await run(async function () {
+    var r = await sb.rpc('cancel_dispatch_request', { p_req: rid });
+    if (r.error) { flash(r.error.message || '취소하지 못했어요'); return; }
+    await loadDispatches(); flash('신청을 취소했어요');
+  });
+}
+async function assignDispatch(req) {
+  await run(async function () {
+    var r = await sb.rpc('assign_dispatch', { p_req: req.id });
+    if (r.error) { flash(r.error.message || '배정하지 못했어요'); await loadDispatches(); return; }
+    await loadDispatches();
+    var p = await pushCall({ kind: 'dispatch_assigned', request_id: req.id });
+    flash(req.driver_name + ' 기사로 배정했어요' + (p && p.sent ? ' · 기사에게 알림을 보냈어요' : ''));
+  });
+}
+// 알림을 눌러 들어온 경우 해당 화면으로 (예: ?tab=dispatch&date=2026-11-25)
+var NAV = (function () { try { var u = new URLSearchParams(location.search); return { tab: u.get('tab'), date: u.get('date') }; } catch (e) { return {}; } })();
+function applyNav() {
+  if (NAV.tab !== 'dispatch') return;
+  S.tab = 'dispatch'; if (/^\d{4}-\d{2}-\d{2}$/.test(NAV.date || '')) S.dispDate = NAV.date; S.dispSel = null;
+  NAV = {}; try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  run(loadDispatches);
 }
 function openNoticeDetail(id) { S.noticeSel = id; S.noticeStatusOpen = false; S.noticeDelAsk = false; }
 async function loadNoticePeople(id) {
@@ -1830,7 +1891,7 @@ async function afterAuth(user) {
   if (S.role === 'admin') { S.screen = 'pick'; }
   else {
     if (!S.drivers.find(function (d) { return d.id === user.id; })) { await sb.auth.signOut(); S.screen = 'login'; S.loginErr = '기사 정보가 없는 계정이에요. 관리자에게 문의해 주세요'; return; }
-    S.screen = 'app'; S.tab = 'home';
+    S.screen = 'app'; S.tab = 'home'; applyNav();
   }
 }
 async function loadCompanies() {
@@ -2016,16 +2077,37 @@ function build() {
       catch (e) { fail(e, '기록하지 못했어요'); }
     });
   }
+  var canAssignAll = !isDriver || (!!meD && tabCan('dispatch', 'edit'));
   function dispView(d) {
     var stt = dispStatus(d), canStamp = !isDriver || d.driver_id === s.uid, open = s.dispSel === d.id;
+    var assigned = !!d.driver_id, dv = assigned ? s.drivers.find(function (x) { return x.id === d.driver_id; }) : null, mine = assigned && d.driver_id === s.uid;
+    var reqs = assigned ? [] : s.dreqs.filter(function (r) { return r.dispatch_id === d.id && r.status === '대기'; });
+    var myReq = reqs.find(function (r) { return r.driver_id === s.uid; });
+    var badge = !assigned ? ['⚠️', '미배정', { background: 'linear-gradient(135deg,#F97316,#EA580C)', color: '#FFFFFF', padding: '4px 10px', boxShadow: '0 6px 14px -8px rgba(234,88,12,.9)' }]
+      : (mine ? ['🚚', '내 배차', { background: 'linear-gradient(135deg,#1E2E9E,#0B1533)', color: '#F7E7A1', padding: '4px 10px' }]
+        : ['👤', (dv ? dv.name + ' ' + (dv.rank || '기사') : '배정됨'), { background: 'linear-gradient(135deg,#E0E7FF,#C7D2FE)', color: '#1E3A8A', padding: '4px 10px' }]);
     var rt = s.routes.find(function (r) { return r.id === d.route_id; });
     return {
       id: d.id, route: d.route_name, driverText: driverName(d.driver_id), driverNameOnly: driverShort(d.driver_id), driverRank: (function () { var x = s.drivers.find(function (y) { return y.id === d.driver_id; }); return x ? (x.rank || '기사') : ''; })(), driverPhone: (function () { var x = s.drivers.find(function (y) { return y.id === d.driver_id; }); return x && !isDriver ? x.phone : ''; })(), title: driverShort(d.driver_id) + ' / ' + d.route_name, feeText: '₩' + won(d.fee), memo: d.memo, routeMemo: rt ? rt.memo : '',
       statusText: stt[0], statusStyle: stStyle(stt), statusEmo: stt[3], lastTime: stt[4] ? hm(stt[4]) : '',
+      assigned: assigned, badgeIcon: badge[0], badgeText: badge[1], badgeStyle: badge[2], reqCount: reqs.length,
+      myReqPending: !!myReq, canAssign: canAssignAll && !assigned,
+      canRequest: isDriver && !assigned && !myReq && !!meD && meD.status === '활성' && d.work_date >= iso(today0()),
+      request: function () { requestDispatch(d); }, cancelReq: function () { if (myReq) cancelDispatchReq(myReq.id); },
+      reqs: reqs.map(function (r) {
+        var armed = s.reqArm === r.id;
+        return { id: r.id, name: r.driver_name, rank: r.driver_rank, mine: r.driver_id === s.uid, when: hm(r.created_at), armed: armed,
+          assignStyle: { flex: 'none', minHeight: '40px', padding: '0 12px', border: 'none', borderRadius: '10px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap',
+            background: armed ? '#C2410C' : '#1E4FD8', color: '#FFFFFF' },
+          assign: function () {
+            if (S.reqArm !== r.id) { S.reqArm = r.id; setTimeout(function () { if (S.reqArm === r.id) S.reqArm = null; }, 4000); return; }
+            S.reqArm = null; assignDispatch(r);
+          } };
+      }),
       chevStyle: { fontSize: '18px', color: '#64748B', transition: 'transform .2s', transform: open ? 'rotate(180deg)' : 'none' },
       isOpen: open, canStamp: canStamp, delAsk: s.delAsk === d.id,
       summary: STEPS.map(function (x) { return x[1] + ' ' + (hm(d[x[0]]) || '—'); }).join(' · '),
-      cardStyle: { background: '#FFFFFF', borderRadius: '18px', border: open ? '2px solid #4F6BFF' : '2px solid transparent', overflow: 'hidden', boxShadow: open ? '0 16px 34px -18px rgba(35,55,184,.55)' : '0 1px 2px rgba(15,23,42,.04), 0 10px 28px -14px rgba(15,23,42,.22)' },
+      cardStyle: { background: assigned ? '#FFFFFF' : 'linear-gradient(180deg,#FFFFFF,#FFF7ED)', borderRadius: '18px', border: open ? '2px solid #4F6BFF' : (assigned ? '2px solid transparent' : '2px dashed #FB923C'), overflow: 'hidden', boxShadow: open ? '0 16px 34px -18px rgba(35,55,184,.55)' : '0 1px 2px rgba(15,23,42,.04), 0 10px 28px -14px rgba(15,23,42,.22)' },
       toggle: function () { S.dispSel = open ? null : d.id; S.delAsk = null; },
       steps: STEPS.map(function (x) {
         var t = d[x[0]], em = { arrive_at: EMO.truck, pickup_at: EMO.pkg, done_at: EMO.check }[x[0]];
@@ -2052,8 +2134,10 @@ function build() {
       }
     };
   }
-  var dayDisp = s.dispatches.filter(function (d) { return d.work_date === s.dispDate && (isDriver ? d.driver_id === s.uid : d.company_id === scopeId); });
-  var dispRows = dayDisp.map(dispView);
+  function openFor(d) { return !d.driver_id && !!meD && d.company_id === meD.company_id && meD.status === '활성'; }
+  var dayDisp = s.dispatches.filter(function (d) { return d.work_date === s.dispDate && (isDriver ? (d.driver_id === s.uid || openFor(d)) : d.company_id === scopeId); });
+  var dispRows = dayDisp.slice().sort(function (a, b) { return (a.driver_id ? 1 : 0) - (b.driver_id ? 1 : 0) || String(a.created_at).localeCompare(String(b.created_at)); }).map(dispView);
+  var openList = isDriver ? s.dispatches.filter(function (d) { return openFor(d) && d.work_date >= iso(today0()); }) : [];
   var todayRaw = isDriver ? s.dispatches.find(function (d) { return d.work_date === iso(today0()) && d.driver_id === s.uid; }) : null;
   var scopeRoutes = s.routes.filter(function (r) { return r.company_id === scopeId; });
   function shiftDay(n) { var p = S.dispDate.split('-'); S.dispDate = iso(addDays(new Date(+p[0], +p[1] - 1, +p[2]), n)); S.dispSel = null; run(loadDispatches); }
@@ -2135,7 +2219,7 @@ function build() {
       var ds = s.drivers.filter(function (d) { return d.company_id === c.id; });
       var p = ds.filter(function (d) { return d.status === '승인 대기'; }).length;
       return { name: c.name, initial: c.name.charAt(0), camp: c.camp || '캠프 미지정', total: ds.length, pending: p, hasPending: p > 0,
-        pick: function () { S.company = c.id; S.screen = 'app'; S.tab = 'home'; S.adminView = 'menu'; S.search = ''; S.selId = null; } };
+        pick: function () { S.company = c.id; S.screen = 'app'; S.tab = 'home'; S.adminView = 'menu'; S.search = ''; S.selId = null; applyNav(); } };
     }),
     noCompanies: s.companies.length === 0,
     addCoOpen: s.addCoOpen, addCoName: s.addCoName,
@@ -2398,7 +2482,7 @@ function build() {
     // 배차
     tDispatch: s.tab === 'dispatch',
     notiPop: (function () {
-      if (!s.notiShow || s.screen !== 'app' || s.role === 'admin' || s.splash) return null;
+      if (!s.notiShow || s.screen !== 'app' || (s.role === 'admin' && !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) || s.splash) return null;
       var e = notiEnv(), later = function () { S.notiShow = false; S.notiDismissed = true; };
       if (e.isIOS && !e.standalone) return { title: '홈 화면에 설치해 주세요', body: '아이폰은 홈 화면에 설치한 앱에서만\n알림을 받을 수 있어요.',
         steps: ['사파리 아래 가운데 공유 버튼을 눌러요', '"홈 화면에 추가"를 눌러요', '홈 화면의 JY 아이콘으로 열어 알림을 허용해요'],
@@ -2536,6 +2620,8 @@ function build() {
         } };
     }),
     dispRows: dispRows,
+    openCount: openList.length,
+    goOpen: function () { var f = openList.slice().sort(function (a, b) { return a.work_date.localeCompare(b.work_date); })[0]; S.tab = 'dispatch'; S.dispDate = f ? f.work_date : iso(today0()); S.dispSel = f ? f.id : null; run(loadDispatches); },
     dispDateText: fmtDate(parseD(s.dispDate)), isToday: s.dispDate === iso(today0()),
     dayPrev: function () { shiftDay(-1); }, dayNext: function () { shiftDay(1); }, dayToday: function () { S.dispDate = iso(today0()); S.dispSel = null; run(loadDispatches); },
     dispStats: { count: dayDisp.length, done: dayDisp.filter(function (d) { return d.done_at; }).length, feeText: wonShort(dayDisp.reduce(function (a, d) { return a + Number(d.fee || 0); }, 0)) },
