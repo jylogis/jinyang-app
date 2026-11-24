@@ -132,6 +132,13 @@ a{color:#1E4FD8;text-decoration:none}
         <div style="display: flex; flex-direction: column; gap: 14px">
           <h2 style="margin: 0; font-size: 20px; font-weight: 800">기본 정보를 입력해 주세요</h2>
           <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-center" style="font-size: 13px; font-weight: 700; color: #374151">소속센터 *</label>
+            <select id="su-center" :value="v.form.center" @change="v.on.center" style="min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 12px; font-family: inherit; font-size: 15px; background: #FFFFFF">
+              <option value="">소속센터를 선택하세요</option>
+              <option v-for="c in v.companyOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
             <label for="su-name" style="font-size: 13px; font-weight: 700; color: #374151">이름 *</label>
             <input id="su-name" type="text" :value="v.form.name" @input="v.on.name" placeholder="실명 입력" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
           </div>
@@ -144,7 +151,7 @@ a{color:#1E4FD8;text-decoration:none}
             </div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px">
-            <label for="su-phone" style="font-size: 13px; font-weight: 700; color: #374151">본폰 * (로그인 아이디로 써요)</label>
+            <label for="su-phone" style="font-size: 13px; font-weight: 700; color: #374151">전화번호 * (로그인 아이디로 써요)</label>
             <input id="su-phone" type="tel" :value="v.form.phone" @input="v.on.phone" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px">
@@ -160,21 +167,53 @@ a{color:#1E4FD8;text-decoration:none}
             <input id="su-sub" type="tel" :value="v.form.sub" @input="v.on.sub" placeholder="010-0000-0000" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
           </div>
           <div style="display: flex; flex-direction: column; gap: 4px">
-            <label for="su-addr" style="font-size: 13px; font-weight: 700; color: #374151">주소</label>
+            <label for="su-addr" style="font-size: 13px; font-weight: 700; color: #374151">주소 *</label>
             <input id="su-addr" type="text" :value="v.form.addr" @input="v.on.addr" placeholder="도로명 주소" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px">
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 4px">
-            <label for="su-center" style="font-size: 13px; font-weight: 700; color: #374151">소속센터 *</label>
-            <select id="su-center" :value="v.form.center" @change="v.on.center" style="min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 12px; font-family: inherit; font-size: 15px; background: #FFFFFF">
-              <option value="">소속센터를 선택하세요</option>
-              <option v-for="c in v.companyOptions" :key="c.id" :value="c.id">{{ c.name }}</option>
-            </select>
           </div>
           <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6; background: #EEF2FF; border-radius: 10px; padding: 10px 12px">주민등록번호는 암호화해서 저장되고, 본인과 소속 업체 관리자만 볼 수 있어요.</p>
         </div>
       </template>
 
       <template v-if="v.step2">
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <h2 style="margin: 0; font-size: 20px; font-weight: 800">면허·차량 정보를 입력해 주세요</h2>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span id="su-lt" style="font-size: 13px; font-weight: 700; color: #374151">면허 종류 *</span>
+            <div role="group" aria-labelledby="su-lt" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+              <button v-for="t in v.licTypes" :key="t" type="button" @click="v.on.licType(t)" :aria-pressed="v.form.licType === t ? 'true' : 'false'" :style="{ minHeight: '46px', borderRadius: '12px', fontFamily: 'inherit', fontSize: '14px', fontWeight: 800, cursor: 'pointer', border: v.form.licType === t ? '2px solid #1E4FD8' : '1px solid #D1D5DB', background: v.form.licType === t ? '#EEF2FF' : '#FFFFFF', color: v.form.licType === t ? '#1E3A8A' : '#374151' }">{{ t }}</button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-lno" style="font-size: 13px; font-weight: 700; color: #374151">운전면허번호 *</label>
+            <input id="su-lno" type="text" inputmode="numeric" autocomplete="off" :value="v.form.licNo" @input="v.on.licNo" placeholder="00-00-000000-00" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-cno" style="font-size: 13px; font-weight: 700; color: #374151">화물운송자격번호 *</label>
+            <input id="su-cno" type="text" autocomplete="off" :value="v.form.cargoNo" @input="v.on.cargoNo" placeholder="자격증에 적힌 번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-cdt" style="font-size: 13px; font-weight: 700; color: #374151">자격증 취득일 *</label>
+            <input id="su-cdt" type="date" :max="v.todayIso" :value="v.form.certDate" @input="v.on.certDate" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%; background: #FFFFFF">
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <label for="su-cnm" style="font-size: 13px; font-weight: 700; color: #374151">차량명 *</label>
+              <input id="su-cnm" type="text" :value="v.form.carName" @input="v.on.carName" placeholder="예: 포터2" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <label for="su-cyr" style="font-size: 13px; font-weight: 700; color: #374151">차량연식 *</label>
+              <input id="su-cyr" type="text" inputmode="numeric" maxlength="4" :value="v.form.carYear" @input="v.on.carYear" placeholder="예: 2022" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="su-cno2" style="font-size: 13px; font-weight: 700; color: #374151">차량번호 *</label>
+            <input id="su-cno2" type="text" autocomplete="off" :value="v.form.carNo" @input="v.on.carNo" placeholder="예: 12가3456" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <p style="margin: 0; font-size: 12px; color: #4B5563; line-height: 1.6; background: #EEF2FF; border-radius: 10px; padding: 10px 12px">면허·차량 정보는 본인과 소속 업체 관리자만 볼 수 있어요. 차가 바뀌면 '내 정보'에서 고칠 수 있어요.</p>
+        </div>
+      </template>
+
+      <template v-if="v.step3">
         <div style="display: flex; flex-direction: column; gap: 14px">
           <h2 style="margin: 0; font-size: 20px; font-weight: 800">서류 사진을 첨부해 주세요</h2>
           <p style="margin: 0; font-size: 13px; color: #4B5563">글자가 잘 보이게 찍어 주세요. 나중에 '내 정보'에서 첨부해도 돼요.</p>
@@ -198,7 +237,7 @@ a{color:#1E4FD8;text-decoration:none}
         </div>
       </template>
 
-      <template v-if="v.step3">
+      <template v-if="v.step4">
         <div style="display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 60px; text-align: center">
           <div style="width: 72px; height: 72px; border-radius: 36px; background: #DCFCE7; display: flex; align-items: center; justify-content: center">
             <svg aria-hidden="true" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#15803D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
@@ -704,6 +743,58 @@ a{color:#1E4FD8;text-decoration:none}
             </template>
           </div>
 
+          <template v-if="v.lv">
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 700">면허·차량 정보 <span v-if="v.lv.missing" style="font-size: 12px; font-weight: 800; color: #B91C1C">미입력 {{ v.lv.missing }}개</span></h2>
+              <button v-if="!v.lv.editing" type="button" @click="v.lv.edit" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #1E4FD8; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">수정</button>
+            </div>
+            <template v-if="!v.lv.editing">
+              <div v-for="r in v.lv.rows" :key="r.label" style="display: flex; justify-content: space-between; gap: 16px; font-size: 14px"><span style="color: #4B5563; flex: none">{{ r.label }}</span><span :style="r.style">{{ r.value }}</span></div>
+            </template>
+            <template v-if="v.lv.editing">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span id="lv-lt" style="font-size: 13px; font-weight: 700; color: #374151">면허 종류</span>
+            <div role="group" aria-labelledby="lv-lt" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+              <button v-for="t in v.licTypes" :key="t" type="button" @click="v.lv.on.licType(t)" :aria-pressed="v.lv.f.licType === t ? 'true' : 'false'" :style="{ minHeight: '46px', borderRadius: '12px', fontFamily: 'inherit', fontSize: '14px', fontWeight: 800, cursor: 'pointer', border: v.lv.f.licType === t ? '2px solid #1E4FD8' : '1px solid #D1D5DB', background: v.lv.f.licType === t ? '#EEF2FF' : '#FFFFFF', color: v.lv.f.licType === t ? '#1E3A8A' : '#374151' }">{{ t }}</button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-lno" style="font-size: 13px; font-weight: 700; color: #374151">운전면허번호</label>
+            <input id="lv-lno" type="text" inputmode="numeric" autocomplete="off" :value="v.lv.f.licNo" @input="v.lv.on.licNo" placeholder="00-00-000000-00" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-cno" style="font-size: 13px; font-weight: 700; color: #374151">화물운송자격번호</label>
+            <input id="lv-cno" type="text" autocomplete="off" :value="v.lv.f.cargoNo" @input="v.lv.on.cargoNo" placeholder="자격증에 적힌 번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-cdt" style="font-size: 13px; font-weight: 700; color: #374151">자격증 취득일</label>
+            <input id="lv-cdt" type="date" :max="v.todayIso" :value="v.lv.f.certDate" @input="v.lv.on.certDate" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%; background: #FFFFFF">
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <label for="lv-cnm" style="font-size: 13px; font-weight: 700; color: #374151">차량명</label>
+              <input id="lv-cnm" type="text" :value="v.lv.f.carName" @input="v.lv.on.carName" placeholder="예: 포터2" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <label for="lv-cyr" style="font-size: 13px; font-weight: 700; color: #374151">차량연식</label>
+              <input id="lv-cyr" type="text" inputmode="numeric" maxlength="4" :value="v.lv.f.carYear" @input="v.lv.on.carYear" placeholder="예: 2022" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-cno2" style="font-size: 13px; font-weight: 700; color: #374151">차량번호</label>
+            <input id="lv-cno2" type="text" autocomplete="off" :value="v.lv.f.carNo" @input="v.lv.on.carNo" placeholder="예: 12가3456" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+              </div>
+              <template v-if="v.lv.err"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.lv.err }}</span></template>
+              <div style="display: flex; gap: 8px">
+                <button type="button" @click="v.lv.cancel" style="flex: 1; min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">취소</button>
+                <button type="button" @click="v.lv.save" style="flex: 2; min-height: 48px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">저장</button>
+              </div>
+            </template>
+          </div>
+          </template>
           <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
             <h2 style="margin: 0; font-size: 16px; font-weight: 700">서류 사진 <span style="font-size: 13px; font-weight: 500; color: #4B5563">{{ v.me.docText }}</span></h2>
             <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
@@ -722,6 +813,28 @@ a{color:#1E4FD8;text-decoration:none}
               </template>
             </div>
           </div>
+          <template v-if="v.ctr">
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px"><img :src="v.emo.memo" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">{{ v.ctr.heading }} <span style="font-size: 13px; font-weight: 500; color: #4B5563">{{ v.ctr.list.length }}건</span></h2>
+              <button v-if="v.ctr.canEdit" type="button" @click="v.ctr.add" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: none; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">+ 계약서 등록</button>
+            </div>
+            <template v-if="!v.ctr.list.length"><p style="margin: 0; font-size: 13px; color: #6B7280; text-align: center; padding: 10px 0">{{ v.ctr.empty }}</p></template>
+            <div v-for="c in v.ctr.list" :key="c.id" style="border: 1px solid #E5E7EB; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+              <button type="button" @click="c.open" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: none; background: transparent; padding: 0; font-family: inherit; text-align: left; cursor: pointer">
+                <span style="font-size: 15px; font-weight: 800; color: #111827">{{ c.title }}</span>
+                <span style="font-size: 13px; color: #374151">계약 기간 {{ c.period }}</span>
+                <span style="font-size: 12px; color: #6B7280">{{ c.meta }}</span>
+              </button>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <button type="button" @click="c.open" style="flex: 1; min-width: 64px; min-height: 40px; border: 1px solid #C7D2FE; border-radius: 10px; background: #EEF2FF; color: #1E3A8A; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">보기</button>
+                <button type="button" @click="c.save" style="flex: 1; min-width: 64px; min-height: 40px; border: 1px solid #FDE68A; border-radius: 10px; background: #FFFBEB; color: #92400E; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">PDF 저장</button>
+                <button v-if="v.ctr.canPrint" type="button" @click="c.print" style="flex: 1; min-width: 64px; min-height: 40px; border: 1px solid #D1D5DB; border-radius: 10px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">인쇄</button>
+                <button v-if="v.ctr.canEdit" type="button" @click="c.del" :style="{ flex: 1, minWidth: '64px', minHeight: '40px', borderRadius: '10px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', border: c.delAsk ? 'none' : '1px solid #FECACA', background: c.delAsk ? '#DC2626' : '#FFFFFF', color: c.delAsk ? '#FFFFFF' : '#B91C1C' }">{{ c.delAsk ? '정말 삭제' : '삭제' }}</button>
+              </div>
+            </div>
+          </div>
+          </template>
           <template v-if="v.showReduceBtn">
             <button type="button" @click="v.openReduce" style="min-height: 48px; border-radius: 14px; border: 1px solid #C2410C; background: #FFFFFF; color: #C2410C; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">{{ v.reduceBtnLabel }}</button>
           </template>
@@ -955,6 +1068,58 @@ a{color:#1E4FD8;text-decoration:none}
             <div style="display: flex; justify-content: space-between; gap: 16px; font-size: 14px"><span style="color: #4B5563; flex: none">주소</span><span style="font-weight: 500; text-align: right">{{ v.sel.addrText }}</span></div>
             <div style="display: flex; justify-content: space-between; font-size: 14px"><span style="color: #4B5563">소속센터</span><span style="font-weight: 500">{{ v.sel.center }}</span></div>
           </div>
+          <template v-if="v.lv">
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 700">면허·차량 정보 <span v-if="v.lv.missing" style="font-size: 12px; font-weight: 800; color: #B91C1C">미입력 {{ v.lv.missing }}개</span></h2>
+              <button v-if="!v.lv.editing" type="button" @click="v.lv.edit" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1px solid #1E4FD8; background: #FFFFFF; color: #1E4FD8; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer">수정</button>
+            </div>
+            <template v-if="!v.lv.editing">
+              <div v-for="r in v.lv.rows" :key="r.label" style="display: flex; justify-content: space-between; gap: 16px; font-size: 14px"><span style="color: #4B5563; flex: none">{{ r.label }}</span><span :style="r.style">{{ r.value }}</span></div>
+            </template>
+            <template v-if="v.lv.editing">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <span id="lv-lt" style="font-size: 13px; font-weight: 700; color: #374151">면허 종류</span>
+            <div role="group" aria-labelledby="lv-lt" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px">
+              <button v-for="t in v.licTypes" :key="t" type="button" @click="v.lv.on.licType(t)" :aria-pressed="v.lv.f.licType === t ? 'true' : 'false'" :style="{ minHeight: '46px', borderRadius: '12px', fontFamily: 'inherit', fontSize: '14px', fontWeight: 800, cursor: 'pointer', border: v.lv.f.licType === t ? '2px solid #1E4FD8' : '1px solid #D1D5DB', background: v.lv.f.licType === t ? '#EEF2FF' : '#FFFFFF', color: v.lv.f.licType === t ? '#1E3A8A' : '#374151' }">{{ t }}</button>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-lno" style="font-size: 13px; font-weight: 700; color: #374151">운전면허번호</label>
+            <input id="lv-lno" type="text" inputmode="numeric" autocomplete="off" :value="v.lv.f.licNo" @input="v.lv.on.licNo" placeholder="00-00-000000-00" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-cno" style="font-size: 13px; font-weight: 700; color: #374151">화물운송자격번호</label>
+            <input id="lv-cno" type="text" autocomplete="off" :value="v.lv.f.cargoNo" @input="v.lv.on.cargoNo" placeholder="자격증에 적힌 번호" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-cdt" style="font-size: 13px; font-weight: 700; color: #374151">자격증 취득일</label>
+            <input id="lv-cdt" type="date" :max="v.todayIso" :value="v.lv.f.certDate" @input="v.lv.on.certDate" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%; background: #FFFFFF">
+          </div>
+          <div style="display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 8px">
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <label for="lv-cnm" style="font-size: 13px; font-weight: 700; color: #374151">차량명</label>
+              <input id="lv-cnm" type="text" :value="v.lv.f.carName" @input="v.lv.on.carName" placeholder="예: 포터2" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px">
+              <label for="lv-cyr" style="font-size: 13px; font-weight: 700; color: #374151">차량연식</label>
+              <input id="lv-cyr" type="text" inputmode="numeric" maxlength="4" :value="v.lv.f.carYear" @input="v.lv.on.carYear" placeholder="예: 2022" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 4px">
+            <label for="lv-cno2" style="font-size: 13px; font-weight: 700; color: #374151">차량번호</label>
+            <input id="lv-cno2" type="text" autocomplete="off" :value="v.lv.f.carNo" @input="v.lv.on.carNo" placeholder="예: 12가3456" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+          </div>
+              </div>
+              <template v-if="v.lv.err"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.lv.err }}</span></template>
+              <div style="display: flex; gap: 8px">
+                <button type="button" @click="v.lv.cancel" style="flex: 1; min-height: 48px; border: 1px solid #D1D5DB; border-radius: 12px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 15px; font-weight: 700; cursor: pointer">취소</button>
+                <button type="button" @click="v.lv.save" style="flex: 2; min-height: 48px; border: none; border-radius: 12px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">저장</button>
+              </div>
+            </template>
+          </div>
+          </template>
           <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
             <h2 style="margin: 0; font-size: 16px; font-weight: 700">제출 서류 <span style="font-size: 13px; font-weight: 500; color: #4B5563">{{ v.sel.docText }}</span></h2>
             <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
@@ -971,6 +1136,28 @@ a{color:#1E4FD8;text-decoration:none}
               </template>
             </div>
           </div>
+          <template v-if="v.ctr">
+          <div style="background: #FFFFFF; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 8px">
+              <h2 style="margin: 0; font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 6px"><img :src="v.emo.memo" alt="" aria-hidden="true" class="e3d" style="width: 24px; height: 24px">{{ v.ctr.heading }} <span style="font-size: 13px; font-weight: 500; color: #4B5563">{{ v.ctr.list.length }}건</span></h2>
+              <button v-if="v.ctr.canEdit" type="button" @click="v.ctr.add" style="min-height: 40px; padding: 0 14px; border-radius: 10px; border: none; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">+ 계약서 등록</button>
+            </div>
+            <template v-if="!v.ctr.list.length"><p style="margin: 0; font-size: 13px; color: #6B7280; text-align: center; padding: 10px 0">{{ v.ctr.empty }}</p></template>
+            <div v-for="c in v.ctr.list" :key="c.id" style="border: 1px solid #E5E7EB; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px">
+              <button type="button" @click="c.open" style="display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: none; background: transparent; padding: 0; font-family: inherit; text-align: left; cursor: pointer">
+                <span style="font-size: 15px; font-weight: 800; color: #111827">{{ c.title }}</span>
+                <span style="font-size: 13px; color: #374151">계약 기간 {{ c.period }}</span>
+                <span style="font-size: 12px; color: #6B7280">{{ c.meta }}</span>
+              </button>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap">
+                <button type="button" @click="c.open" style="flex: 1; min-width: 64px; min-height: 40px; border: 1px solid #C7D2FE; border-radius: 10px; background: #EEF2FF; color: #1E3A8A; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">보기</button>
+                <button type="button" @click="c.save" style="flex: 1; min-width: 64px; min-height: 40px; border: 1px solid #FDE68A; border-radius: 10px; background: #FFFBEB; color: #92400E; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">PDF 저장</button>
+                <button v-if="v.ctr.canPrint" type="button" @click="c.print" style="flex: 1; min-width: 64px; min-height: 40px; border: 1px solid #D1D5DB; border-radius: 10px; background: #FFFFFF; color: #374151; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">인쇄</button>
+                <button v-if="v.ctr.canEdit" type="button" @click="c.del" :style="{ flex: 1, minWidth: '64px', minHeight: '40px', borderRadius: '10px', fontFamily: 'inherit', fontSize: '13px', fontWeight: 800, cursor: 'pointer', border: c.delAsk ? 'none' : '1px solid #FECACA', background: c.delAsk ? '#DC2626' : '#FFFFFF', color: c.delAsk ? '#FFFFFF' : '#B91C1C' }">{{ c.delAsk ? '정말 삭제' : '삭제' }}</button>
+              </div>
+            </div>
+          </div>
+          </template>
           <template v-if="v.sel.rd.has">
             <div style="background: #FFF7ED; border: 2px solid #EA580C; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
               <div style="display: flex; align-items: center; justify-content: space-between">
@@ -1111,6 +1298,74 @@ a{color:#1E4FD8;text-decoration:none}
   </div>
 </template>
 
+<template v-if="v.ctrF">
+  <div style="position: absolute; inset: 0; z-index: 45; background: rgba(5,7,15,0.6); display: flex; align-items: flex-end; justify-content: center">
+    <div role="dialog" aria-modal="true" aria-labelledby="ctrf-title" style="width: 100%; max-height: 92dvh; overflow-y: auto; box-sizing: border-box; background: #FFFFFF; border-radius: 22px 22px 0 0; padding: 18px 18px calc(18px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between">
+        <h2 id="ctrf-title" style="margin: 0; font-size: 18px; font-weight: 800">계약서 등록 · {{ v.ctrF.who }}</h2>
+        <button type="button" aria-label="닫기" @click="v.ctrF.close" style="width: 44px; height: 44px; border: none; background: transparent; font-size: 24px; color: #374151; cursor: pointer">×</button>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="ctr-title" style="font-size: 13px; font-weight: 700; color: #374151">계약서 이름 *</label>
+        <input id="ctr-title" type="text" :value="v.ctrF.f.title" @input="v.ctrF.on.title" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <div style="display: flex; flex-direction: column; gap: 4px"><label for="ctr-start" style="font-size: 13px; font-weight: 700; color: #374151">계약 시작일</label><input id="ctr-start" type="date" :value="v.ctrF.f.start" @input="v.ctrF.on.start" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%; background: #FFFFFF; padding: 0 8px"></div>
+        <div style="display: flex; flex-direction: column; gap: 4px"><label for="ctr-end" style="font-size: 13px; font-weight: 700; color: #374151">계약 종료일</label><input id="ctr-end" type="date" :value="v.ctrF.f.end" @input="v.ctrF.on.end" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%; background: #FFFFFF; padding: 0 8px"></div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <label for="ctr-memo" style="font-size: 13px; font-weight: 700; color: #374151">메모</label>
+        <input id="ctr-memo" type="text" :value="v.ctrF.f.memo" @input="v.ctrF.on.memo" placeholder="예: 2027년 재계약" style="min-height: 48px; box-sizing: border-box; border: 1px solid #D1D5DB; border-radius: 12px; padding: 0 14px; font-family: inherit; font-size: 15px; width: 100%">
+      </div>
+      <span style="font-size: 13px; font-weight: 700; color: #374151">계약서 파일 * <span style="font-weight: 500; color: #6B7280">(스캔 사진 여러 장 또는 PDF)</span></span>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+        <label for="ctr-cam" style="min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 14px; background: #0B1533; color: #FFFFFF; font-size: 14px; font-weight: 800; cursor: pointer">📷 카메라로 스캔</label>
+        <input id="ctr-cam" type="file" accept="image/*" capture="environment" @change="v.ctrF.addFiles" style="display: none">
+        <label for="ctr-file" style="min-height: 56px; display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: 14px; background: #EEF2FF; color: #1E3A8A; font-size: 14px; font-weight: 800; cursor: pointer">📎 파일 선택</label>
+        <input id="ctr-file" type="file" accept="application/pdf,image/*" multiple @change="v.ctrF.addFiles" style="display: none">
+      </div>
+      <template v-if="!v.ctrF.files.length"><p style="margin: 0; font-size: 13px; color: #6B7280; text-align: center; background: #F8FAFC; border-radius: 12px; padding: 14px">계약서를 한 장씩 찍거나, PDF·사진 파일을 골라 주세요.<br>여러 장이면 순서대로 한 계약서로 묶여요.</p></template>
+      <div v-for="(fi, $index) in v.ctrF.files" :key="fi.key" style="display: flex; align-items: center; gap: 10px; border: 1px solid #E5E7EB; border-radius: 12px; padding: 8px">
+        <span style="width: 22px; font-size: 13px; font-weight: 800; color: #1E3A8A; text-align: center">{{ $index + 1 }}</span>
+        <img v-if="fi.thumb" :src="fi.thumb" alt="" style="width: 44px; height: 56px; object-fit: cover; border-radius: 6px; background: #F3F4F6">
+        <span v-else style="width: 44px; height: 56px; border-radius: 6px; background: #FEE2E2; color: #B91C1C; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center">PDF</span>
+        <span style="flex: 1; min-width: 0; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ fi.name }}<br><span style="color: #6B7280">{{ fi.sizeText }}</span></span>
+        <button type="button" @click="fi.remove" :aria-label="(fi.name) + ' 빼기'" style="width: 40px; height: 40px; border: none; border-radius: 10px; background: #F3F4F6; color: #374151; font-size: 18px; cursor: pointer">×</button>
+      </div>
+      <template v-if="v.ctrF.err"><span role="alert" style="font-size: 13px; font-weight: 700; color: #B91C1C">{{ v.ctrF.err }}</span></template>
+      <button type="button" @click="v.ctrF.save" style="min-height: 54px; border: none; border-radius: 14px; background: #1E4FD8; color: #FFFFFF; font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer">{{ v.busy ? '올리는 중…' : '계약서 등록하기' }}</button>
+    </div>
+  </div>
+</template>
+
+<template v-if="v.ctrV">
+  <div style="position: absolute; inset: 0; z-index: 45; background: rgba(5,7,15,0.85); display: flex; flex-direction: column">
+    <div style="flex: none; display: flex; align-items: center; gap: 8px; padding: 12px 12px 10px; color: #FFFFFF">
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+        <span style="font-size: 16px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ v.ctrV.title }}</span>
+        <span style="font-size: 12px; color: #CBD5E1">{{ v.ctrV.sub }}</span>
+      </div>
+      <button type="button" aria-label="닫기" @click="v.ctrV.close" style="width: 44px; height: 44px; border: none; border-radius: 22px; background: rgba(255,255,255,.12); color: #FFFFFF; font-size: 22px; cursor: pointer">×</button>
+    </div>
+    <div style="flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px">
+      <template v-if="v.ctrV.memo"><div style="background: rgba(255,255,255,.1); color: #F1F5F9; border-radius: 12px; padding: 10px 12px; font-size: 13px">메모: {{ v.ctrV.memo }}</div></template>
+      <template v-if="v.ctrV.loading"><div style="color: #E2E8F0; text-align: center; padding: 40px 0; font-size: 14px">불러오는 중…</div></template>
+      <template v-for="pg in v.ctrV.pages" :key="pg.key">
+        <img v-if="pg.isImg && pg.url" :src="pg.url" :alt="v.ctrV.title + ' ' + pg.no + '쪽'" style="width: 100%; border-radius: 6px; background: #FFFFFF">
+        <div v-if="!pg.isImg" style="background: #FFFFFF; border-radius: 12px; padding: 16px; display: flex; align-items: center; gap: 12px">
+          <span style="width: 44px; height: 56px; border-radius: 6px; background: #FEE2E2; color: #B91C1C; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none">PDF</span>
+          <span style="flex: 1; min-width: 0; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{ pg.name }}</span>
+          <a v-if="pg.url" :href="pg.url" target="_blank" rel="noopener" style="min-height: 40px; padding: 0 14px; display: flex; align-items: center; border-radius: 10px; background: #1E4FD8; color: #FFFFFF; font-size: 13px; font-weight: 800; text-decoration: none">열기</a>
+        </div>
+      </template>
+    </div>
+    <div style="flex: none; display: flex; gap: 8px; padding: 10px 12px calc(12px + env(safe-area-inset-bottom)); background: #0B1533">
+      <button type="button" @click="v.ctrV.save" style="flex: 1; min-height: 52px; border: none; border-radius: 14px; background: linear-gradient(135deg,#F7E7A1 0%,#D4AF37 45%,#A8801F 100%); color: #1A1305; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">{{ v.pdfBusy ? 'PDF 만드는 중…' : 'PDF 저장' }}</button>
+      <button v-if="v.ctr && v.ctr.canPrint" type="button" @click="v.ctrV.print" style="flex: 1; min-height: 52px; border: 1px solid rgba(255,255,255,.4); border-radius: 14px; background: transparent; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">인쇄</button>
+    </div>
+  </div>
+</template>
+
 <template v-if="v.notiPop">
   <div style="position: absolute; inset: 0; z-index: 50; background: rgba(5,7,15,0.72); display: flex; align-items: center; justify-content: center; padding: 20px">
     <div role="dialog" aria-modal="true" aria-labelledby="np-title" style="width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 24px; padding: 24px 20px 20px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; box-shadow: 0 30px 60px -20px rgba(0,0,0,.6)">
@@ -1233,8 +1488,184 @@ function leaseView(l) {
 }
 
 // ---------- 앱 상태 ----------
-function emptyForm() { return { name: '', rrn1: '', rrn2: '', phone: '', pw: '', pw2: '', sub: '', addr: '', center: '', centerName: '', docs: { license: null, cargo: null, car: null, biz: null } }; }
+function emptyForm() { return { name: '', rrn1: '', rrn2: '', phone: '', pw: '', pw2: '', sub: '', addr: '', center: '', centerName: '', licType: '', licNo: '', cargoNo: '', certDate: '', carName: '', carYear: '', carNo: '', docs: { license: null, cargo: null, car: null, biz: null } }; }
 var FILES = {}; // 가입 중 고른 사진 파일 (화면 상태와 분리)
+var CTR_FILES = []; // 계약서 등록 중 고른 파일 (화면 상태와 분리)
+var CTR_BUCKET = 'contracts';
+var LIC_TYPES = ['1종보통', '1종대형', '2종보통'];
+// 운전면허번호 12자리 → 11-23-456789-01
+function fmtLic(v) { var d = digits(v).slice(0, 12), out = d.slice(0, 2); if (d.length > 2) out += '-' + d.slice(2, 4); if (d.length > 4) out += '-' + d.slice(4, 10); if (d.length > 10) out += '-' + d.slice(10); return out; }
+function normCarNo(v) { return String(v || '').replace(/\s+/g, ''); }
+function dotD(v) { if (!v) return ''; var p = String(v).slice(0, 10).split('-'); return p[0] + '.' + p[1] + '.' + p[2]; }
+// 면허·차량 입력 검사 (가입 화면과 수정 화면이 같이 씀). 문제없으면 ''
+function checkLV(f) {
+  var y = new Date().getFullYear();
+  if (LIC_TYPES.indexOf(f.licType) < 0) return '면허 종류를 골라 주세요';
+  if (digits(f.licNo).length !== 12) return '운전면허번호 12자리를 입력해 주세요 (예: 11-23-456789-01)';
+  if (String(f.cargoNo || '').trim().length < 4) return '화물운송자격번호를 입력해 주세요';
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(f.certDate || '') || f.certDate > iso(today0())) return '자격증 취득일을 확인해 주세요';
+  if (!String(f.carName || '').trim()) return '차량명을 입력해 주세요';
+  if (!/^\d{4}$/.test(f.carYear || '') || +f.carYear < 1980 || +f.carYear > y + 1) return '차량연식을 4자리로 입력해 주세요 (예: 2022)';
+  if (!/^([가-힣]{2})?\d{2,3}[가-힣]\d{4}$/.test(normCarNo(f.carNo))) return '차량번호를 확인해 주세요 (예: 12가3456)';
+  return '';
+}
+function lvRows(f, id) {
+  return [
+    { driver_id: id, license_type: f.licType, license_no: fmtLic(f.licNo), cargo_cert_no: String(f.cargoNo).trim(), cert_date: f.certDate, updated_at: new Date().toISOString() },
+    { driver_id: id, car_name: String(f.carName).trim(), car_year: +f.carYear, car_no: normCarNo(f.carNo), updated_at: new Date().toISOString() }
+  ];
+}
+async function saveLV(id, f) {
+  var r = lvRows(f, id);
+  await q(sb.from('driver_licenses').upsert(r[0], { onConflict: 'driver_id' }));
+  await q(sb.from('driver_vehicles').upsert(r[1], { onConflict: 'driver_id' }));
+}
+function openLV(id) {
+  var L = S.lic[id] || {}, V = S.veh[id] || {};
+  S.dx = { driverId: id, licType: L.license_type || '', licNo: L.license_no || '', cargoNo: L.cargo_cert_no || '', certDate: L.cert_date || '', carName: V.car_name || '', carYear: V.car_year ? String(V.car_year) : '', carNo: V.car_no || '', err: '' };
+}
+function lvView(id) {
+  var L = S.lic[id] || {}, V = S.veh[id] || {}, dx = S.dx && S.dx.driverId === id ? S.dx : null;
+  var rows = [['면허 종류', L.license_type], ['운전면허번호', L.license_no], ['화물운송자격번호', L.cargo_cert_no], ['자격증 취득일', dotD(L.cert_date)],
+    ['차량명', V.car_name], ['차량연식', V.car_year ? V.car_year + '년식' : ''], ['차량번호', V.car_no]].map(function (x) {
+    return { label: x[0], value: x[1] || '미입력', style: { fontWeight: x[1] ? 600 : 700, color: x[1] ? '#111827' : '#B91C1C', textAlign: 'right' } };
+  });
+  return { rows: rows, missing: rows.filter(function (r) { return r.value === '미입력'; }).length, editing: !!dx, f: dx || {}, err: dx ? dx.err : '',
+    on: dx ? { licType: function (t) { dx.licType = t; }, licNo: function (e) { dx.licNo = fmtLic(e.target.value); }, cargoNo: function (e) { dx.cargoNo = e.target.value; },
+      certDate: function (e) { dx.certDate = e.target.value; }, carName: function (e) { dx.carName = e.target.value; }, carYear: function (e) { dx.carYear = digits(e.target.value).slice(0, 4); },
+      carNo: function (e) { dx.carNo = e.target.value; } } : {},
+    edit: function () { openLV(id); }, cancel: function () { S.dx = null; },
+    save: function () {
+      var e = checkLV(S.dx); if (e) { S.dx.err = e; return; }
+      run(async function () { try { await saveLV(id, S.dx); S.dx = null; await loadAll(); flash('면허·차량 정보를 저장했어요'); } catch (er) { fail(er, '저장하지 못했어요'); } });
+    } };
+}
+
+// ---------- 계약서 ----------
+function sizeText(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + 'MB' : Math.max(1, Math.round(n / 1024)) + 'KB'; }
+function isPdf(f) { return f.type === 'application/pdf' || /\.pdf$/i.test(f.name || ''); }
+// 스캔 사진은 긴 변 2200px JPEG 로 줄여서 올림 (글자는 또렷, 용량은 작게)
+function prepImage(file) {
+  return new Promise(function (res, rej) {
+    var url = URL.createObjectURL(file), img = new Image();
+    img.onload = function () {
+      var k = Math.min(1, 2200 / Math.max(img.naturalWidth, img.naturalHeight)), c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+      var g = c.getContext('2d'); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(function (b) { b ? res(b) : rej(new Error('이미지 변환 실패')); }, 'image/jpeg', 0.85);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('사진을 읽을 수 없어요 (JPG·PNG로 찍어 주세요)')); };
+    img.src = url;
+  });
+}
+function openCtrForm(driverId) {
+  CTR_FILES.forEach(function (x) { if (x.thumb) URL.revokeObjectURL(x.thumb); }); CTR_FILES = [];
+  S.ctrForm = { driverId: driverId, title: '위·수탁 계약서', start: iso(today0()), end: '', memo: '', files: [], err: '' };
+}
+function syncCtrFiles() { S.ctrForm.files = CTR_FILES.map(function (x) { return { key: x.key, name: x.file.name, sizeText: sizeText(x.file.size), thumb: x.thumb }; }); }
+function addCtrFiles(e) {
+  var list = Array.prototype.slice.call((e.target && e.target.files) || []); e.target.value = '';
+  var bad = [];
+  list.forEach(function (f) {
+    var pdf = isPdf(f), img = /^image\//.test(f.type);
+    if (!pdf && !img) { bad.push(f.name + ' (PDF·사진만 가능)'); return; }
+    if (pdf && f.size > 20 * 1048576) { bad.push(f.name + ' (20MB 넘음)'); return; }
+    CTR_FILES.push({ key: Date.now() + '-' + Math.random(), file: f, pdf: pdf, thumb: img ? URL.createObjectURL(f) : '' });
+  });
+  S.ctrForm.err = bad.length ? '못 넣은 파일: ' + bad.join(', ') : '';
+  syncCtrFiles();
+}
+async function saveCtr() {
+  var f = S.ctrForm; f.err = '';
+  if (!f.title.trim()) { f.err = '계약서 이름을 입력해 주세요'; return; }
+  if (!CTR_FILES.length) { f.err = '계약서 파일을 1개 이상 넣어 주세요'; return; }
+  if (f.start && f.end && f.end < f.start) { f.err = '종료일이 시작일보다 빨라요'; return; }
+  await run(async function () {
+    var id = crypto.randomUUID(), done = [], metas = [];
+    try {
+      for (var i = 0; i < CTR_FILES.length; i++) {
+        var x = CTR_FILES[i], blob = x.pdf ? x.file : await prepImage(x.file), ext = x.pdf ? 'pdf' : 'jpg', type = x.pdf ? 'application/pdf' : 'image/jpeg';
+        if (blob.size > 20 * 1048576) throw new Error(x.file.name + ' 파일이 너무 커요 (20MB 이하)');
+        var path = f.driverId + '/' + id + '/' + String(i + 1).padStart(2, '0') + '.' + ext;
+        var up = await sb.storage.from(CTR_BUCKET).upload(path, blob, { contentType: type, upsert: false });
+        if (up.error) throw up.error;
+        done.push(path); metas.push({ path: path, name: x.file.name, type: type, size: blob.size });
+      }
+      await q(sb.from('driver_contracts').insert({ id: id, driver_id: f.driverId, title: f.title.trim(), start_date: f.start || null, end_date: f.end || null, memo: f.memo.trim(), files: metas }));
+    } catch (e) {
+      if (done.length) await sb.storage.from(CTR_BUCKET).remove(done);
+      console.error(e); f.err = '등록하지 못했어요: ' + (e.message || e); return;
+    }
+    CTR_FILES.forEach(function (x) { if (x.thumb) URL.revokeObjectURL(x.thumb); }); CTR_FILES = [];
+    S.ctrForm = null; await loadContracts(); flash('계약서를 등록했어요');
+  });
+}
+async function loadContracts() { S.contracts = await q(sb.from('driver_contracts').select('*').order('created_at', { ascending: false })); }
+async function signedCtr(paths) {
+  var r = await sb.storage.from(CTR_BUCKET).createSignedUrls(paths, 60 * 60);
+  if (r.error) throw r.error;
+  var m = {}; r.data.forEach(function (x) { if (x.signedUrl) m[x.path] = x.signedUrl; }); return m;
+}
+async function openCtrView(c) {
+  S.ctrView = c.id; S.ctrUrls = {};
+  try { S.ctrUrls = await signedCtr((c.files || []).map(function (f) { return f.path; })); } catch (e) { fail(e, '계약서를 불러오지 못했어요'); }
+}
+var PDFLIB_SRC = 'https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js';
+function loadPdfLib() {
+  if (window.PDFLib) return Promise.resolve(window.PDFLib);
+  return new Promise(function (res, rej) { var sc = document.createElement('script'); sc.src = PDFLIB_SRC; sc.onload = function () { res(window.PDFLib); }; sc.onerror = function () { rej(new Error('PDF 도구를 불러오지 못했어요')); }; document.head.appendChild(sc); });
+}
+// 계약서 파일(사진·PDF)을 순서대로 A4 PDF 한 개로 합치기
+async function buildCtrPdf(c) {
+  var PL = await loadPdfLib(), urls = await signedCtr(c.files.map(function (f) { return f.path; }));
+  var doc = await PL.PDFDocument.create(); doc.setTitle(c.title); doc.setCreator('진양로지스틱스');
+  for (var i = 0; i < c.files.length; i++) {
+    var f = c.files[i], ab = await (await fetch(urls[f.path])).arrayBuffer();
+    if (f.type === 'application/pdf') {
+      var src = await PL.PDFDocument.load(ab, { ignoreEncryption: true }), pages = await doc.copyPages(src, src.getPageIndices());
+      pages.forEach(function (pg) { doc.addPage(pg); });
+    } else {
+      var im = f.type === 'image/png' ? await doc.embedPng(ab) : await doc.embedJpg(ab);
+      var W = 595.28, H = 841.89, M = 18, k = Math.min((W - M * 2) / im.width, (H - M * 2) / im.height), w = im.width * k, h = im.height * k;
+      doc.addPage([W, H]).drawImage(im, { x: (W - w) / 2, y: (H - h) / 2, width: w, height: h });
+    }
+  }
+  return new Blob([await doc.save()], { type: 'application/pdf' });
+}
+function ctrFileName(c) { var d = S.drivers.find(function (x) { return x.id === c.driver_id; }); return ('계약서_' + (d ? d.name : '') + '_' + c.title).replace(/[\\/:*?"<>|\s]+/g, '_') + '.pdf'; }
+async function ctrPdf(c, mode) {
+  if (S.pdfBusy) return;
+  var w = mode === 'print' ? window.open('', '_blank') : null;
+  S.pdfBusy = true;
+  try {
+    var blob = await buildCtrPdf(c), url = URL.createObjectURL(blob);
+    if (mode === 'print' && w) { w.location.href = url; }
+    else { var a = document.createElement('a'); a.href = url; a.download = ctrFileName(c); document.body.appendChild(a); a.click(); a.remove(); flash('PDF를 저장했어요'); }
+    setTimeout(function () { URL.revokeObjectURL(url); }, 120000);
+  } catch (e) { if (w) w.close(); fail(e, 'PDF를 만들지 못했어요'); }
+  finally { S.pdfBusy = false; }
+}
+async function delCtr(c) {
+  if (S.ctrDel !== c.id) { S.ctrDel = c.id; setTimeout(function () { if (S.ctrDel === c.id) S.ctrDel = null; }, 4000); return; }
+  S.ctrDel = null;
+  await run(async function () {
+    try {
+      var paths = (c.files || []).map(function (f) { return f.path; });
+      await q(sb.from('driver_contracts').delete().eq('id', c.id));
+      if (paths.length) await sb.storage.from(CTR_BUCKET).remove(paths);
+      await loadContracts(); flash('계약서를 삭제했어요');
+    } catch (e) { fail(e, '삭제하지 못했어요'); }
+  });
+}
+function ctrList(id) {
+  return S.contracts.filter(function (c) { return c.driver_id === id; }).map(function (c) {
+    var n = (c.files || []).length;
+    return { id: c.id, title: c.title, period: (c.start_date || c.end_date) ? (dotD(c.start_date) || '?') + ' ~ ' + (dotD(c.end_date) || '') : '미입력',
+      meta: '파일 ' + n + '개 · ' + dotD(c.created_at) + ' 등록' + (c.memo ? ' · ' + c.memo : ''), delAsk: S.ctrDel === c.id,
+      open: function () { openCtrView(c); }, save: function () { ctrPdf(c, 'save'); }, print: function () { ctrPdf(c, 'print'); }, del: function () { delCtr(c); } };
+  });
+}
 
 var S = Vue.reactive({
   screen: 'boot', role: 'driver', uid: null, tab: 'home', busy: false, toast: '',
@@ -1251,6 +1682,7 @@ var S = Vue.reactive({
   routes: [], dispatches: [], dispDate: iso(today0()), dispSel: null, delAsk: null,
   dispOpen: false, dispErr: '', dispForm: { id: null, work_date: iso(today0()), route_id: '', driver_id: '', fee: '', memo: '' },
   routeForm: { id: null, name: '', fee: '', memo: '' }, routeErr: '', routeDel: null,
+  lic: {}, veh: {}, contracts: [], dx: null, ctrForm: null, ctrView: null, ctrUrls: {}, ctrDel: null, pdfBusy: false,
   perms: {}, notiShow: false, notiDismissed: false, notiPerm: 'default', noticeSel: null, noticeStatusOpen: false, noticeDelAsk: false, noticePeople: {}, armKey: null, meSub: 'menu', reduceTaps: 0, tabSet: {}, tabOpen: null, mgrMode: false, myMgr: null, managers: [], mgrOpen: false, mgrForm: { scope: 'none', ids: [] }, mgrErr: '', coEdit: null, coEditName: ''
 });
 function notiEnv() {
@@ -1327,8 +1759,14 @@ async function loadAll() {
     q(sb.from('teams_messages').select('*').order('created_at', { ascending: false }).limit(50)),
     q(sb.from('payslips').select('*').order('month', { ascending: false })),
     q(sb.from('reduce_requests').select('*').order('created_at', { ascending: false })),
-    q(sb.from('leases').select('*').order('created_at', { ascending: false }))
+    q(sb.from('leases').select('*').order('created_at', { ascending: false })),
+    q(sb.from('driver_licenses').select('*')),
+    q(sb.from('driver_vehicles').select('*')),
+    q(sb.from('driver_contracts').select('*').order('created_at', { ascending: false }))
   ]);
+  var lic = {}; res[9].forEach(function (r) { lic[r.driver_id] = r; }); S.lic = lic;
+  var veh = {}; res[10].forEach(function (r) { veh[r.driver_id] = r; }); S.veh = veh;
+  S.contracts = res[11];
   S.drivers = res[0];
   var rrn = {}; res[1].forEach(function (r) { rrn[r.driver_id] = r.rrn; }); S.rrn = rrn;
   var docs = {}; res[2].forEach(function (r) { (docs[r.driver_id] = docs[r.driver_id] || {})[r.kind] = r.path; }); S.docs = docs;
@@ -1451,7 +1889,7 @@ function rowOf(d) {
     name: d.name, rank: d.rank || '기사', initial: (d.name || '?').charAt(0), phone: d.phone,
     pending: d.status === '승인 대기', reduce: !!rr && rr.status === '요청',
     docText: '서류 ' + n + '/4', docStyle: { fontSize: '12px', fontWeight: 700, color: n === 4 ? '#15803D' : '#B91C1C' },
-    open: function () { S.tab = 'settings'; S.adminView = 'detail'; S.selId = d.id; S.showRrn = false; S.mgrOpen = false; }
+    open: function () { S.tab = 'settings'; S.adminView = 'detail'; S.selId = d.id; S.showRrn = false; S.mgrOpen = false; S.dx = null; S.ctrDel = null; }
   };
 }
 function payView(p) {
@@ -1644,27 +2082,33 @@ function build() {
     backToLogin: function () { S.screen = 'login'; },
 
     // 회원가입
-    step1: s.step === 1, step2: s.step === 2, step3: s.step === 3,
-    stepText: s.step + ' / 3', stepBar: { width: (s.step * 100 / 3) + '%', height: '4px', background: '#1E4FD8' },
-    nextLabel: s.step === 1 ? '다음' : (s.step === 2 ? '가입 신청하기' : '앱 시작하기'),
+    step1: s.step === 1, step2: s.step === 2, step3: s.step === 3, step4: s.step === 4,
+    stepText: s.step + ' / 4', stepBar: { width: (s.step * 100 / 4) + '%', height: '4px', background: '#1E4FD8' },
+    nextLabel: s.step <= 2 ? '다음' : (s.step === 3 ? '가입 신청하기' : '앱 시작하기'),
+    licTypes: LIC_TYPES, todayIso: iso(today0()),
     form: s.form, companyOptions: s.companies.map(function (c) { return { id: c.id, name: c.name }; }),
     on: {
       name: setF(s.form, 'name'), rrn1: setF(s.form, 'rrn1', digits), rrn2: setF(s.form, 'rrn2', digits),
       phone: setF(s.form, 'phone'), pw: setF(s.form, 'pw'), pw2: setF(s.form, 'pw2'),
       sub: setF(s.form, 'sub'), addr: setF(s.form, 'addr'),
+      licType: function (t) { S.form.licType = t; }, licNo: setF(s.form, 'licNo', fmtLic), cargoNo: setF(s.form, 'cargoNo'), certDate: setF(s.form, 'certDate'),
+      carName: setF(s.form, 'carName'), carYear: setF(s.form, 'carYear', function (x) { return digits(x).slice(0, 4); }), carNo: setF(s.form, 'carNo'),
       center: function (e) { S.form.center = e.target.value; S.form.centerName = companyName(e.target.value); }
     },
     draftDocs: draftDocs, hasErr: !!s.err, err: s.err,
-    signupBack: function () { if (S.step === 2) S.step = 1; else if (S.step === 1) S.screen = 'login'; },
+    signupBack: function () { if (S.step === 2 || S.step === 3) S.step -= 1; else if (S.step === 1) S.screen = 'login'; },
     signupNext: function () {
       var f = S.form; S.err = '';
       if (S.step === 1) {
-        if (!f.name.trim() || f.rrn1.length !== 6 || f.rrn2.length !== 7 || digits(f.phone).length < 10 || !f.center) { S.err = '이름, 주민번호(13자리), 본폰, 소속센터는 꼭 입력해 주세요'; return; }
+        if (!f.center) { S.err = '소속센터를 골라 주세요'; return; }
+        if (!f.name.trim() || f.rrn1.length !== 6 || f.rrn2.length !== 7 || digits(f.phone).length < 10) { S.err = '이름, 주민번호(13자리), 전화번호는 꼭 입력해 주세요'; return; }
+        if (!f.addr.trim()) { S.err = '주소를 입력해 주세요'; return; }
         if (f.pw.length < 6) { S.err = '비밀번호는 6자리 이상으로 정해 주세요'; return; }
         if (f.pw !== f.pw2) { S.err = '비밀번호 확인이 달라요'; return; }
         S.step = 2; return;
       }
-      if (S.step === 2) {
+      if (S.step === 2) { var lvErr = checkLV(f); if (lvErr) { S.err = lvErr; return; } S.step = 3; return; }
+      if (S.step === 3) {
         run(async function () {
           var r = await sb.auth.signUp({ email: loginEmail(f.phone), password: f.pw,
             options: { data: { name: f.name.trim(), phone: fmtPhone(f.phone), sub_phone: f.sub.trim() ? fmtPhone(f.sub) : '', address: f.addr.trim(), company_id: f.center } } });
@@ -1672,10 +2116,11 @@ function build() {
           var uid = r.data.user.id;
           try {
             await q(sb.from('driver_private').insert({ driver_id: uid, rrn: f.rrn1 + '-' + f.rrn2 }));
+            await saveLV(uid, f);
             for (var i = 0; i < DOCS.length; i++) { var k = DOCS[i].k; if (FILES[k]) await uploadDoc(uid, k, FILES[k]); }
           } catch (e) { console.error(e); flash('일부 정보 저장에 실패했어요. 내 정보에서 다시 확인해 주세요'); }
           FILES = {}; S.form.pw = ''; S.form.pw2 = ''; S.form.rrn2 = '';
-          S.step = 3; S.uid = uid;
+          S.step = 4; S.uid = uid;
         });
         return;
       }
@@ -1719,6 +2164,25 @@ function build() {
     headerTitleStyle: { margin: 0, fontSize: s.tab === 'home' ? '18px' : '22px', fontWeight: 800, color: '#FFFFFF', whiteSpace: 'nowrap' }, coInitial: (scopeName || '?').charAt(0),
     headerTitle: s.tab === 'home' ? (isDriver ? (meD ? meD.name + ' ' + (meD.rank || '기사') + '님' : '홈') : '관리자') : titles[s.tab], isAdminRole: !isDriver, isDriverRole: isDriver, tabs: tabs,
     dHome: isDriver && s.tab === 'home', aHome: !isDriver && s.tab === 'home',
+    lv: (function () { var id = (!isDriver && s.tab === 'settings' && s.adminView === 'detail' && s.selId) || (isDriver && s.tab === 'me' && s.meSub === 'info' && meD && meD.id); return id ? lvView(id) : null; })(),
+    ctr: (function () {
+      var id = (!isDriver && s.tab === 'settings' && s.adminView === 'detail' && s.selId) || (isDriver && s.tab === 'me' && s.meSub === 'info' && meD && meD.id);
+      if (!id) return null;
+      return { list: ctrList(id), canEdit: !isDriver, canPrint: !/Android|iPhone|iPad|iPod/i.test(navigator.userAgent), heading: isDriver ? '내 계약서' : '계약서',
+        empty: isDriver ? '아직 등록된 계약서가 없어요' : '등록된 계약서가 없어요. 스캔하거나 PDF로 올려 주세요', add: function () { openCtrForm(id); } };
+    })(),
+    pdfBusy: s.pdfBusy,
+    ctrF: s.ctrForm ? { f: s.ctrForm, files: s.ctrForm.files, err: s.ctrForm.err, who: (s.drivers.find(function (d) { return d.id === s.ctrForm.driverId; }) || {}).name || '',
+      on: ['title', 'start', 'end', 'memo'].reduce(function (o, k) { o[k] = function (e) { S.ctrForm[k] = e.target.value; S.ctrForm.err = ''; }; return o; }, {}),
+      addFiles: addCtrFiles, save: saveCtr, close: function () { if (!S.busy) S.ctrForm = null; } } : null,
+    ctrV: (function () {
+      var c = s.ctrView && s.contracts.find(function (x) { return x.id === s.ctrView; }); if (!c) return null;
+      var files = c.files || [], ready = Object.keys(s.ctrUrls).length > 0;
+      return { title: c.title, sub: (s.drivers.find(function (d) { return d.id === c.driver_id; }) || {}).name + ' · 계약 기간 ' + ((c.start_date || c.end_date) ? dotD(c.start_date) + ' ~ ' + dotD(c.end_date) : '미입력') + ' · ' + files.length + '개 파일',
+        memo: c.memo, loading: !ready && files.length > 0,
+        pages: files.map(function (f, i) { return { key: f.path, no: i + 1, name: f.name, isImg: f.type !== 'application/pdf', url: s.ctrUrls[f.path] || '' }; }),
+        close: function () { S.ctrView = null; S.ctrUrls = {}; }, save: function () { ctrPdf(c, 'save'); }, print: function () { ctrPdf(c, 'print'); } };
+    })(),
     tNotice: s.tab === 'notice', tTeams: s.tab === 'teams', tMe: isDriver && s.tab === 'me' && s.meSub === 'info',
     sMenu: !isDriver && s.tab === 'settings' && s.adminView === 'menu',
     sList: !isDriver && s.tab === 'settings' && s.adminView === 'list',
@@ -2042,7 +2506,7 @@ function build() {
       };
     }),
     meMenu: isDriver && s.tab === 'me' && s.meSub === 'menu' ? [
-      ['pay', '정산', '정산서 · 넘버 임대료', EMO.money], ['info', '내 정보', '기본 정보 · 서류 사진 · 감차 요청', EMO.card], ['manage', '관리 모드', '맡은 업체의 기사·배차·공지 관리', EMO.shield]
+      ['pay', '정산', '정산서 · 넘버 임대료', EMO.money], ['info', '내 정보', '기본 정보 · 면허·차량 · 서류 · 계약서 · 감차', EMO.card], ['manage', '관리 모드', '맡은 업체의 기사·배차·공지 관리', EMO.shield]
     ].filter(function (x) { return (x[0] !== 'pay' || tabCan('pay', 'view')) && (x[0] !== 'manage' || !!s.myMgr); }).map(function (x, i) {
       return { key: x[0], label: x[1], desc: x[2], emo: x[3], go: function () { if (x[0] === 'manage') { toManageMode(); return; } S.meSub = x[0]; S.editMe = false; S.showRrn = false; },
         rowStyle: { width: '100%', display: 'flex', alignItems: 'center', gap: '12px', minHeight: '68px', border: 'none', borderTop: i === 0 ? 'none' : '1px solid #EEF2F7', background: 'transparent', fontFamily: 'inherit', cursor: 'pointer', padding: '0' } };
