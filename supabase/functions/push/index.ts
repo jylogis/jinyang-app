@@ -58,6 +58,7 @@ Deno.serve(async (req) => {
       await log({ kind: 'test', title: '알림 연결 시험', sent_by: u.user.id, drivers: 1, ...sent });
       return json({ ok: true, ...sent });
     }
+    if (body.kind === 'dispatch_request' || body.kind === 'dispatch_assigned') return json(await dispatchPush(body, u.user.id, userDb, keys));
     const { data: n } = await admin.from('notices').select('id,company_id,title,body,starts_at,ends_at').eq('id', body.notice_id).single();
     if (!n) return json({ error: 'notice not found' }, 404);
     const { data: can } = await userDb.rpc('can_manage', { cid: n.company_id });
@@ -79,6 +80,47 @@ Deno.serve(async (req) => {
     return json({ error: String((e as Error)?.message || e) }, 500);
   }
 });
+
+// 배차 신청 알림: 기사가 신청 → 관리자·관리 권한자·배차 수정 권한 직급에게 / 배정 확정 → 신청한 기사에게
+// deno-lint-ignore no-explicit-any
+async function dispatchPush(body: any, uid: string, userDb: any, keys: { pub: string; priv: string }) {
+  const { data: r } = await admin.from('dispatch_requests').select('*').eq('id', body.request_id).maybeSingle();
+  if (!r) return { error: 'request not found' };
+  const { data: d } = await admin.from('dispatches').select('id,route_name,work_date,company_id').eq('id', r.dispatch_id).maybeSingle();
+  if (!d) return { error: 'dispatch not found' };
+  const md = (() => { const p = String(d.work_date).split('-'); return (+p[1]) + '/' + (+p[2]); })();
+  const url = './?source=noti&tab=dispatch&date=' + d.work_date;
+  const { data: ts } = await admin.from('tab_settings').select('notify,perms').eq('tab', 'dispatch').maybeSingle();
+  const base = { kind: body.kind, company_id: r.company_id, title: md + ' ' + d.route_name + ' · ' + r.driver_name, sent_by: uid };
+  if (ts && ts.notify === false) { await log({ ...base, skipped: 'notify off' }); return { ok: true, skipped: 'notify off' }; }
+
+  if (body.kind === 'dispatch_request') {
+    if (r.driver_id !== uid) return { error: 'forbidden' };
+    if (r.status !== '대기') return { ok: true, skipped: 'not pending' };
+    const set = new Set<string>();
+    const { data: ad } = await admin.from('admins').select('user_id'); (ad || []).forEach((x: { user_id: string }) => set.add(x.user_id));
+    const { data: mg } = await admin.from('managers').select('driver_id,scope,company_ids');
+    (mg || []).forEach((m: { driver_id: string; scope: string; company_ids: string[] | null }) => { if (m.scope === 'all' || (m.company_ids || []).includes(r.company_id)) set.add(m.driver_id); });
+    const perms = (ts && ts.perms) || {};
+    const editRanks = Object.keys(perms).filter((k) => perms[k] && perms[k].edit === true);
+    if (editRanks.length) {
+      const { data: ed } = await admin.from('drivers').select('id').eq('company_id', r.company_id).eq('status', '활성').in('rank', editRanks);
+      (ed || []).forEach((x: { id: string }) => set.add(x.id));
+    }
+    set.delete(uid);
+    const ids = [...set];
+    const sent = await sendTo(ids, { title: '🙋 배차 신청 · ' + d.route_name, body: r.driver_name + ' ' + r.driver_rank + '님이 ' + md + ' ' + d.route_name + ' 배차를 신청했어요. 눌러서 배정해 주세요.', url, tag: 'dreq-' + r.id }, keys);
+    await log({ ...base, drivers: ids.length, ...sent });
+    return { ok: true, people: ids.length, ...sent };
+  }
+  // dispatch_assigned
+  const { data: can } = await userDb.rpc('can_assign_dispatch', { cid: r.company_id });
+  if (!can) return { error: 'forbidden' };
+  if (r.status !== '배정') return { ok: true, skipped: 'not assigned' };
+  const sent = await sendTo([r.driver_id], { title: '✅ 배차 확정 · ' + d.route_name, body: md + ' ' + d.route_name + ' 배차가 ' + r.driver_name + '님으로 확정됐어요.', url, tag: 'dok-' + r.id }, keys);
+  await log({ ...base, drivers: 1, ...sent });
+  return { ok: true, people: 1, ...sent };
+}
 
 // 발송 기록 저장 (실패해도 알림 자체는 막지 않음)
 async function log(row: Record<string, unknown>) {
